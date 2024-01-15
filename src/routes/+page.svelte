@@ -1,6 +1,14 @@
 <script>
+	import PopularMovies from '../components/PopularMovies.svelte';
+
 	export let data;
-
-	console.log(data);
-
+  	const movieResults = data.data ? data.data.results : data.results;
 </script>
+
+<section>
+    {#if movieResults}
+        <PopularMovies movies={movieResults} />
+    {:else}
+        <p>Loading...</p>
+    {/if}
+</section>
