@@ -1,3 +1,7 @@
+# Just a simple movieDB web, if you don't know what to watch, this is the page!
+
+
+
 # create-svelte
 
 Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
