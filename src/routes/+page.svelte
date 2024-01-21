@@ -2,13 +2,13 @@
 	import PopularMovies from '../components/PopularMovies.svelte';
 
 	export let data;
-  	const movieResults = data.data ? data.data.results : data.results;
+	const movieResults = data.data ? data.data.results : data.results;
 </script>
 
 <section>
-    {#if movieResults}
-        <PopularMovies movies={movieResults} />
-    {:else}
-        <p>Loading...</p>
-    {/if}
+	{#if movieResults}
+		<PopularMovies movies={movieResults} />
+	{:else}
+		<p>Loading...</p>
+	{/if}
 </section>
