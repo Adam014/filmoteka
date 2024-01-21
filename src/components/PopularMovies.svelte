@@ -6,7 +6,7 @@
 </script>
 
 
-<h3>Popular Movies</h3>
+<h1>Movify</h1>
 
 <div class="popular-movies">
     {#each movies as movie (movie.id)}
@@ -15,8 +15,9 @@
 </div>
 
 <style>
-    h3{
+    h1{
         padding: 0 1rem;
+        font-size: 2rem;
     }
     .popular-movies{
         display: grid;

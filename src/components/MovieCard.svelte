@@ -23,7 +23,8 @@
         font-size: 1.1rem
     }
     .description {
-        height: 5vh;
+        height: 6.5vh;
+        padding-bottom: 30px;
     }   
     p{
         font-size: 0.9rem;
