@@ -5,7 +5,7 @@
 	const movieResults = data.data ? data.data.results : data.results;
 </script>
 
-<section>
+<section class="container">
 	{#if movieResults}
 		<PopularMovies movies={movieResults} />
 	{:else}
