@@ -1,1 +1,6 @@
-<h1>HELLO</h1>
+<script>
+    export let data;    
+    const movieDetails = data.data;
+
+    console.log(movieDetails);
+</script>
