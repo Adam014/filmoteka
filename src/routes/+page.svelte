@@ -12,8 +12,3 @@
 		<p>Loading...</p>
 	{/if}
 </section>
-
-<style>
-
-
-</style>

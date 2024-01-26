@@ -3,7 +3,7 @@
 	import Navbar from './Navbar.svelte';
 
 	export let movies;
-	console.log(movies);
+	// console.log(movies);
 </script>
 
 <Navbar />

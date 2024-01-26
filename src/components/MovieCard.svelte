@@ -1,6 +1,6 @@
 <script>
 	export let movie;
-	console.log(movie.id);
+	// console.log(movie.id);
 </script>
 
 <div class="movie-card">
