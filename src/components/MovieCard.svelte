@@ -4,17 +4,21 @@
 </script>
 
 <div class="movie-card">
-
 	<a href={`/movie/` + movie.id}>
 		<img src={'https://image.tmdb.org/t/p/w500' + movie.poster_path} alt={movie.title} />
 	</a>
-	<div class="description">
+	<div class="description"><hr />
 		<h2>{movie.title}</h2>
-		<p>{movie.release_date}</p>
 	</div>
 </div>
 
 <style>
+	*{
+		color: white
+	}
+	hr{
+		margin-top: -20px;
+	}
 	img {
 		width: 100%;
 		height: 40vh;
@@ -23,6 +27,7 @@
 	}
 	h2 {
 		font-size: 1.1rem;
+		text-align: center;
 	}
 	.description {
 		height: 6.5vh;
@@ -36,5 +41,8 @@
 		flex-direction: column;
 		justify-content: space-around;
 		padding: 0.5rem;
+		height: 31rem;
+		background-color: black;
 	}
+
 </style>
