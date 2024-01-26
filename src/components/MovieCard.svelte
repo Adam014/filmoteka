@@ -42,7 +42,7 @@
 		justify-content: space-around;
 		padding: 0.5rem;
 		height: 31rem;
-		background-color: black;
+		background-color: #232b2b;
 	}
 
 </style>
