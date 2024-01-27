@@ -7,16 +7,17 @@
 	<a href={`/movie/` + movie.id}>
 		<img src={'https://image.tmdb.org/t/p/w500' + movie.poster_path} alt={movie.title} />
 	</a>
-	<div class="description"><hr />
+	<div class="description">
+		<hr />
 		<h2>{movie.title}</h2>
 	</div>
 </div>
 
 <style>
-	*{
-		color: white
+	* {
+		color: white;
 	}
-	hr{
+	hr {
 		margin-top: -20px;
 	}
 	img {
@@ -44,5 +45,4 @@
 		height: 31rem;
 		background-color: #232b2b;
 	}
-
 </style>

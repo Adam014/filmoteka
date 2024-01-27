@@ -1,6 +1,6 @@
 <script>
-    export let data;    
-    const movieDetails = data.data;
+	export let data;
+	const movieDetails = data.data;
 
-    console.log(movieDetails);
+	console.log(movieDetails);
 </script>
