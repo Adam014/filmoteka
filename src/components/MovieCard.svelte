@@ -34,9 +34,6 @@
 		height: 6.5vh;
 		padding-bottom: 30px;
 	}
-	p {
-		font-size: 0.9rem;
-	}
 	.movie-card {
 		display: flex;
 		flex-direction: column;
