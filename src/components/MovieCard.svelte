@@ -17,16 +17,16 @@
 	* {
 		color: white;
 	}
-	img {
+	a img {
 		width: 100%;
 		height: 40vh;
-		object-fit: cover;
+		background-size: 100% 40vh;
 	}
 	img:hover{
 		transform: scale(1.1);
 		transition: 0.2s ease-in-out;
 	}
-	h2, h4 {
+	/* h2, h4 {
 		font-size: 1.1rem;
 		text-align: left;
 		margin: 0;
@@ -34,11 +34,16 @@
 	}
 	h4{
 		font-weight: 100 !important;
-	}
+	} */
 	.movie-card {
 		display: flex;
 		flex-direction: column;
 		justify-content: space-around;
 		padding: 0.5rem;
+		overflow: hidden;
+	}
+	a {
+		width: 100%;
+		height: 40vh;
 	}
 </style>
