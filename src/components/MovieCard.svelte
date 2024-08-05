@@ -8,8 +8,8 @@
 		<img src={'https://image.tmdb.org/t/p/w500' + movie.poster_path} alt={movie.title} />
 	</a>
 	<div class="description">
-		<hr />
 		<h2>{movie.title}</h2>
+		<h4>{movie.release_date}</h4>
 	</div>
 </div>
 
@@ -17,22 +17,23 @@
 	* {
 		color: white;
 	}
-	hr {
-		margin-top: -20px;
-	}
 	img {
 		width: 100%;
 		height: 40vh;
 		object-fit: cover;
-		margin-bottom: 1rem;
 	}
-	h2 {
+	img:hover{
+		transform: scale(1.1);
+		transition: 0.2s ease-in-out;
+	}
+	h2, h4 {
 		font-size: 1.1rem;
-		text-align: center;
+		text-align: left;
+		margin: 0;
+		font-weight: 600;
 	}
-	.description {
-		height: 6.5vh;
-		padding-bottom: 30px;
+	h4{
+		font-weight: 100 !important;
 	}
 	.movie-card {
 		display: flex;
@@ -40,6 +41,5 @@
 		justify-content: space-around;
 		padding: 0.5rem;
 		height: 31rem;
-		background-color: #232b2b;
 	}
 </style>

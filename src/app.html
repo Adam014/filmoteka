@@ -2,11 +2,11 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
-		<meta name="description" content="Movify is a MovieDB Web app, where I'm learning the power of SvelteKit!" />
+		<meta name="description" content="Filmoteka is a MovieDB Web app, where I'm learning the power of SvelteKit!" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
 		<meta name="viewport" content="width=device-width" />
 		%sveltekit.head%
-		<title>Movify</title>
+		<title>Filmoteka</title>
 	</head>
 	<body>
 		<div id="svelte">%sveltekit.body%</div>
@@ -16,7 +16,18 @@
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Corben&display=swap');
 
+	:root{
+		--bg: #1a1a1a;
+		--text-color: #e5e5e5;
+	}
+
 	body {
-		font-family: 'Corben', serif;
+		font-family: 'Corben', serif;	
+		background-color: var(--bg);
+		color: var(--text-color);
+	}
+
+	::selection{
+		background-color:  #555;
 	}
 </style>
