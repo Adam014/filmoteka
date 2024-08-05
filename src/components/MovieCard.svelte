@@ -7,10 +7,10 @@
 	<a href={`/movie/` + movie.id}>
 		<img src={'https://image.tmdb.org/t/p/w500' + movie.poster_path} alt={movie.title} />
 	</a>
-	<div class="description">
+	<!-- <div class="description">
 		<h2>{movie.title}</h2>
 		<h4>{movie.release_date}</h4>
-	</div>
+	</div> -->
 </div>
 
 <style>
@@ -40,6 +40,5 @@
 		flex-direction: column;
 		justify-content: space-around;
 		padding: 0.5rem;
-		height: 31rem;
 	}
 </style>
