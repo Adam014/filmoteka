@@ -5,11 +5,20 @@
 	const movieDetails = data.data;
 
 	const {
+		original_language,
+		original_title,
 		status,
 		release_date,
 		tagline,
 		revenue,
 		genres,
+		budget,
+		adult,
+		id,
+		imdb_id,
+		overview,
+		production_companies,
+		production_countries,
 	} = movieDetails
 	
 	console.log(movieDetails);
@@ -18,22 +27,43 @@
 	<Navbar />
 <section class="movie-details">
 	<div class="movie-title-container">
-		<h3>{movieDetails.original_language}</h3>
-		<h3>{movieDetails.status} {status === "Released" ? release_date : ""}</h3>
+		<h3>ID: {id}</h3>
+		<h3>lang: {original_language}</h3>
+		<h3>{status} {status === "Released" ? release_date : ""}</h3>
+		<h3>Adult: {adult}</h3>
 	</div>
 	<div>
-		<h1>{movieDetails.original_title}</h1>
-		<p class="overview">{movieDetails.overview}</p>
+		<h1>{imdb_id} | {original_title}</h1>
+		<p class="overview">{overview}</p>
 		<p class="tagline">{tagline !== "" ? '"' + tagline + '"': ""}</p>
+		<p>movie budget -> ${budget}</p>
 		<p>{revenue === 0 ? "0 revenue" : "movie revenue -> $" + revenue}</p>
 	</div>
-	<div class="idk">
-		<p class="idk-p">Genres:</p>
-		<ul>
-			{#each genres as genre}
-				<li>ID{genre.id} | {genre.name}</li>
-			{/each}
-		</ul>
+	<div class="stats-container">
+		<div class="idk">
+			<p class="idk-p">genres:</p>
+			<ul>
+				{#each genres as genre}
+					<li>id: {genre.id} & {genre.name}</li>
+				{/each}
+			</ul>
+		</div>
+		<div class="loneliness">
+			<p class="loneliness-p">production-companies</p>
+			<ul>
+				{#each production_companies as company}
+					<li>id: {company.id} | {company.name} | {company.origin_country}</li>
+				{/each}
+			</ul>
+		</div>
+		<div class="loneliness">
+			<p class="loneliness-p">production-countries</p>
+			<ul>
+				{#each production_countries as country}
+					<li>{country.iso_3166_1} {country.name}</li>
+				{/each}
+			</ul>
+		</div>
 	</div>
 </section>
 
@@ -43,8 +73,8 @@
 	h3, h1, p{
 		padding: 0rem 2.5rem 0rem 2.5rem
 	}
-	.idk, .idk-p{
-		padding: 1rem 1.5rem 0rem 1.5rem;
+	.idk, .idk-p, .loneliness, .loneliness-p{
+		padding: 1rem 1.5rem 0rem 1.5rem !important;
 	}
 	h3, p{
 		font-weight: 400;
@@ -55,8 +85,7 @@
 	h1{
 		font-size: 2rem;
 	}
-	.overview, .idk ul li{
-		width: 60%;
+	.overview, .idk ul li, .loneliness ul li{
 		color: #a0a0a0;
 	}
 	.movie-title-container{
@@ -64,5 +93,15 @@
 	}
 	.tagline{
 		font-family: "Indie Flower", cursive;
+	}
+	.movie-details{
+		display: grid;
+		justify-content: center;
+	}
+	@media screen and (max-width: 676px) {
+		.movie-title-container{
+			display: grid;	
+			grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+		}
 	}
 </style>
