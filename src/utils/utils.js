@@ -1,22 +1,68 @@
-function findVideoByType(videoList, type = []) {
-    return videoList.find(video => 
-        video.type === type &&
-        !video.name.toLowerCase().includes("restricted")
-    );
+const API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY; 
+
+export async function isVideoAgeRestricted(videoId) {
+    const url = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${videoId}&key=${API_KEY}`;
+
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.items && data.items.length > 0) {
+            const videoDetails = data.items[0];
+            const contentRating = videoDetails.contentDetails.contentRating;
+            return contentRating && contentRating.ytRating === 'ytAgeRestricted';
+        }
+
+        return false;
+    } catch (error) {
+        console.error('Error checking video age restriction:', error);
+        return false;
+    }
 }
 
-export function getBestAvailableVideo(videoList) {
-    // Priority order for search: Official Trailer, Final Trailer, Any Trailer, Teaser, Clip
-    const searchCriteria = [
-        { type: "Trailer" },
-        { type: "Teaser" },
-        { type: "Clip" }
-    ];
+export async function isVideoAvailable(videoId) {
+    const url = `https://www.googleapis.com/youtube/v3/videos?part=status&id=${videoId}&key=${API_KEY}`;
 
-    // Iterate through the search criteria to find the best available video
-    for (const { type } of searchCriteria) {
-        const video = findVideoByType(videoList, type);
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.items && data.items.length > 0) {
+            const videoStatus = data.items[0].status;
+            return videoStatus.embeddable && videoStatus.uploadStatus === 'processed';
+        }
+
+        return false;
+    } catch (error) {
+        console.error('Error checking video availability:', error);
+        return false;
+    }
+}
+
+export async function getBestAvailableVideoWithCheck(videoList) {
+    // Priority order for search: Official Trailer, Teaser, Clip
+    const prioritizedTypes = ["Trailer", "Teaser", "Clip"];
+    
+    for (const type of prioritizedTypes) {
+        const video = videoList.find(video =>
+            video.type === type &&
+            !video.name.toLowerCase().includes("restricted")
+        );
+        
         if (video) {
+            const isRestricted = await isVideoAgeRestricted(video.key);
+            const isAvailable = await isVideoAvailable(video.key);
+            if (!isRestricted && isAvailable) {
+                return video;
+            }
+        }
+    }
+
+    // If no suitable video is found, return the first available and non-restricted video
+    for (const video of videoList) {
+        const isRestricted = await isVideoAgeRestricted(video.key);
+        const isAvailable = await isVideoAvailable(video.key);
+        if (!isRestricted && isAvailable) {
             return video;
         }
     }
@@ -47,7 +93,7 @@ export async function loadMovies(page, setMovieResults) {
 export async function cacheFirstPage() {
     const cachedPage1 = localStorage.getItem('movies_page_1');
     if (!cachedPage1) {
-        await loadMovies(1, null, null);
+        await loadMovies(1, null);
     }
 }
 

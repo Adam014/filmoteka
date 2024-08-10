@@ -1,6 +1,6 @@
 <script>
-	import Navbar from '../../../components/Navbar.svelte';
-	import { getBestAvailableVideo, formatCurrency } from "../../../utils/utils";
+	import { onMount } from 'svelte';
+	import { getBestAvailableVideoWithCheck, formatCurrency } from "../../../utils/utils";
 
 	export let data;
 
@@ -24,13 +24,16 @@
 		production_countries = [],
 	} = movieDetails;
 
-	console.log(budget, revenue)
+	let finalTrailer = null;
 
-	// Use the refactored function to find the final video
-	let finalTrailer = getBestAvailableVideo(movieVideos);
+	// Asynchronous function to get the best available video
+	async function fetchBestAvailableVideo() {
+		finalTrailer = await getBestAvailableVideoWithCheck(movieVideos);
+	}
 
-	console.log(movieVideos);
-	console.log(finalTrailer);
+	onMount(() => {
+		fetchBestAvailableVideo();
+	});
 
 	// Format the budget and revenue
 	const formattedBudget = formatCurrency(budget);
@@ -47,10 +50,10 @@
 
 	{#if finalTrailer}
 		<div class="video-container">
-			<iframe title="youtube-trailer" src={`https://www.youtube.com/embed/${finalTrailer.key}`} frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+			<iframe title="youtube-video" src={`https://www.youtube.com/embed/${finalTrailer.key}`} frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 		</div>
 	{:else}
-		<p>No trailer available.</p>
+		<p class="no-trailer">No trailer available.</p>
 	{/if}
 
 	<div>
@@ -70,27 +73,36 @@
 				{/each}
 			</ul>
 		</div>
-		<div class="loneliness">
-			<p class="loneliness-p">production-companies</p>
-			<ul>
-				{#each production_companies as company}
-					<li>id: {company.id} | {company.name} | {company.origin_country}</li>
-				{/each}
-			</ul>
-		</div>
-		<div class="loneliness">
-			<p class="loneliness-p">production-countries</p>
-			<ul>
-				{#each production_countries as country}
-					<li>{country.iso_3166_1} {country.name}</li>
-				{/each}
-			</ul>
-		</div>
+		{#if production_companies.length > 0}
+			<div class="loneliness">
+				<p class="loneliness-p">production-companies</p>
+				<ul>
+					{#each production_companies as company}
+						<li>id: {company.id} | {company.name} | {company.origin_country}</li>
+					{/each}
+				</ul>
+			</div>
+		{/if}
+
+		{#if production_countries.length > 0}
+			<div class="loneliness">
+				<p class="loneliness-p">production-countries</p>
+				<ul>
+					{#each production_countries as country}
+						<li>{country.iso_3166_1} {country.name}</li>
+					{/each}
+				</ul>
+			</div>
+		{/if}
 	</div>
 </section>
 
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap');
+
+	.no-trailer{
+		padding: 50px 2.5rem 50px 2.5rem;
+	}
 
 	h3, h1, p {
 		padding: 0rem 2.5rem 0rem 2.5rem;
@@ -126,6 +138,10 @@
 	.movie-details {
 		display: grid;
 		justify-content: center;
+	}
+
+	.stats-container{
+		padding-bottom: 40px;
 	}
 
 	/* Video container styles to ensure width matches description */

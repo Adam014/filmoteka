@@ -73,7 +73,12 @@
 				on:keypress={(e) => { if (e.key === 'Enter') changePage(parseInt(inputPage, 10)); }}
 				class="pagination-input"
 			/>
-			<button on:click={() => changePage(parseInt(inputPage, 10))} class="go-button">Go</button>
+			<!-- <button on:click={() => changePage(parseInt(inputPage, 10))} class="go-button">Go</button> -->
+			<div class="tmdb-reference">
+				<a href="https://www.themoviedb.org">
+					TMDB.org
+				</a>
+			</div>
 		</div>
 	{:else}
 		<p>Loading...</p>
@@ -81,6 +86,11 @@
 </section>
 
 <style>
+	.tmdb-reference a{
+		text-decoration: none;
+		color: #e5e5e5;
+	}
+
 	.pagination {
 		display: flex;
 		justify-content: center;
@@ -117,7 +127,7 @@
 		text-align: center;
 	}
 
-	.go-button {
+	/* .go-button {
 		padding: 8px 12px;
 		cursor: pointer;
 		border: 1px solid #ccc;
@@ -128,7 +138,7 @@
 
 	.go-button:hover {
 		background-color: #ddd;
-	}
+	} */
 
 	@media screen and (max-width: 600px) {
 		.pagination {
@@ -141,8 +151,8 @@
 			text-align: center;
 		}
 
-		.go-button {
+		/* .go-button {
 			width: 85%;
-		}
+		} */
 	}
 </style>
