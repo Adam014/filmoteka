@@ -240,19 +240,6 @@
 		box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); /* Light shadow for depth */
 	}
 
-	.shortcut-key {
-		position: absolute;
-		right: 10px;
-		top: 50%;
-		transform: translateY(-50%);
-		background-color: #333;
-		color: #fff;
-		font-size: 0.8rem;
-		padding: 2px 6px;
-		border-radius: 4px;
-		pointer-events: none;
-	}
-
 	.tmdb-reference a {
 		text-decoration: none;
 		color: #e5e5e5;
