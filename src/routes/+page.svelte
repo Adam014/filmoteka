@@ -113,7 +113,7 @@
 
 	.pagination-input {
 		width: 80px;
-		padding: 8px;
+		padding: 10px;
 		border-radius: 4px;
 		border: 1px solid #ccc;
 		text-align: center;
