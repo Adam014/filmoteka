@@ -4,46 +4,48 @@
 </script>
 
 <div class="movie-card">
-	<a href={`/movie/` + movie.id}>
+	<a href={`/movie/` + movie.id} data-sveltekit-preload-data="hover">
 		<img src={'https://image.tmdb.org/t/p/w500' + movie.poster_path} alt={movie.title} />
 	</a>
-	<!-- <div class="description">
-		<h2>{movie.title}</h2>
-		<h4>{movie.release_date}</h4>
-	</div> -->
 </div>
 
 <style>
 	* {
 		color: white;
 	}
-	a img {
-		width: 100%;
-		height: 40vh;
-		background-size: 100% 40vh;
-	}
-	img:hover{
-		transform: scale(1.1);
-		transition: 0.2s ease-in-out;
-	}
-	/* h2, h4 {
-		font-size: 1.1rem;
-		text-align: left;
-		margin: 0;
-		font-weight: 600;
-	}
-	h4{
-		font-weight: 100 !important;
-	} */
+
 	.movie-card {
 		display: flex;
 		flex-direction: column;
 		justify-content: space-around;
 		padding: 0.5rem;
-		overflow: hidden;
+		overflow: hidden; /* Prevent the scaled image from overflowing the container */
+		width: 100%;
+		max-width: 400px; /* Set the max width of the card */
+		height: 450px; /* Set the fixed height for the card */
 	}
+
 	a {
 		width: 100%;
-		height: 40vh;
+		height: 100%;
+		display: block;
+		overflow: hidden; /* Hide the overflow of the image */
+		position: relative;
+	}
+
+	a img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover; 
+		border-radius: 8px; 
+		transition: transform 0.3s ease-in-out; /* Smooth scaling on hover */
+		position: absolute; /* Ensure the image stays positioned correctly */
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%); /* Center the image in its container */
+	}
+
+	a:hover img {
+		transform: translate(-50%, -50%) scale(1.1); /* Scale up the image without moving the container */
 	}
 </style>

@@ -1,5 +1,6 @@
 <script>
 	import Navbar from '../../../components/Navbar.svelte';
+	import { getBestAvailableVideo } from "../../../utils/utils";
 
 	export let data;
 
@@ -23,13 +24,11 @@
 		production_countries = [],
 	} = movieDetails;
 
-	// Find the official trailer or fallback to the final trailer
-	let finalTrailer = movieVideos.find(video => video.type === "Trailer" && video.name.toLowerCase().includes("official"));
 
-	if (!finalTrailer) {
-		finalTrailer = movieVideos.find(video => video.type === "Trailer" && video.name.toLowerCase().includes("final"));
-	}
+	// Use the refactored function to find the final video
+	let finalTrailer = getBestAvailableVideo(movieVideos);
 
+	console.log(movieVideos)
 	console.log(finalTrailer);
 </script>
 
@@ -127,7 +126,7 @@
 	iframe {
 		width: 100%;
 		max-width: 100%;
-		height: 500px;
+		height: 550px;
 		border-radius: 8px;
 	}
 
