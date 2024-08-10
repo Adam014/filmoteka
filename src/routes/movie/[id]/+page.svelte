@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
-	import { getBestAvailableVideoWithCheck, formatCurrency } from "../../../utils/utils";
+	import { getBestAvailableVideoWithCheck, formatCurrency } from '../../../utils/utils';
 
 	export let data;
 
@@ -21,7 +21,7 @@
 		imdb_id = 'N/A',
 		overview = 'No overview available.',
 		production_companies = [],
-		production_countries = [],
+		production_countries = []
 	} = movieDetails;
 
 	let finalTrailer = null;
@@ -44,13 +44,19 @@
 	<div class="movie-title-container">
 		<h3>ID: {id}</h3>
 		<h3>lang: {original_language}</h3>
-		<h3>{status} {status === "Released" ? release_date : ""}</h3>
+		<h3>{status} {status === 'Released' ? release_date : ''}</h3>
 		<h3>Adult: {adult}</h3>
 	</div>
 
 	{#if finalTrailer}
 		<div class="video-container">
-			<iframe title="youtube-video" src={`https://www.youtube.com/embed/${finalTrailer.key}`} frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+			<iframe
+				title="youtube-video"
+				src={`https://www.youtube.com/embed/${finalTrailer.key}`}
+				frameborder="0"
+				allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+				allowfullscreen
+			/>
 		</div>
 	{:else}
 		<p class="no-trailer">No trailer available.</p>
@@ -59,9 +65,9 @@
 	<div>
 		<h1>{imdb_id} | {original_title}</h1>
 		<p class="overview">{overview}</p>
-		<p class="tagline">{tagline !== "" ? '"' + tagline + '"': ""}</p>
-		<p>{budget === 0 ? "" : "movie budget -> " + formattedBudget}</p>
-		<p>{revenue === 0 ? "" : "movie revenue -> " + formattedRevenue}</p>
+		<p class="tagline">{tagline !== '' ? '"' + tagline + '"' : ''}</p>
+		<p>{budget === 0 ? '' : 'movie budget -> ' + formattedBudget}</p>
+		<p>{revenue === 0 ? '' : 'movie revenue -> ' + formattedRevenue}</p>
 	</div>
 
 	<div class="stats-container">
@@ -100,17 +106,23 @@
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap');
 
-	.no-trailer{
+	.no-trailer {
 		padding: 50px 2.5rem 50px 2.5rem;
 	}
 
-	h3, h1, p {
+	h3,
+	h1,
+	p {
 		padding: 0rem 2.5rem 0rem 2.5rem;
 	}
-	.idk, .idk-p, .loneliness, .loneliness-p {
+	.idk,
+	.idk-p,
+	.loneliness,
+	.loneliness-p {
 		padding: 1rem 1.5rem 0rem 1.5rem !important;
 	}
-	h3, p {
+	h3,
+	p {
 		font-weight: 400;
 	}
 	h3 {
@@ -119,7 +131,9 @@
 	h1 {
 		font-size: 2.3rem;
 	}
-	.overview, .idk ul li, .loneliness ul li {
+	.overview,
+	.idk ul li,
+	.loneliness ul li {
 		color: #a0a0a0;
 	}
 	.overview {
@@ -131,7 +145,7 @@
 		display: flex;
 	}
 	.tagline {
-		font-family: "Indie Flower", cursive;
+		font-family: 'Indie Flower', cursive;
 		padding: 10px 40px 10px 40px;
 		font-size: 1.7rem;
 	}
@@ -140,7 +154,7 @@
 		justify-content: center;
 	}
 
-	.stats-container{
+	.stats-container {
 		padding-bottom: 40px;
 	}
 
@@ -158,7 +172,7 @@
 
 	@media screen and (max-width: 676px) {
 		.movie-title-container {
-			display: grid;	
+			display: grid;
 			grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 		}
 	}

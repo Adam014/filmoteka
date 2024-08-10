@@ -16,9 +16,9 @@
 		display: grid;
 		grid-template-columns: repeat(5, 1fr);
 		grid-template-rows: repeat(4, auto);
-		grid-gap: 20px; 
+		grid-gap: 20px;
 		padding: 20px;
-		justify-content: center; 
+		justify-content: center;
 	}
 
 	@media screen and (max-width: 1200px) {
@@ -29,7 +29,7 @@
 
 	@media screen and (max-width: 900px) {
 		.popular-movies {
-			grid-template-columns: repeat(3, 1fr); 
+			grid-template-columns: repeat(3, 1fr);
 		}
 	}
 

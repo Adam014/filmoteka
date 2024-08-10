@@ -1,12 +1,11 @@
 <script>
-    import Navbar from "../components/Navbar.svelte";
+	import Navbar from '../components/Navbar.svelte';
 	import { inject } from '@vercel/analytics';
 	import { Toaster } from 'svelte-french-toast';
 
 	if (process.env.NODE_ENV === 'production') {
 		inject();
 	}
-
 </script>
 
 <Navbar />

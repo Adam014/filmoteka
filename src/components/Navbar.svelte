@@ -18,9 +18,13 @@
 	}
 </script>
 
-<nav>		
+<nav>
 	<div class="navbar-container">
-		<a href="/?page=1" on:click={goToFirstPage} on:keydown={(e) => e.key === 'Enter' && goToFirstPage(e)}>
+		<a
+			href="/?page=1"
+			on:click={goToFirstPage}
+			on:keydown={(e) => e.key === 'Enter' && goToFirstPage(e)}
+		>
 			<h1>Filmoteka</h1>
 		</a>
 	</div>

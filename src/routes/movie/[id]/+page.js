@@ -1,36 +1,36 @@
 export async function load({ fetch, params }) {
-    const baseUrl = `https://api.themoviedb.org/3/movie/${params.id}`;
-    const apiKey = import.meta.env.VITE_TMDB_API_KEY;
+	const baseUrl = `https://api.themoviedb.org/3/movie/${params.id}`;
+	const apiKey = import.meta.env.VITE_TMDB_API_KEY;
 
-    const detailsUrl = `${baseUrl}?api_key=${apiKey}&language=en-US`;
-    const videosUrl = `${baseUrl}/videos?api_key=${apiKey}&language=en-US`;
+	const detailsUrl = `${baseUrl}?api_key=${apiKey}&language=en-US`;
+	const videosUrl = `${baseUrl}/videos?api_key=${apiKey}&language=en-US`;
 
-    try {
-        const [detailsResponse, videosResponse] = await Promise.all([
-            fetch(detailsUrl),
-            fetch(videosUrl)
-        ]);
+	try {
+		const [detailsResponse, videosResponse] = await Promise.all([
+			fetch(detailsUrl),
+			fetch(videosUrl)
+		]);
 
-        if (!detailsResponse.ok || !videosResponse.ok) {
-            // If any of the responses are not OK, throw an error
-            throw new Error('Failed to fetch data');
-        }
+		if (!detailsResponse.ok || !videosResponse.ok) {
+			// If any of the responses are not OK, throw an error
+			throw new Error('Failed to fetch data');
+		}
 
-        const detailsData = await detailsResponse.json();
-        const videosData = await videosResponse.json();
+		const detailsData = await detailsResponse.json();
+		const videosData = await videosResponse.json();
 
-        return {
-            details: detailsData,
-            videos: videosData
-        };
-    } catch (error) {
-        console.error('Error loading movie data:', error);
+		return {
+			details: detailsData,
+			videos: videosData
+		};
+	} catch (error) {
+		console.error('Error loading movie data:', error);
 
-        // Optionally return some fallback data or handle the error in a way suitable for your application
-        return {
-            details: null,
-            videos: null,
-            error: true
-        };
-    }
+		// Optionally return some fallback data or handle the error in a way suitable for your application
+		return {
+			details: null,
+			videos: null,
+			error: true
+		};
+	}
 }
