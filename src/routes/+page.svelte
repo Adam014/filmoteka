@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { loadMovies, cacheFirstPage } from '../utils/utils.js';
+	import { toast } from 'svelte-french-toast'; 
 
 	// TODO: Refactor
 	// When entered page from input exceeds totalPages use toast notifications
@@ -32,12 +33,15 @@
 
 	// Function to change page
 	async function changePage(page) {
-		if (page >= 1 && page <= totalPages) {
-			currentPage = page;
-			localStorage.setItem('currentPage', page);
-			await loadMovies(page, setMovieResults);
-			goto(`/?page=${page}`, { replaceState: true });
+		if (page < 1 || page > totalPages) {
+			toast.error(`Page ${page} is out of range. Please enter a valid page number.`);
+			return;
 		}
+
+		currentPage = page;
+		localStorage.setItem('currentPage', page);
+		await loadMovies(page, setMovieResults);
+		goto(`/?page=${page}`, { replaceState: true });
 	}
 
 	// Handle movies-loaded event
@@ -69,7 +73,7 @@
 				min="1"
 				max={totalPages}
 				bind:value={inputPage}
-				placeholder="Go to page..."
+				placeholder="Enter page"
 				on:keypress={(e) => { if (e.key === 'Enter') changePage(parseInt(inputPage, 10)); }}
 				class="pagination-input"
 			/>
