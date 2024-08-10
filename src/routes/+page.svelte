@@ -4,6 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { loadMovies, cacheFirstPage } from '../utils/utils.js';
 	import { toast } from 'svelte-french-toast';
+	import ShortcutKey from '../components/ShortcutKey.svelte';
 
 	// TODO: Need to resolve this crappy code
 	// TODO: Resolve the search function, it search functionality is shit
@@ -144,7 +145,7 @@
 				class="search-input"
 				on:focus={openSearchPopup}
 			/>
-			<span class="shortcut-key">Ctrl+K</span>
+			<ShortcutKey keyLabel="Ctrl+K" />
 		</div>
 	</div>
 
@@ -152,13 +153,15 @@
 		<div class="search-popup">
 			<div class="search-popup-content">
 				<form on:submit={handleSearch}>
-					<input
-						type="text"
-						bind:value={searchQuery}
-						placeholder="Search for a movie..."
-						class="search-popup-input"
-						autofocus
-					/>
+					<div class="input-wrapper">
+						<input
+							type="text"
+							bind:value={searchQuery}
+							placeholder="Search for a movie..."
+							class="search-popup-input"
+							autofocus
+						/>
+					</div>
 				</form>
 				<ul class="suggestions">
 					{#each topPopularMovies as movie}
@@ -217,39 +220,25 @@
 		width: 300px;
 	}
 
-	.search-input {
-		width: 75%;
-		padding: 8px 10px;
-		font-size: 1rem;
-		border: 1px solid #ccc;
-		border-radius: 4px;
-		background-color: #222;
-		color: #fff;
-		transition: all 0.3s ease; /* Add transition for smooth animation */
+	.search-popup-input {
+		width: 92%;
+		padding: 10px;
+		transition: all 0.3s ease;
 		outline: none;
-		padding-right: 60px; /* Make space for the shortcut key */
+		border: 1px solid #333;
+		border-radius: 4px;
+		background-color: #2c2c2c;
+		color: #fff;
 	}
 
 	form {
 		padding-bottom: 20px;
 	}
 
-	.search-input:focus {
-		transform: scale(1.03); /* Slight scaling effect */
-		box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); /* Light shadow for depth */
-	}
-
-	.shortcut-key {
-		position: absolute;
-		right: 10px;
-		top: 50%;
-		transform: translateY(-50%);
-		background-color: #333;
-		color: #fff;
-		font-size: 0.8rem;
-		padding: 2px 6px;
-		border-radius: 4px;
-		pointer-events: none;
+	.search-input:focus,
+	.search-popup-input:focus {
+		transform: scale(1.03);
+		box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 	}
 
 	.tmdb-reference a {
@@ -329,21 +318,9 @@
 		align-items: center;
 	}
 
-	.search-popup-input {
-		width: 100%;
-		padding: 15px;
-		font-size: 1.2rem;
-		border-radius: 4px;
-		border: 1px solid #333;
-		background-color: #2c2c2c;
-		color: #fff;
-		margin-bottom: 10px;
-		transition: all 0.3s ease; /* Add transition for smooth animation */
-	}
-
 	.search-popup-input:focus {
-		transform: scale(1.03); /* Slight scaling effect */
-		box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); /* Light shadow for depth */
+		transform: scale(1.03);
+		box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 	}
 
 	.suggestions {
