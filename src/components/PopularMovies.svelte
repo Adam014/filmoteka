@@ -1,12 +1,10 @@
 <script>
 	import MovieCard from './MovieCard.svelte';
-	import Navbar from './Navbar.svelte';
 
 	export let movies;
 	// console.log(movies);
 </script>
 
-<Navbar />
 <div class="popular-movies">
 	{#each movies as movie (movie.id)}
 		<MovieCard {movie} />

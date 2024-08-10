@@ -32,8 +32,6 @@
 	console.log(finalTrailer);
 </script>
 
-<Navbar />
-
 <section class="movie-details">
 	<div class="movie-title-container">
 		<h3>ID: {id}</h3>
