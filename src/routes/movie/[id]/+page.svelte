@@ -2,29 +2,39 @@
 	import Navbar from '../../../components/Navbar.svelte';
 
 	export let data;
-	const movieDetails = data.data;
+
+	const movieDetails = data?.details || {};
+	const movieVideos = data?.videos?.results || [];
 
 	const {
-		original_language,
-		original_title,
-		status,
-		release_date,
-		tagline,
-		revenue,
-		genres,
-		budget,
-		adult,
-		id,
-		imdb_id,
-		overview,
-		production_companies,
-		production_countries,
-	} = movieDetails
-	
-	console.log(movieDetails);
+		original_language = 'N/A',
+		original_title = 'N/A',
+		status = 'N/A',
+		release_date = 'N/A',
+		tagline = '',
+		revenue = 0,
+		genres = [],
+		budget = 0,
+		adult = false,
+		id = 'N/A',
+		imdb_id = 'N/A',
+		overview = 'No overview available.',
+		production_companies = [],
+		production_countries = [],
+	} = movieDetails;
+
+	// Find the official trailer or fallback to the final trailer
+	let finalTrailer = movieVideos.find(video => video.type === "Trailer" && video.name.toLowerCase().includes("official"));
+
+	if (!finalTrailer) {
+		finalTrailer = movieVideos.find(video => video.type === "Trailer" && video.name.toLowerCase().includes("final"));
+	}
+
+	console.log(finalTrailer);
 </script>
 
-	<Navbar />
+<Navbar />
+
 <section class="movie-details">
 	<div class="movie-title-container">
 		<h3>ID: {id}</h3>
@@ -32,6 +42,15 @@
 		<h3>{status} {status === "Released" ? release_date : ""}</h3>
 		<h3>Adult: {adult}</h3>
 	</div>
+
+	{#if finalTrailer}
+		<div class="video-container">
+			<iframe src={`https://www.youtube.com/embed/${finalTrailer.key}`} frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+		</div>
+	{:else}
+		<p>No trailer available.</p>
+	{/if}
+
 	<div>
 		<h1>{imdb_id} | {original_title}</h1>
 		<p class="overview">{overview}</p>
@@ -39,6 +58,7 @@
 		<p>movie budget -> ${budget}</p>
 		<p>{revenue === 0 ? "0 revenue" : "movie revenue -> $" + revenue}</p>
 	</div>
+
 	<div class="stats-container">
 		<div class="idk">
 			<p class="idk-p">genres:</p>
@@ -70,36 +90,49 @@
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap');
 
-	h3, h1, p{
-		padding: 0rem 2.5rem 0rem 2.5rem
+	h3, h1, p {
+		padding: 0rem 2.5rem 0rem 2.5rem;
 	}
-	.idk, .idk-p, .loneliness, .loneliness-p{
+	.idk, .idk-p, .loneliness, .loneliness-p {
 		padding: 1rem 1.5rem 0rem 1.5rem !important;
 	}
-	h3, p{
+	h3, p {
 		font-weight: 400;
 	}
-	h3{
+	h3 {
 		font-size: 1rem;
 	}
-	h1{
+	h1 {
 		font-size: 2rem;
 	}
-	.overview, .idk ul li, .loneliness ul li{
+	.overview, .idk ul li, .loneliness ul li {
 		color: #a0a0a0;
 	}
-	.movie-title-container{
+	.movie-title-container {
 		display: flex;
 	}
-	.tagline{
+	.tagline {
 		font-family: "Indie Flower", cursive;
 	}
-	.movie-details{
+	.movie-details {
 		display: grid;
 		justify-content: center;
 	}
+
+	/* Video container styles to ensure width matches description */
+	.video-container {
+		margin: 1rem 2.5rem;
+	}
+
+	iframe {
+		width: 100%;
+		max-width: 100%;
+		height: 500px;
+		border-radius: 8px;
+	}
+
 	@media screen and (max-width: 676px) {
-		.movie-title-container{
+		.movie-title-container {
 			display: grid;	
 			grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 		}
