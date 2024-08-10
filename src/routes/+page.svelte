@@ -4,6 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { loadMovies, cacheFirstPage } from '../utils/utils.js';
 	import { toast } from 'svelte-french-toast';
+	import ShortcutKey from '../components/ShortcutKey.svelte';
 
 	// TODO: Need to resolve this crappy code
 	// TODO: Resolve the search function, it search functionality is shit
@@ -144,7 +145,7 @@
 				class="search-input"
 				on:focus={openSearchPopup}
 			/>
-			<span class="shortcut-key">Ctrl+K</span>
+			<ShortcutKey keyLabel="Ctrl+K" />
 		</div>
 	</div>
 
