@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { loadMovies, cacheFirstPage } from '../utils/utils.js';
-	import { toast } from 'svelte-french-toast'; 
+	import { toast } from 'svelte-french-toast';
 
 	// TODO: Need to resolve this crappy code
 	// TODO: Resolve the search function, it search functionality is shit
@@ -62,7 +62,9 @@
 
 		if (searchQuery.trim()) {
 			const apiKey = '6b6f517b5228ea3d3ea85b1649b6a34a'; // Replace with your TMDB API key
-			const searchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(searchQuery)}&language=en-US&page=1&include_adult=false`;
+			const searchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(
+				searchQuery
+			)}&language=en-US&page=1&include_adult=false`;
 
 			const res = await fetch(searchUrl);
 			const data = await res.json();
@@ -140,7 +142,7 @@
 				bind:value={searchQuery}
 				placeholder="Search for a movie..."
 				class="search-input"
-				on:focus={openSearchPopup} 
+				on:focus={openSearchPopup}
 			/>
 			<span class="shortcut-key">Ctrl+K</span>
 		</div>
@@ -161,10 +163,13 @@
 				<ul class="suggestions">
 					{#each topPopularMovies as movie}
 						<li>
-							<a 
+							<a
 								href={`/movie/${movie.id}`}
-								class="suggestion-link" 
-								on:click={(e) => { e.preventDefault(); goto(`/movie/${movie.id}`); }}
+								class="suggestion-link"
+								on:click={(e) => {
+									e.preventDefault();
+									goto(`/movie/${movie.id}`);
+								}}
 								on:keydown={(e) => e.key === 'Enter' && goto(`/movie/${movie.id}`)}
 							>
 								{movie.title}
@@ -179,22 +184,26 @@
 	{#if movieResults.length > 0}
 		<PopularMovies movies={movieResults} />
 		<div class="pagination">
-			<button on:click={() => changePage(currentPage - 1)} disabled={currentPage === 1}>Previous</button>
+			<button on:click={() => changePage(currentPage - 1)} disabled={currentPage === 1}
+				>Previous</button
+			>
 			<span>Page {currentPage} of {totalPages}</span>
-			<button on:click={() => changePage(currentPage + 1)} disabled={currentPage === totalPages}>Next</button>
+			<button on:click={() => changePage(currentPage + 1)} disabled={currentPage === totalPages}
+				>Next</button
+			>
 			<input
 				type="number"
 				min="1"
 				max={totalPages}
 				bind:value={inputPage}
 				placeholder="Enter page"
-				on:keypress={(e) => { if (e.key === 'Enter') changePage(parseInt(inputPage, 10)); }}
+				on:keypress={(e) => {
+					if (e.key === 'Enter') changePage(parseInt(inputPage, 10));
+				}}
 				class="pagination-input"
 			/>
 			<div class="tmdb-reference">
-				<a href="https://www.themoviedb.org">
-					TMDB.org
-				</a>
+				<a href="https://www.themoviedb.org"> TMDB.org </a>
 			</div>
 		</div>
 	{:else}
@@ -203,216 +212,216 @@
 </section>
 
 <style>
-.input-wrapper {
-    position: relative;
-    width: 300px;
-}
+	.input-wrapper {
+		position: relative;
+		width: 300px;
+	}
 
-.search-input {
-    width: 75%;
-    padding: 8px 10px;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #222;
-    color: #fff;
-    transition: all 0.3s ease;  /* Add transition for smooth animation */
-    outline: none;
-    padding-right: 60px; /* Make space for the shortcut key */
-}
+	.search-input {
+		width: 75%;
+		padding: 8px 10px;
+		font-size: 1rem;
+		border: 1px solid #ccc;
+		border-radius: 4px;
+		background-color: #222;
+		color: #fff;
+		transition: all 0.3s ease; /* Add transition for smooth animation */
+		outline: none;
+		padding-right: 60px; /* Make space for the shortcut key */
+	}
 
-form{
-	padding-bottom: 20px;
-}
+	form {
+		padding-bottom: 20px;
+	}
 
-.search-input:focus {
-    transform: scale(1.03);  /* Slight scaling effect */
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); /* Light shadow for depth */
-}
+	.search-input:focus {
+		transform: scale(1.03); /* Slight scaling effect */
+		box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); /* Light shadow for depth */
+	}
 
-.shortcut-key {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    background-color: #333;
-    color: #fff;
-    font-size: 0.8rem;
-    padding: 2px 6px;
-    border-radius: 4px;
-    pointer-events: none;
-}
+	.shortcut-key {
+		position: absolute;
+		right: 10px;
+		top: 50%;
+		transform: translateY(-50%);
+		background-color: #333;
+		color: #fff;
+		font-size: 0.8rem;
+		padding: 2px 6px;
+		border-radius: 4px;
+		pointer-events: none;
+	}
 
-.tmdb-reference a {
-    text-decoration: none;
-    color: #e5e5e5;
-}
+	.tmdb-reference a {
+		text-decoration: none;
+		color: #e5e5e5;
+	}
 
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 20px 0;
-    gap: 10px;
-}
+	.pagination {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		margin: 20px 0;
+		gap: 10px;
+	}
 
-.pagination button {
-    margin: 0 10px;
-    padding: 10px 20px;
-    font-size: 1rem;
-    cursor: pointer;
-    border: 1px solid #ccc;
-    transition: background-color 0.3s;
-    color: white;
-    background-color: transparent;
-}
+	.pagination button {
+		margin: 0 10px;
+		padding: 10px 20px;
+		font-size: 1rem;
+		cursor: pointer;
+		border: 1px solid #ccc;
+		transition: background-color 0.3s;
+		color: white;
+		background-color: transparent;
+	}
 
-.pagination button:hover {
-    background-color: #ddd;
-    color: black;
-}
+	.pagination button:hover {
+		background-color: #ddd;
+		color: black;
+	}
 
-.pagination span {
-    margin: 0 10px;
-}
+	.pagination span {
+		margin: 0 10px;
+	}
 
-.pagination-input {
-    width: 80px;
-    padding: 11px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    text-align: center;
-}
+	.pagination-input {
+		width: 80px;
+		padding: 11px;
+		border-radius: 4px;
+		border: 1px solid #ccc;
+		text-align: center;
+	}
 
-.search-input-container {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 20px;
-}
+	.search-input-container {
+		position: relative;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		margin-bottom: 20px;
+	}
 
-.search-popup {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    padding: 20px; 
-    overflow-y: auto; 
-}
+	.search-popup {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.8);
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		z-index: 1000;
+		padding: 20px;
+		overflow-y: auto;
+	}
 
-.search-popup-content {
-    position: relative;
-    background: #1a1a1a;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    width: 100%;
-    max-width: 600px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+	.search-popup-content {
+		position: relative;
+		background: #1a1a1a;
+		padding: 20px;
+		border-radius: 8px;
+		box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+		width: 100%;
+		max-width: 600px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
 
-.search-popup-input {
-    width: 100%;
-    padding: 15px;
-    font-size: 1.2rem;
-    border-radius: 4px;
-    border: 1px solid #333;
-    background-color: #2c2c2c;
-    color: #fff;
-    margin-bottom: 10px;
-    transition: all 0.3s ease;  /* Add transition for smooth animation */
-}
+	.search-popup-input {
+		width: 100%;
+		padding: 15px;
+		font-size: 1.2rem;
+		border-radius: 4px;
+		border: 1px solid #333;
+		background-color: #2c2c2c;
+		color: #fff;
+		margin-bottom: 10px;
+		transition: all 0.3s ease; /* Add transition for smooth animation */
+	}
 
-.search-popup-input:focus {
-    transform: scale(1.03);  /* Slight scaling effect */
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); /* Light shadow for depth */
-}
+	.search-popup-input:focus {
+		transform: scale(1.03); /* Slight scaling effect */
+		box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); /* Light shadow for depth */
+	}
 
-.suggestions {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    width: 100%;
-}
+	.suggestions {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		width: 100%;
+	}
 
-.suggestion-link {
-    text-decoration: none;
-    color: inherit;
-    display: block;
-    padding: 10px;
-    width: 100%;
-}
+	.suggestion-link {
+		text-decoration: none;
+		color: inherit;
+		display: block;
+		padding: 10px;
+		width: 100%;
+	}
 
-.suggestions li {
-    padding: 10px;
-    background-color: #444;
-    border-radius: 4px;
-    margin-bottom: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
+	.suggestions li {
+		padding: 10px;
+		background-color: #444;
+		border-radius: 4px;
+		margin-bottom: 5px;
+		cursor: pointer;
+		transition: background-color 0.3s;
+	}
 
-.suggestions li:hover {
-    background-color: #666;
-}
+	.suggestions li:hover {
+		background-color: #666;
+	}
 
-@media screen and (max-width: 600px) {
-    .pagination {
-        flex-direction: column;
-        gap: 15px;
-    }
+	@media screen and (max-width: 600px) {
+		.pagination {
+			flex-direction: column;
+			gap: 15px;
+		}
 
-    .pagination-input {
-        width: 80%;
-        text-align: center;
-    }
+		.pagination-input {
+			width: 80%;
+			text-align: center;
+		}
 
-    .search-input:focus {
-        width: 100%;
-    }
+		.search-input:focus {
+			width: 100%;
+		}
 
-    .search-popup-content {
-        max-width: 70%; 
-        border-radius: 0;
-        padding: 15px; 
-    }
+		.search-popup-content {
+			max-width: 70%;
+			border-radius: 0;
+			padding: 15px;
+		}
 
-    .search-popup-input {
-        font-size: 1rem; 
-        padding: 12px; 
-        width: auto;
-    }
+		.search-popup-input {
+			font-size: 1rem;
+			padding: 12px;
+			width: auto;
+		}
 
-    .suggestions li {
-        padding: 12px; 
-        font-size: 1rem; 
-    }
+		.suggestions li {
+			padding: 12px;
+			font-size: 1rem;
+		}
 
-    .suggestion-link {
-        padding: 0; 
-    }
+		.suggestion-link {
+			padding: 0;
+		}
 
-    .search-popup {
-        padding: 0;
-    }
+		.search-popup {
+			padding: 0;
+		}
 
-    .search-input-container {
-        padding: 0 15px;
-    }
+		.search-input-container {
+			padding: 0 15px;
+		}
 
-    .search-input {
-        width: 92%;
-        font-size: 1rem;
-        padding: 10px;
-    }
-}
+		.search-input {
+			width: 92%;
+			font-size: 1rem;
+			padding: 10px;
+		}
+	}
 </style>

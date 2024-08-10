@@ -18,27 +18,27 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: space-around;
-		overflow: hidden; 
+		overflow: hidden;
 		width: 100%;
-		max-width: 350px; 
-		height: 450px; 
+		max-width: 350px;
+		height: 450px;
 	}
 
 	a {
 		width: 100%;
 		height: 100%;
 		display: block;
-		overflow: hidden; 
+		overflow: hidden;
 		position: relative;
 	}
 
 	a img {
 		width: 100%;
 		height: 100%;
-		object-fit: cover; 
-		border-radius: 8px; 
+		object-fit: cover;
+		border-radius: 8px;
 		transition: transform 0.3s ease-in-out;
-		position: absolute; 
+		position: absolute;
 		top: 50%;
 		left: 50%;
 		transform: translate(-50%, -50%);
@@ -49,17 +49,16 @@
 	}
 
 	@media screen and (max-width: 600px) {
-		.movie-card{
+		.movie-card {
 			max-width: 200px;
 			height: 230px;
 		}
 	}
 
 	@media screen and (max-width: 360px) {
-		.movie-card{
+		.movie-card {
 			max-width: 150px;
 			height: 200px;
 		}
 	}
-
 </style>
