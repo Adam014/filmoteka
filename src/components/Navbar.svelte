@@ -37,6 +37,7 @@
 	.navbar-container {
 		display: flex;
 		justify-content: center;
+		padding-top: 40px;
 	}
 	a {
 		text-decoration: none;

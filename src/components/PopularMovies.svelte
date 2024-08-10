@@ -16,38 +16,35 @@
 <style>
 	.popular-movies {
 		display: grid;
-		grid-template-columns: repeat(5, 1fr); /* 5 columns */
-		grid-template-rows: repeat(4, auto); /* 4 rows */
-		grid-gap: 20px; /* Consistent spacing between items */
-		padding: 30px;
+		grid-template-columns: repeat(5, 1fr);
+		grid-template-rows: repeat(4, auto);
+		grid-gap: 20px; 
+		padding: 20px;
+		justify-content: center; 
 	}
 
-	/* Media Queries to ensure responsiveness */
 	@media screen and (max-width: 1200px) {
 		.popular-movies {
-			grid-template-columns: repeat(4, 1fr); /* Reduce to 4 columns */
-			grid-template-rows: auto; /* Adjust rows to fill available space */
+			grid-template-columns: repeat(4, 1fr);
 		}
 	}
 
 	@media screen and (max-width: 900px) {
 		.popular-movies {
-			grid-template-columns: repeat(3, 1fr); /* Reduce to 3 columns */
-			grid-template-rows: auto; /* Adjust rows to fill available space */
+			grid-template-columns: repeat(3, 1fr); 
 		}
 	}
 
 	@media screen and (max-width: 600px) {
 		.popular-movies {
-			grid-template-columns: repeat(2, 1fr); /* Reduce to 2 columns */
-			grid-template-rows: auto; /* Adjust rows to fill available space */
+			grid-template-columns: repeat(2, 1fr);
 		}
 	}
 
-	@media screen and (max-width: 400px) {
+	/* @media screen and (max-width: 400px) {
 		.popular-movies {
-			grid-template-columns: 1fr; /* Single column */
-			grid-template-rows: auto; /* Stack all items vertically */
+			grid-template-columns: fr; 
+			grid-template-rows: auto; 
 		}
-	}
+	} */
 </style>

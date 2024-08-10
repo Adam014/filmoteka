@@ -18,18 +18,17 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: space-around;
-		padding: 0.5rem;
-		overflow: hidden; /* Prevent the scaled image from overflowing the container */
+		overflow: hidden; 
 		width: 100%;
-		max-width: 400px; /* Set the max width of the card */
-		height: 450px; /* Set the fixed height for the card */
+		max-width: 350px; 
+		height: 450px; 
 	}
 
 	a {
 		width: 100%;
 		height: 100%;
 		display: block;
-		overflow: hidden; /* Hide the overflow of the image */
+		overflow: hidden; 
 		position: relative;
 	}
 
@@ -38,14 +37,29 @@
 		height: 100%;
 		object-fit: cover; 
 		border-radius: 8px; 
-		transition: transform 0.3s ease-in-out; /* Smooth scaling on hover */
-		position: absolute; /* Ensure the image stays positioned correctly */
+		transition: transform 0.3s ease-in-out;
+		position: absolute; 
 		top: 50%;
 		left: 50%;
-		transform: translate(-50%, -50%); /* Center the image in its container */
+		transform: translate(-50%, -50%);
 	}
 
 	a:hover img {
-		transform: translate(-50%, -50%) scale(1.1); /* Scale up the image without moving the container */
+		transform: translate(-50%, -50%) scale(1.1);
 	}
+
+	@media screen and (max-width: 600px) {
+		.movie-card{
+			max-width: 200px;
+			height: 230px;
+		}
+	}
+
+	@media screen and (max-width: 360px) {
+		.movie-card{
+			max-width: 150px;
+			height: 200px;
+		}
+	}
+
 </style>

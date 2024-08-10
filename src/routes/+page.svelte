@@ -139,12 +139,12 @@
 		}
 
 		.pagination-input {
-			width: 100%;
+			width: 80%;
 			text-align: center;
 		}
 
 		.go-button {
-			width: 100%;
+			width: 85%;
 		}
 	}
 </style>
