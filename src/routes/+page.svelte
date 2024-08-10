@@ -17,21 +17,16 @@
 		movieResults = movies;
 	}
 
-	// Function to set total pages
-	function setTotalPages(pages) {
-		totalPages = pages;
-	}
-
 	// Function to update movies based on URL or page change
 	async function updateMoviesFromUrl() {
 		const urlParams = new URLSearchParams(window.location.search);
 		const pageFromUrl = urlParams.get('page');
 		if (pageFromUrl) {
 			currentPage = parseInt(pageFromUrl, 10);
-			await loadMovies(currentPage, setMovieResults, setTotalPages);
+			await loadMovies(currentPage, setMovieResults);
 		} else {
 			currentPage = 1;
-			await loadMovies(1, setMovieResults, setTotalPages);
+			await loadMovies(1, setMovieResults);
 		}
 	}
 
@@ -40,7 +35,7 @@
 		if (page >= 1 && page <= totalPages) {
 			currentPage = page;
 			localStorage.setItem('currentPage', page);
-			await loadMovies(page, setMovieResults, setTotalPages);
+			await loadMovies(page, setMovieResults);
 			goto(`/?page=${page}`, { replaceState: true });
 		}
 	}
@@ -97,14 +92,17 @@
 	.pagination button {
 		margin: 0 10px;
 		padding: 10px 20px;
+		font-size: 1rem;
 		cursor: pointer;
 		border: 1px solid #ccc;
-		background-color: #fff;
 		transition: background-color 0.3s;
+		color: white;
+		background-color: transparent;
 	}
 
 	.pagination button:hover {
 		background-color: #ddd;
+		color: black;
 	}
 
 	.pagination span {
@@ -113,7 +111,7 @@
 
 	.pagination-input {
 		width: 80px;
-		padding: 10px;
+		padding: 11px;
 		border-radius: 4px;
 		border: 1px solid #ccc;
 		text-align: center;

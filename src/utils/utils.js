@@ -25,7 +25,7 @@ export function getBestAvailableVideo(videoList) {
     return null;
 }
 
-export async function loadMovies(page, setMovieResults, setTotalPages) {
+export async function loadMovies(page, setMovieResults) {
     let cachedMovies = JSON.parse(localStorage.getItem(`movies_page_${page}`));
 
     if (!cachedMovies) {
@@ -35,9 +35,6 @@ export async function loadMovies(page, setMovieResults, setTotalPages) {
             const data = await res.json();
             cachedMovies = data.results;
             localStorage.setItem(`movies_page_${page}`, JSON.stringify(cachedMovies));
-            if (setTotalPages) {
-                setTotalPages(data.total_pages);
-            }
         }
     }
 
@@ -52,4 +49,14 @@ export async function cacheFirstPage() {
     if (!cachedPage1) {
         await loadMovies(1, null, null);
     }
+}
+
+export function formatCurrency(num) {
+    if (!num) return '';
+    return num.toLocaleString('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    });
 }

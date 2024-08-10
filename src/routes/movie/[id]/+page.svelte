@@ -1,6 +1,6 @@
 <script>
 	import Navbar from '../../../components/Navbar.svelte';
-	import { getBestAvailableVideo } from "../../../utils/utils";
+	import { getBestAvailableVideo, formatCurrency } from "../../../utils/utils";
 
 	export let data;
 
@@ -24,12 +24,17 @@
 		production_countries = [],
 	} = movieDetails;
 
+	console.log(budget, revenue)
 
 	// Use the refactored function to find the final video
 	let finalTrailer = getBestAvailableVideo(movieVideos);
 
-	console.log(movieVideos)
+	console.log(movieVideos);
 	console.log(finalTrailer);
+
+	// Format the budget and revenue
+	const formattedBudget = formatCurrency(budget);
+	const formattedRevenue = formatCurrency(revenue);
 </script>
 
 <section class="movie-details">
@@ -42,7 +47,7 @@
 
 	{#if finalTrailer}
 		<div class="video-container">
-			<iframe src={`https://www.youtube.com/embed/${finalTrailer.key}`} frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+			<iframe title="youtube-trailer" src={`https://www.youtube.com/embed/${finalTrailer.key}`} frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 		</div>
 	{:else}
 		<p>No trailer available.</p>
@@ -52,8 +57,8 @@
 		<h1>{imdb_id} | {original_title}</h1>
 		<p class="overview">{overview}</p>
 		<p class="tagline">{tagline !== "" ? '"' + tagline + '"': ""}</p>
-		<p>movie budget -> ${budget}</p>
-		<p>{revenue === 0 ? "0 revenue" : "movie revenue -> $" + revenue}</p>
+		<p>{budget === 0 ? "" : "movie budget -> " + formattedBudget}</p>
+		<p>{revenue === 0 ? "" : "movie revenue -> " + formattedRevenue}</p>
 	</div>
 
 	<div class="stats-container">
@@ -100,16 +105,23 @@
 		font-size: 1rem;
 	}
 	h1 {
-		font-size: 2rem;
+		font-size: 2.3rem;
 	}
 	.overview, .idk ul li, .loneliness ul li {
 		color: #a0a0a0;
 	}
+	.overview {
+		padding: 20px 40px 20px 40px;
+		font-size: 1.3rem;
+	}
+
 	.movie-title-container {
 		display: flex;
 	}
 	.tagline {
 		font-family: "Indie Flower", cursive;
+		padding: 10px 40px 10px 40px;
+		font-size: 1.7rem;
 	}
 	.movie-details {
 		display: grid;
