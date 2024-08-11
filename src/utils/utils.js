@@ -1,22 +1,14 @@
 const API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
 
-/**
- * Fetches the YouTube video content details to determine if it's age-restricted.
- * @param {string} videoId - The ID of the YouTube video.
- * @returns {Promise<boolean>} - Returns true if the video is age-restricted, otherwise false.
- */
 async function isVideoAgeRestricted(videoId) {
     const url = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${videoId}&key=${API_KEY}`;
-
     try {
         const response = await fetch(url);
         const data = await response.json();
-
         if (data.items && data.items.length > 0) {
             const contentRating = data.items[0].contentDetails.contentRating;
             return contentRating?.ytRating === 'ytAgeRestricted';
         }
-
         return false;
     } catch (error) {
         console.error('Error checking video age restriction:', error);
@@ -24,23 +16,15 @@ async function isVideoAgeRestricted(videoId) {
     }
 }
 
-/**
- * Fetches the YouTube video status to determine if it's available and embeddable.
- * @param {string} videoId - The ID of the YouTube video.
- * @returns {Promise<boolean>} - Returns true if the video is available and embeddable, otherwise false.
- */
 async function isVideoAvailable(videoId) {
     const url = `https://www.googleapis.com/youtube/v3/videos?part=status&id=${videoId}&key=${API_KEY}`;
-
     try {
         const response = await fetch(url);
         const data = await response.json();
-
         if (data.items && data.items.length > 0) {
             const { embeddable, uploadStatus } = data.items[0].status;
             return embeddable && uploadStatus === 'processed';
         }
-
         return false;
     } catch (error) {
         console.error('Error checking video availability:', error);
@@ -48,22 +32,14 @@ async function isVideoAvailable(videoId) {
     }
 }
 
-/**
- * Fetches YouTube video statistics, including view count.
- * @param {string} videoId - The ID of the YouTube video.
- * @returns {Promise<object|null>} - Returns an object containing video statistics or null if not found.
- */
 async function getVideoDetails(videoId) {
     const url = `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${videoId}&key=${API_KEY}`;
-
     try {
         const response = await fetch(url);
         const data = await response.json();
-
         if (data.items && data.items.length > 0) {
-            return data.items[0].statistics; // Contains viewCount, likeCount, etc.
+            return data.items[0].statistics;
         }
-
         return null;
     } catch (error) {
         console.error('Error fetching video details:', error);
@@ -72,33 +48,36 @@ async function getVideoDetails(videoId) {
 }
 
 /**
- * Filters and returns the best available video from the given list based on the highest view count.
- * The video must be a trailer, teaser, or clip, not age-restricted, and available on YouTube.
- * @param {Array} videoList - The list of videos to check.
- * @returns {Promise<object|null>} - Returns the best video object or null if no suitable video is found.
+ * Optimized function to find the best available video by making concurrent requests.
+ * @param {Array} videoList - List of video objects.
+ * @returns {Promise<object|null>} - The best available video based on views, availability, and age restriction.
  */
 export async function getBestAvailableVideoWithCheck(videoList) {
     const prioritizedTypes = ['Trailer', 'Teaser', 'Clip'];
-    const validVideos = [];
+    
+    // Filter videos by prioritized types
+    const filteredVideos = videoList.filter(
+        video => prioritizedTypes.includes(video.type) && !video.name.toLowerCase().includes('restricted')
+    );
 
-    for (const type of prioritizedTypes) {
-        const videosOfType = videoList.filter(
-            (video) => video.type === type && !video.name.toLowerCase().includes('restricted')
-        );
+    // Map through videos and get promises for availability, age restriction, and view count
+    const videoChecks = filteredVideos.map(async video => {
+        const [isRestricted, isAvailable, videoDetails] = await Promise.all([
+            isVideoAgeRestricted(video.key),
+            isVideoAvailable(video.key),
+            getVideoDetails(video.key)
+        ]);
 
-        for (const video of videosOfType) {
-            const isRestricted = await isVideoAgeRestricted(video.key);
-            const isAvailable = await isVideoAvailable(video.key);
-
-            if (!isRestricted && isAvailable) {
-                const videoDetails = await getVideoDetails(video.key);
-                if (videoDetails) {
-                    validVideos.push({ ...video, views: videoDetails.viewCount });
-                }
-            }
+        if (!isRestricted && isAvailable && videoDetails) {
+            return { ...video, views: parseInt(videoDetails.viewCount, 10) };
         }
-    }
+        return null;
+    });
 
+    // Wait for all checks to complete
+    const validVideos = (await Promise.all(videoChecks)).filter(video => video !== null);
+
+    // Sort videos by view count in descending order
     validVideos.sort((a, b) => b.views - a.views);
 
     return validVideos.length > 0 ? validVideos[0] : null;

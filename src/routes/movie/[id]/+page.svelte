@@ -25,10 +25,12 @@
 	} = movieDetails;
 
 	let finalTrailer = null;
+	let isLoading = true;
 
 	// Asynchronous function to get the best available video
 	async function fetchBestAvailableVideo() {
 		finalTrailer = await getBestAvailableVideoWithCheck(movieVideos);
+		isLoading = false;
 	}
 
 	onMount(() => {
@@ -48,7 +50,10 @@
 		<h3>Adult: {adult}</h3>
 	</div>
 
-	{#if finalTrailer}
+	<!-- Show Loading... when trailer is being fetched -->
+	{#if isLoading}
+		<p class="loading">Loading trailer...</p>
+	{:else if finalTrailer}
 		<div class="video-container">
 			<iframe
 				title="youtube-video"
@@ -121,6 +126,13 @@
 	.loneliness-p {
 		padding: 1rem 1.5rem 0rem 1.5rem !important;
 	}
+
+	.loading{
+		padding: 2rem 2.5rem 2rem 2.5rem;
+		font-size: 1.3rem;
+		font-family: 'Indie Flower', cursive;
+	}
+
 	h3,
 	p {
 		font-weight: 400;
