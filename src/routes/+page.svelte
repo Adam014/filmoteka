@@ -222,7 +222,7 @@
 		color: #fff;
 		transition: all 0.3s ease;
 		outline: none;
-		padding-right: 60px; /* Space for the shortcut key */
+		padding-right: 60px; 
 	}
 
 	.search-input:focus {

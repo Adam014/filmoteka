@@ -1,3 +1,3 @@
-TODO: Need to resolve this crappy code
-TODO: Resolve the search function, it search functionality is shit
-TODO: Need to better the function for getting the trailer, we need to get the best trailer, with biggest views?
+TODO: Need to resolve /routes/+page.svelte its a crap
+TODO: Resolve the search function on /routes/+page.svelte, it search functionality is shit
+TODO: Start saving data to Supabase
