@@ -6,32 +6,27 @@
 	import { toast } from 'svelte-french-toast';
 	import ShortcutKey from '../components/ShortcutKey.svelte';
 
-	// TODO: Need to resolve this crappy code
-	// TODO: Resolve the search function, it search functionality is shit
-
 	let movieResults = [];
 	let currentPage = 1;
 	let totalPages = 500;
 	let inputPage = '';
 	let searchQuery = '';
 	let isSearchPopupOpen = false; // Controls the visibility of the search popup
+	let isFadingOut = false; // Flag for fade-out animation
 	let topPopularMovies = [];
 	let preventClose = false; // Flag to prevent immediate closing
 
-	// Function to update the movies state
 	function setMovieResults(movies) {
 		movieResults = movies;
 		selectTopPopularMovies(); // Select top 5 popular movies for suggestions
 	}
 
-	// Function to select top 5 movies by popularity
 	function selectTopPopularMovies() {
 		topPopularMovies = [...movieResults]
-			.sort((a, b) => b.popularity - a.popularity) // Sort by popularity descending
-			.slice(0, 5); // Take top 5
+			.sort((a, b) => b.popularity - a.popularity)
+			.slice(0, 5);
 	}
 
-	// Function to update movies based on URL or page change
 	async function updateMoviesFromUrl() {
 		const urlParams = new URLSearchParams(window.location.search);
 		const pageFromUrl = urlParams.get('page');
@@ -44,7 +39,6 @@
 		}
 	}
 
-	// Function to change page
 	async function changePage(page) {
 		if (page < 1 || page > totalPages) {
 			toast.error(`Page ${page} is out of range. Please enter a valid page number.`);
@@ -57,12 +51,11 @@
 		goto(`/?page=${page}`, { replaceState: true });
 	}
 
-	// Function to handle search and redirect to the movie details page
 	async function handleSearch(event) {
 		event.preventDefault();
 
 		if (searchQuery.trim()) {
-			const apiKey = '6b6f517b5228ea3d3ea85b1649b6a34a'; // Replace with your TMDB API key
+			const apiKey = '6b6f517b5228ea3d3ea85b1649b6a34a';
 			const searchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(
 				searchQuery
 			)}&language=en-US&page=1&include_adult=false`;
@@ -73,39 +66,39 @@
 			if (data.results && data.results.length > 0) {
 				const movieId = data.results[0].id;
 				goto(`/movie/${movieId}`);
-				closeSearchPopup(); // Close the search popup after redirect
+				closeSearchPopup();
 			} else {
 				toast.error('Movie not found!');
 			}
 		}
 	}
 
-	// Function to open the search popup
 	function openSearchPopup() {
 		isSearchPopupOpen = true;
-		preventClose = true; // Prevent immediate close
-		selectTopPopularMovies(); // Select top 5 popular movies when opening the popup
+		preventClose = true;
+		selectTopPopularMovies();
 
 		setTimeout(() => {
-			preventClose = false; // Re-enable closing after a delay
+			preventClose = false;
 			document.addEventListener('click', handleClickOutside);
-		}, 200); // Set a slight delay before adding the click event listener
+		}, 200);
 	}
 
-	// Function to close the search popup
 	function closeSearchPopup() {
-		isSearchPopupOpen = false;
-		document.removeEventListener('click', handleClickOutside);
+		isFadingOut = true; // Start fade-out animation
+		setTimeout(() => {
+			isSearchPopupOpen = false; // Close the popup after the fade-out animation
+			isFadingOut = false; // Reset fade-out flag
+			document.removeEventListener('click', handleClickOutside);
+		}, 500); // Match this duration with the CSS animation duration
 	}
 
-	// Function to close the search popup when clicking outside of it
 	function handleClickOutside(event) {
 		if (!preventClose && isSearchPopupOpen && !event.target.closest('.search-popup-content')) {
 			closeSearchPopup();
 		}
 	}
 
-	// Handle keyboard shortcut for search popup and closing on Escape key
 	function handleKeydown(event) {
 		if (event.ctrlKey && event.key === 'k') {
 			event.preventDefault();
@@ -115,14 +108,13 @@
 		}
 	}
 
-	// Handle movies-loaded event
 	function handleMoviesLoaded(event) {
 		setMovieResults(event.detail.movies);
 		currentPage = event.detail.page;
 	}
 
 	onMount(() => {
-		cacheFirstPage(); // Ensure page 1 is cached on initial load
+		cacheFirstPage();
 		updateMoviesFromUrl();
 		window.addEventListener('keydown', handleKeydown);
 		window.addEventListener('movies-loaded', handleMoviesLoaded);
@@ -136,51 +128,54 @@
 </script>
 
 <section class="container">
-	<div class="search-input-container">
-		<div class="input-wrapper">
-			<input
-				type="text"
-				bind:value={searchQuery}
-				placeholder="Search for a movie..."
-				class="search-input"
-				on:focus={openSearchPopup}
-			/>
-			<ShortcutKey keyLabel="Ctrl+K" />
-		</div>
-	</div>
+ 	<div class="search-input-container">
+        <div class="input-wrapper">
+            <input
+                type="text"
+                bind:value={searchQuery}
+                placeholder="Search for a movie..."
+                class="search-input"
+                on:focus={openSearchPopup}
+            />
+            <ShortcutKey keyLabel="Ctrl+K" class="shortcut-key-ctrlk" />
+        </div>
+    </div>
 
-	{#if isSearchPopupOpen}
-		<div class="search-popup">
-			<div class="search-popup-content">
-				<form on:submit={handleSearch}>
-					<input
-						type="text"
-						bind:value={searchQuery}
-						placeholder="Search for a movie..."
-						class="search-popup-input"
-						autofocus
-					/>
-				</form>
-				<ul class="suggestions">
-					{#each topPopularMovies as movie}
-						<li>
-							<a
-								href={`/movie/${movie.id}`}
-								class="suggestion-link"
-								on:click={(e) => {
-									e.preventDefault();
-									goto(`/movie/${movie.id}`);
-								}}
-								on:keydown={(e) => e.key === 'Enter' && goto(`/movie/${movie.id}`)}
-							>
-								{movie.title}
-							</a>
-						</li>
-					{/each}
-				</ul>
-			</div>
-		</div>
-	{/if}
+ 	{#if isSearchPopupOpen}
+       	<div class="search-popup {isFadingOut ? 'fade-out' : ''}">
+            <div class="search-popup-content">
+                <div class="input-wrapper">
+                    <form on:submit={handleSearch}>
+                        <input
+                            type="text"
+                            bind:value={searchQuery}
+                            placeholder="Search for a movie..."
+                            class="search-popup-input"
+                            autofocus
+                        />
+                        <ShortcutKey keyLabel="Esc" class="shortcut-key-esc" />
+                    </form>
+                </div>
+                <ul class="suggestions">
+                    {#each topPopularMovies as movie}
+                        <li>
+                            <a
+                                href={`/movie/${movie.id}`}
+                                class="suggestion-link"
+                                on:click={(e) => {
+                                    e.preventDefault();
+                                    goto(`/movie/${movie.id}`);
+                                }}
+                                on:keydown={(e) => e.key === 'Enter' && goto(`/movie/${movie.id}`)}
+                            >
+                                {movie.title}
+                            </a>
+                        </li>
+                    {/each}
+                </ul>
+            </div>
+        </div>
+    {/if}
 
 	{#if movieResults.length > 0}
 		<PopularMovies movies={movieResults} />
@@ -215,7 +210,6 @@
 <style>
 	.input-wrapper {
 		position: relative;
-		width: 300px;
 	}
 
 	.search-input {
@@ -226,18 +220,14 @@
 		border-radius: 4px;
 		background-color: #222;
 		color: #fff;
-		transition: all 0.3s ease; /* Add transition for smooth animation */
+		transition: all 0.3s ease;
 		outline: none;
-		padding-right: 60px; /* Make space for the shortcut key */
-	}
-
-	form {
-		padding-bottom: 20px;
+		padding-right: 60px; /* Space for the shortcut key */
 	}
 
 	.search-input:focus {
-		transform: scale(1.03); /* Slight scaling effect */
-		box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); /* Light shadow for depth */
+		transform: scale(1.03);
+		box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 	}
 
 	.tmdb-reference a {
@@ -302,6 +292,15 @@
 		z-index: 1000;
 		padding: 20px;
 		overflow-y: auto;
+		transition: opacity 0.5s ease, visibility 0.5s ease; /* Adjusted for both opacity and visibility */
+		opacity: 1;
+		visibility: visible;
+	}
+
+
+	.search-popup.fade-out {
+		opacity: 0; 
+		visibility: hidden; /* This hides the element after the fade-out */
 	}
 
 	.search-popup-content {
@@ -315,28 +314,45 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+		animation: fadeIn 0.5s ease forwards;
+	}
+
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+			transform: scale(0.95);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1);
+		}
 	}
 
 	.search-popup-input {
-		width: 100%;
+		width: 75%;
 		padding: 15px;
 		font-size: 1.2rem;
 		border-radius: 4px;
 		border: 1px solid #333;
 		background-color: #2c2c2c;
 		color: #fff;
-		margin-bottom: 10px;
-		transition: all 0.3s ease; /* Add transition for smooth animation */
+		transition: all 0.3s ease;
+		padding-right: 60px;
+	}
+
+	form{
+		align-items: center;
+		display: flex;
 	}
 
 	.search-popup-input:focus {
-		transform: scale(1.03); /* Slight scaling effect */
-		box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); /* Light shadow for depth */
+		transform: scale(1.03);
+		box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 	}
 
 	.suggestions {
 		list-style: none;
-		padding: 0;
+		padding: 20px 0 0 0;
 		margin: 0;
 		width: 100%;
 	}
