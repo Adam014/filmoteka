@@ -3,6 +3,7 @@
 
 	export let movies;
 	// console.log(movies);
+
 </script>
 
 <div class="popular-movies">
