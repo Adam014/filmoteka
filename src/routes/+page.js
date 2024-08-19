@@ -31,6 +31,7 @@ export async function load({ fetch, url }) {
 
         // Store fetched data into Supabase
         const filmsToInsert = data.results.map((movie) => ({
+            id: movie.id,
             adult: movie.adult,
             backdrop_path: movie.backdrop_path,
             genre_ids: movie.genre_ids,
