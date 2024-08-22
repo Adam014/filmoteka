@@ -4,28 +4,20 @@ export async function load({ fetch, params }) {
 	const baseUrl = `https://api.themoviedb.org/3/movie/${params.id}`;
 	const apiKey = import.meta.env.VITE_TMDB_API_KEY;
 
-	// Check if the movie exists in the Supabase DB
-	const { data: filmData, error: filmError } = await supabase
-		.from('films')
+	// If film exists, fetch the detailed information from the detailed_film table
+	const { data: detailedData, error: detailedError } = await supabase
+		.from('film_detailed')
 		.select('*')
 		.eq('id', params.id)
 		.single();
 
-	if (filmData) {
-		// If film exists, fetch the detailed information from the detailed_film table
-		const { data: detailedData, error: detailedError } = await supabase
-			.from('film_detailed')
-			.select('*')
-			.eq('id', params.id)
-			.single();
+	// console.log(detailedData);
 
-		if (detailedData) {
-			// Return the data from the DB
-			return {
-				details: detailedData,
-				videos: detailedData.videos || null,
-			};
-		}
+	if (detailedData) {
+		return {
+			details: detailedData,
+			videos: detailedData.videos || null,
+		};
 	}
 
 	// If the film is not found in the DB, fetch the data from the external API
@@ -44,8 +36,6 @@ export async function load({ fetch, params }) {
 
 		const detailsData = await detailsResponse.json();
 		const videosData = await videosResponse.json();
-
-		console.log(detailsData)
 
 		const { error: insertDetailedFilmError } = await supabase
 			.from('film_detailed')
@@ -67,7 +57,8 @@ export async function load({ fetch, params }) {
 					spoken_languages: detailsData.spoken_languages,
 					status: detailsData.status,
 					tagline: detailsData.tagline,
-					videos: videosData.results 
+					videos: videosData,
+					original_title: detailsData.title
 				},
 			]);
 
