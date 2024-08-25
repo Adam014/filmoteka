@@ -36,7 +36,7 @@
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
-		border-radius: 8px;
+		border-radius: 20px;
 		transition: transform 0.3s ease-in-out;
 		position: absolute;
 		top: 50%;

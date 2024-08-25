@@ -21,7 +21,8 @@
 		imdb_id = 'N/A',
 		overview = 'No overview available.',
 		production_companies = [],
-		production_countries = []
+		production_countries = [],
+		homepage = ""
 	} = movieDetails;
 
 	let finalTrailer = null;
@@ -44,10 +45,25 @@
 
 <section class="movie-details">
 	<div class="movie-title-container">
-		<h3>ID: {id}</h3>
-		<h3>lang: {original_language}</h3>
-		<h3>{status} {status === 'Released' ? release_date : ''}</h3>
-		<h3>Adult: {adult}</h3>
+		{#if id}
+			<h3>ID: {id}</h3>
+		{/if}
+
+		{#if original_language}
+			<h3>Lang: {original_language}</h3>
+		{/if}
+
+		{#if status}
+			<h3>{status} {status === 'Released' && release_date ? release_date : ''}</h3>
+		{/if}
+
+		{#if adult !== null && adult !== undefined}
+			<h3>Adult: {adult ? 'Yes' : 'No'}</h3>
+		{/if}
+
+		{#if homepage}
+			<h3><a href={homepage}>HomePage</a></h3>
+		{/if}
 	</div>
 
 	<!-- Show Loading... when trailer is being fetched -->
@@ -179,7 +195,7 @@
 		width: 100%;
 		max-width: 100%;
 		height: 550px;
-		border-radius: 8px;
+		border-radius: 30px;
 	}
 
 	@media screen and (max-width: 676px) {
