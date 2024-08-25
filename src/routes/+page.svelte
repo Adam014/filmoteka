@@ -27,6 +27,19 @@
 			.slice(0, 5);
 	}
 
+    // Function to generate the list of pages to display
+    function generatePageNumbers(currentPage, totalPages, pageRange = 2) {
+        const startPage = Math.max(1, currentPage - pageRange);
+        const endPage = Math.min(totalPages, currentPage + pageRange);
+        const pages = [];
+
+        for (let i = startPage; i <= endPage; i++) {
+            pages.push(i);
+        }
+
+        return pages;
+    }
+
 	async function updateMoviesFromUrl() {
 		const urlParams = new URLSearchParams(window.location.search);
 		const pageFromUrl = urlParams.get('page');
@@ -163,13 +176,20 @@
 	{#if movieResults.length > 0}
 		<PopularMovies movies={movieResults} />
 		<div class="pagination">
-			<button on:click={() => changePage(currentPage - 1)} disabled={currentPage === 1}
-				>Previous</button
-			>
-			<span>Page {currentPage} of {totalPages}</span>
-			<button on:click={() => changePage(currentPage + 1)} disabled={currentPage === totalPages}
-				>Next</button
-			>
+			<button on:click={() => changePage(currentPage - 1)} disabled={currentPage === 1}>Previous</button>
+
+			<div>
+				{#each generatePageNumbers(currentPage, totalPages) as page}
+					<button 
+						class:active={page === currentPage}
+						on:click={() => changePage(page)}
+					>
+						{page}
+					</button>
+				{/each}
+			</div>
+
+			<button on:click={() => changePage(currentPage + 1)} disabled={currentPage === totalPages}>Next</button>
 			<input
 				type="number"
 				min="1"
@@ -216,43 +236,49 @@
 	.tmdb-reference a {
 		text-decoration: none;
 		color: #e5e5e5;
+		padding-left: 15px;
 	}
 
-	.pagination {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		margin: 20px 0;
-		gap: 10px;
-	}
+   	.pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 20px 0;
+    }
 
-	.pagination button {
-		margin: 0 10px;
-		padding: 10px 20px;
-		font-size: 1rem;
-		cursor: pointer;
-		border: 1px solid #ccc;
-		transition: background-color 0.3s;
-		color: white;
-		background-color: transparent;
-	}
+    .pagination button {
+        font-size: 1rem;
+        cursor: pointer;
+		background: none;
+        color: white;
+		border: 0;
+        transition: background-color 0.3s;
+		padding: 10px
+    }
 
-	.pagination button:hover {
-		background-color: #ddd;
-		color: black;
-	}
+    .pagination button:hover {
+    	color: white;
+		background-color: #B7999C;
+    }
+
+  	.pagination button.active {
+        background-color: #EB5160;
+        color: white;
+        font-weight: bold;
+    }
 
 	.pagination span {
 		margin: 0 10px;
 	}
 
-	.pagination-input {
-		width: 80px;
-		padding: 11px;
-		border-radius: 4px;
-		border: 1px solid #ccc;
-		text-align: center;
-	}
+    .pagination-input {
+        width: 80px;
+        padding: 11px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        text-align: center;
+		margin-left: 10px;
+    }
 
 	.search-input-container {
 		position: relative;
