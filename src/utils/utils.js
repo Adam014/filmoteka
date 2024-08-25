@@ -1,4 +1,108 @@
-const API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
+import { supabase } from "./db/supabaseClient";
+import toast from "svelte-french-toast";
+import { goto } from "$app/navigation";
+
+export const API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
+export const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY
+
+export async function handleSearch(searchQuery, closeSearchPopup) {
+    if (searchQuery.trim()) {
+        // Step 1: Try to find the movie in the local database
+        const { data: filmData, error: fetchError } = await supabase
+            .from('film_detailed')
+            .select('*')
+            .ilike('original_title', `%${searchQuery.trim()}%`);
+
+        if (fetchError) {
+            console.error('Error fetching from Supabase:', fetchError);
+        }
+
+        let selectedMovie = null;
+
+        if (filmData && filmData.length > 0) {
+            // Step 2: Apply smart selection logic for the movie
+            selectedMovie = selectBestMatch(filmData, searchQuery);
+
+            // If we found a good match, navigate to that movie
+            if (selectedMovie) {
+                goto(`/movie/${selectedMovie.id}`);
+                closeSearchPopup();
+                return;
+            }
+        }
+
+        // Step 3: If not found or no good match, fetch from the TMDB API
+        const searchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(
+            searchQuery.trim()
+        )}&language=en-US&page=1&include_adult=false`;
+
+        const res = await fetch(searchUrl);
+        const data = await res.json();
+
+        if (data.results && data.results.length > 0) {
+            // Step 4: Apply the same smart selection logic to API results
+            selectedMovie = selectBestMatch(data.results, searchQuery);
+
+            if (selectedMovie) {
+                // Step 5: Insert fetched movie data into the database
+                const { error: insertError } = await supabase
+                    .from('film_detailed')
+                    .upsert([{
+                        id: selectedMovie.id,
+                        title: selectedMovie.title,
+                        overview: selectedMovie.overview,
+                        release_date: selectedMovie.release_date,
+                        poster_path: selectedMovie.poster_path,
+                        backdrop_path: selectedMovie.backdrop_path,
+                        vote_average: selectedMovie.vote_average,
+                        vote_count: selectedMovie.vote_count,
+                        genres: selectedMovie.genre_ids,
+                        original_language: selectedMovie.original_language,
+                        original_title: selectedMovie.original_title,
+                        popularity: selectedMovie.popularity,
+                        video: selectedMovie.video,
+                        adult: selectedMovie.adult,
+                    }]);
+
+                if (insertError) {
+                    console.error('Error inserting into Supabase:', insertError);
+                }
+
+                // Navigate to the movie's page
+                goto(`/movie/${selectedMovie.id}`);
+                closeSearchPopup();
+            } else {
+                toast.error('Movie not found!');
+            }
+        } else {
+            toast.error('Movie not found!');
+        }
+    }
+}
+
+function selectBestMatch(movies, searchQuery) {
+    const exactMatches = movies.filter(movie => movie.original_title.toLowerCase() === searchQuery.trim().toLowerCase());
+
+    // Set a minimum popularity threshold to filter out irrelevant results
+    const MIN_POPULARITY_THRESHOLD = 50;
+
+    if (exactMatches.length > 0) {
+        // Prioritize exact matches with the highest popularity
+        return exactMatches.reduce((prev, current) => {
+            return current.popularity > MIN_POPULARITY_THRESHOLD && current.popularity > prev.popularity ? current : prev;
+        });
+    } else {
+        // If no exact match, choose the most popular movie above the popularity threshold
+        const popularMatches = movies.filter(movie => movie.popularity > MIN_POPULARITY_THRESHOLD);
+        if (popularMatches.length > 0) {
+            return popularMatches.reduce((prev, current) => {
+                return current.popularity > prev.popularity ? current : prev;
+            });
+        } else {
+            return null; // Return null if no suitable match is found
+        }
+    }
+}
 
 async function isVideoAgeRestricted(videoId) {
     const url = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${videoId}&key=${API_KEY}`;
@@ -132,4 +236,34 @@ export function formatCurrency(num) {
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
     });
+}
+
+export async function getAllMovies(page) {
+    try {
+        const { data: films, error } = await supabase
+            .from('films')
+            .select('*')
+            .eq('page', page);
+
+        return films || null;
+    } catch (error) {
+        console.error('Unexpected error:', error);
+        return null; // Or handle the error as needed
+    }
+}
+
+export async function getDetailedMovie(id){
+	// If film exists, fetch the detailed information from the detailed_film table
+    try {
+        const { data: detailedData, error} = await supabase
+            .from('film_detailed')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        return detailedData
+    } catch (error){
+        console.log(error)
+        return null;
+    }
 }

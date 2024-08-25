@@ -1,18 +1,11 @@
 import { supabase } from '../utils/db/supabaseClient';
+import { getAllMovies, TMDB_API_KEY } from '../utils/utils';
 
 export async function load({ fetch, url }) {
     const page = parseInt(url.searchParams.get('page')) || 1;
 
     try {
-        // Check if the page exists in Supabase
-        let { data: films, error } = await supabase
-            .from('films')
-            .select('*')
-            .eq('page', page);
-
-        if (error) {
-            console.error('Error fetching from Supabase:', error);
-        }
+        let films = getAllMovies(page);
 
         if (films && films.length > 0) {
             return {
@@ -21,7 +14,7 @@ export async function load({ fetch, url }) {
         }
 
         // If not found in Supabase, fetch from TMDB API
-        const apiUrl = `https://api.themoviedb.org/3/movie/popular?api_key=${process.env.TMDB_API_KEY}&language=en-US&page=${page}`;
+        const apiUrl = `https://api.themoviedb.org/3/movie/popular?api_key=${TMDB_API_KEY}&language=en-US&page=${page}`;
         const res = await fetch(apiUrl);
 
         if (res.ok) {

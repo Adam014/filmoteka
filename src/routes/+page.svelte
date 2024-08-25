@@ -2,7 +2,7 @@
 	import PopularMovies from '../components/PopularMovies.svelte';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { loadMovies, cacheFirstPage } from '../utils/utils.js';
+	import { loadMovies, cacheFirstPage, handleSearch } from '../utils/utils.js';
 	import { toast } from 'svelte-french-toast';
 	import ShortcutKey from '../components/ShortcutKey.svelte';
 
@@ -51,27 +51,10 @@
 		goto(`/?page=${page}`, { replaceState: true });
 	}
 
-	async function handleSearch(event) {
-		event.preventDefault();
-
-		if (searchQuery.trim()) {
-			const apiKey = '6b6f517b5228ea3d3ea85b1649b6a34a';
-			const searchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(
-				searchQuery
-			)}&language=en-US&page=1&include_adult=false`;
-
-			const res = await fetch(searchUrl);
-			const data = await res.json();
-
-			if (data.results && data.results.length > 0) {
-				const movieId = data.results[0].id;
-				goto(`/movie/${movieId}`);
-				closeSearchPopup();
-			} else {
-				toast.error('Movie not found!');
-			}
-		}
-	}
+	async function handleSearchEvent(event) {
+        event.preventDefault();
+        await handleSearch(searchQuery, closeSearchPopup, toast);
+    }
 
 	function openSearchPopup() {
 		isSearchPopupOpen = true;
@@ -145,7 +128,7 @@
        	<div class="search-popup {isFadingOut ? 'fade-out' : ''}">
             <div class="search-popup-content">
                 <div class="input-wrapper">
-                    <form on:submit={handleSearch}>
+                    <form on:submit={handleSearchEvent}>
                         <input
                             type="text"
                             bind:value={searchQuery}
