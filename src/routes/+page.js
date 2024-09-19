@@ -1,4 +1,4 @@
-import { supabase } from '../utils/db/supabaseClient';
+import { supabase } from '../lib/db/supabaseClient';
 import { getAllMovies, TMDB_API_KEY } from '../lib/utils';
 
 export async function load({ fetch, url }) {
