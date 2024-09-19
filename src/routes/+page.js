@@ -5,7 +5,7 @@ export async function load({ fetch, url }) {
     const page = parseInt(url.searchParams.get('page')) || 1;
 
     try {
-        let films = getAllMovies(page);
+        let films = await getAllMovies(page);
 
         if (films && films.length > 0) {
             return {
