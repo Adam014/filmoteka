@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
-	import { getBestAvailableVideoWithCheck, formatCurrency } from '../../../utils/utils';
+	import { getBestAvailableVideoWithCheck, formatCurrency } from '../../../lib/utils';
 
 	export let data;
 

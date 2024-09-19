@@ -1,5 +1,5 @@
 import { supabase } from '../utils/db/supabaseClient';
-import { getAllMovies, TMDB_API_KEY } from '../utils/utils';
+import { getAllMovies, TMDB_API_KEY } from '../lib/utils';
 
 export async function load({ fetch, url }) {
     const page = parseInt(url.searchParams.get('page')) || 1;
