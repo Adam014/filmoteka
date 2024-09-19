@@ -2,7 +2,7 @@
 	import PopularMovies from '../components/PopularMovies.svelte';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { loadMovies, cacheFirstPage, handleSearch } from '../utils/utils.js';
+	import { loadMovies, cacheFirstPage, handleSearch } from '../lib/utils.js';
 	import { toast } from 'svelte-french-toast';
 	import ShortcutKey from '../components/ShortcutKey.svelte';
 
