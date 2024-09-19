@@ -1,6 +1,6 @@
 <script>
 	import { goto } from '$app/navigation';
-	import { loadMovies } from '../utils/utils.js';
+	import { loadMovies } from '../lib/utils.js';
 
 	// Function to navigate to the first page and load cached movies
 	async function goToFirstPage(event) {
