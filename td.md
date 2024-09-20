@@ -1,4 +1,4 @@
-TODO: Need to resolve /routes/+page.svelte its a crap
 TODO: Add categories to /
-TODO: Add better pagination
-TODO:
+TODO: Make better /login, /registration, /profile
+TODO: Set custom STMP server for supabase
+TODO: Add favorites films to user
