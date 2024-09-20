@@ -22,23 +22,21 @@
 	}
 
 	function selectTopPopularMovies() {
-		topPopularMovies = [...movieResults]
-			.sort((a, b) => b.popularity - a.popularity)
-			.slice(0, 5);
+		topPopularMovies = [...movieResults].sort((a, b) => b.popularity - a.popularity).slice(0, 5);
 	}
 
-    // Function to generate the list of pages to display
-    function generatePageNumbers(currentPage, totalPages, pageRange = 2) {
-        const startPage = Math.max(1, currentPage - pageRange);
-        const endPage = Math.min(totalPages, currentPage + pageRange);
-        const pages = [];
+	// Function to generate the list of pages to display
+	function generatePageNumbers(currentPage, totalPages, pageRange = 2) {
+		const startPage = Math.max(1, currentPage - pageRange);
+		const endPage = Math.min(totalPages, currentPage + pageRange);
+		const pages = [];
 
-        for (let i = startPage; i <= endPage; i++) {
-            pages.push(i);
-        }
+		for (let i = startPage; i <= endPage; i++) {
+			pages.push(i);
+		}
 
-        return pages;
-    }
+		return pages;
+	}
 
 	async function updateMoviesFromUrl() {
 		const urlParams = new URLSearchParams(window.location.search);
@@ -65,9 +63,9 @@
 	}
 
 	async function handleSearchEvent(event) {
-        event.preventDefault();
-        await handleSearch(searchQuery, closeSearchPopup, toast);
-    }
+		event.preventDefault();
+		await handleSearch(searchQuery, closeSearchPopup, toast);
+	}
 
 	function openSearchPopup() {
 		isSearchPopupOpen = true;
@@ -124,72 +122,75 @@
 </script>
 
 <section class="container">
- 	<div class="search-input-container">
-        <div class="input-wrapper">
-            <input
-                type="text"
-                bind:value={searchQuery}
-                placeholder="Search for a movie..."
-                class="search-input"
-                on:focus={openSearchPopup}
-            />
-            <ShortcutKey keyLabel="Ctrl+K" class="shortcut-key-ctrlk" />
-        </div>
-    </div>
+	<div class="search-input-container">
+		<div class="input-wrapper">
+			<input
+				type="text"
+				bind:value={searchQuery}
+				placeholder="Search for a movie..."
+				class="search-input"
+				on:focus={openSearchPopup}
+			/>
+			<ShortcutKey keyLabel="Ctrl+K" class="shortcut-key-ctrlk" />
+		</div>
+	</div>
 
- 	{#if isSearchPopupOpen}
-       	<div class="search-popup {isFadingOut ? 'fade-out' : ''}">
-            <div class="search-popup-content">
-                <div class="input-wrapper">
-                    <form on:submit={handleSearchEvent}>
-                        <input
-                            type="text"
-                            bind:value={searchQuery}
-                            placeholder="Search for a movie..."
-                            class="search-popup-input"
-                            autofocus
-                        />
-                        <ShortcutKey keyLabel="Esc" class="shortcut-key-esc" />
-                    </form>
-                </div>
-                <ul class="suggestions">
-                    {#each topPopularMovies as movie}
-                        <li>
-                            <a
-                                href={`/movie/${movie.id}`}
-                                class="suggestion-link"
-                                on:click={(e) => {
-                                    e.preventDefault();
-                                    goto(`/movie/${movie.id}`);
-                                }}
-                                on:keydown={(e) => e.key === 'Enter' && goto(`/movie/${movie.id}`)}
-                            >
-                                {movie.title}
-                            </a>
-                        </li>
-                    {/each}
-                </ul>
-            </div>
-        </div>
-    {/if}
+	{#if isSearchPopupOpen}
+		<div class="search-popup {isFadingOut ? 'fade-out' : ''}">
+			<div class="search-popup-content">
+				<div class="input-wrapper">
+					<form on:submit={handleSearchEvent}>
+						<input
+							type="text"
+							bind:value={searchQuery}
+							placeholder="Search for a movie..."
+							class="search-popup-input"
+							autofocus
+						/>
+						<ShortcutKey keyLabel="Esc" class="shortcut-key-esc" />
+					</form>
+				</div>
+				<ul class="suggestions">
+					{#each topPopularMovies as movie}
+						<li>
+							<a
+								href={`/movie/${movie.id}`}
+								class="suggestion-link"
+								on:click={(e) => {
+									e.preventDefault();
+									goto(`/movie/${movie.id}`);
+								}}
+								on:keydown={(e) => e.key === 'Enter' && goto(`/movie/${movie.id}`)}
+							>
+								{movie.title}
+							</a>
+						</li>
+					{/each}
+				</ul>
+			</div>
+		</div>
+	{/if}
 
 	{#if movieResults.length > 0}
 		<PopularMovies movies={movieResults} />
 		<div class="pagination">
-			<button on:click={() => changePage(currentPage - 1)} disabled={currentPage === 1}>Previous</button>
+			<div class="paginate-container">
+				<button on:click={() => changePage(currentPage - 1)} disabled={currentPage === 1}
+					>Previous</button
+				>
 
-			<div>
-				{#each generatePageNumbers(currentPage, totalPages) as page}
-					<button 
-						class:active={page === currentPage}
-						on:click={() => changePage(page)}
-					>
-						{page}
-					</button>
-				{/each}
+				<div>
+					{#each generatePageNumbers(currentPage, totalPages) as page}
+						<button class:active={page === currentPage} on:click={() => changePage(page)}>
+							{page}
+						</button>
+					{/each}
+				</div>
+
+				<button on:click={() => changePage(currentPage + 1)} disabled={currentPage === totalPages}
+					>Next</button
+				>
 			</div>
-
-			<button on:click={() => changePage(currentPage + 1)} disabled={currentPage === totalPages}>Next</button>
 			<input
 				type="number"
 				min="1"
@@ -215,6 +216,10 @@
 		position: relative;
 	}
 
+	.container {
+		padding-top: 20px;
+	}
+
 	.search-input {
 		width: 75%;
 		padding: 8px 10px;
@@ -225,7 +230,7 @@
 		color: #fff;
 		transition: all 0.3s ease;
 		outline: none;
-		padding-right: 60px; 
+		padding-right: 60px;
 	}
 
 	.search-input:focus {
@@ -239,46 +244,50 @@
 		padding-left: 15px;
 	}
 
-   	.pagination {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin: 20px 0;
-    }
+	.pagination {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		margin: 20px 0;
+	}
 
-    .pagination button {
-        font-size: 1rem;
-        cursor: pointer;
+	.paginate-container {
+		display: flex;
+	}
+
+	.pagination button {
+		font-size: 1rem;
+		cursor: pointer;
 		background: none;
-        color: white;
+		color: white;
 		border: 0;
-        transition: background-color 0.3s;
-		padding: 10px
-    }
+		transition: background-color 0.3s;
+		padding: 10px;
+	}
 
-    .pagination button:hover {
-    	color: white;
-		background-color: #B7999C;
-    }
+	.pagination button:hover {
+		color: white;
+		background-color: #b7999c;
+	}
 
-  	.pagination button.active {
-        background-color: #EB5160;
-        color: white;
-        font-weight: bold;
-    }
+	.pagination button.active {
+		background-color: #eb5160;
+		color: white;
+		font-weight: bold;
+	}
 
 	.pagination span {
 		margin: 0 10px;
 	}
 
-    .pagination-input {
-        width: 80px;
-        padding: 11px;
-        border-radius: 4px;
-        border: 1px solid #ccc;
-        text-align: center;
+	.pagination-input {
+		width: 80px;
+		padding: 11px;
+		border-radius: 4px;
+		border: 1px solid #ccc;
+		text-align: center;
 		margin-left: 10px;
-    }
+	}
 
 	.search-input-container {
 		position: relative;
@@ -306,9 +315,8 @@
 		visibility: visible;
 	}
 
-
 	.search-popup.fade-out {
-		opacity: 0; 
+		opacity: 0;
 		visibility: hidden; /* This hides the element after the fade-out */
 	}
 
@@ -349,7 +357,7 @@
 		padding-right: 60px;
 	}
 
-	form{
+	form {
 		align-items: center;
 		display: flex;
 	}
