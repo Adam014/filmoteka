@@ -4,6 +4,7 @@
 	import { supabase } from '../lib/db/supabaseClient.js';
 	import { onDestroy, onMount } from 'svelte';
 	import { user } from '../stores/user.js';
+	import logo from "../lib/assets/Filmoteka_logo.svg"
 
 	let currentUser;
 	let menuOpen = false;
@@ -93,12 +94,13 @@
 		</label>
 		{:else}
 			<a href="/login">Login</a>
+			<p>|</p>
 			<a href="/register">Register</a>
 	{/if}
 
 	<div class="header-container">
 		<a href="/?page=1" on:click={goToFirstPage}>
-			<h1>Filmoteka</h1>
+			<img src={logo} alt="logo" class="logo"/>
 		</a>
 	</div>
 
@@ -130,7 +132,7 @@
 				</button>
 			</div>
 		{:else}
-			<a href="/login">Login</a>
+			<a href="/login">Login </a>
 			<a href="/register">Register</a>
 		{/if}
 	</div>
@@ -147,6 +149,11 @@
 		align-items: center;
 		padding: 30px 40px;
 		box-sizing: border-box;
+	}
+
+	.logo{
+		width: 50%;
+		padding-top: 20px;
 	}
 
 	.hamburger {
@@ -230,8 +237,7 @@
 
 	.header-container {
 		position: absolute;
-		left: 50%;
-		transform: translateX(-50%);
+		left: 35%;
 	}
 
 	h1 {
@@ -374,6 +380,9 @@
 		.header-container {
 			transform: none;
 			left: 7%;
+		}
+		.logo{
+			width: 30%;
 		}
 	}
 </style>
