@@ -45,6 +45,7 @@
 			alert('Error signing out: ' + error.message);
 		} else {
 			goto('/');
+			menuOpen = false;
 		}
 	}
 
@@ -126,8 +127,6 @@
 							/></svg
 						>
 					</div>
-
-					<div class="text">Logout</div>
 				</button>
 			</div>
 		{:else}
@@ -194,7 +193,8 @@
 		top: 0;
 		right: 0;
 		height: 100%;
-		width: 250px;
+		width: 100%;
+		opacity: 1;
 		background-color: #333;
 		box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
 		display: flex;
@@ -350,35 +350,7 @@
 	.sign svg path {
 		fill: white;
 	}
-	/* text */
-	.text {
-		position: absolute;
-		right: 0%;
-		width: 0%;
-		opacity: 0;
-		color: white;
-		font-size: 1.2em;
-		font-weight: 600;
-		transition-duration: 0.3s;
-	}
-	/* hover effect on button width */
-	.Btn:hover {
-		width: 125px;
-		border-radius: 40px;
-		transition-duration: 0.3s;
-	}
 
-	.Btn:hover .sign {
-		width: 30%;
-		transition-duration: 0.3s;
-		padding-left: 20px;
-	}
-	/* hover effect button's text */
-	.Btn:hover .text {
-		opacity: 1;
-		width: 60%;
-		transition-duration: 0.3s;
-	}
 	/* button click effect*/
 	.Btn:active {
 		transform: translate(2px, 2px);
