@@ -65,21 +65,6 @@
 </script>
 
 <nav class="navbar-container">
-	<div class="profile-container">
-		{#if currentUser}
-			<a href="/profile">
-				{#if currentUser.user_metadata && currentUser.user_metadata.avatar_url}
-					<img
-						src={currentUser.user_metadata.avatar_url}
-						alt="Profile Picture"
-						class="profile-picture"
-					/>
-				{:else}
-					<span class="placeholder-icon">👤</span>
-				{/if}
-			</a>
-		{/if}
-	</div>
 
 	{#if currentUser}
 		<label class="hamburger">
@@ -102,7 +87,24 @@
 		</a>
 	</div>
 
-	<div class="nav-menu" style="transform: translateX({menuOpen ? '0%' : '100%'});">
+	<div class="profile-container">
+		{#if currentUser}
+			<a href="/profile">
+				{#if currentUser.user_metadata && currentUser.user_metadata.avatar_url}
+					<img
+						src={currentUser.user_metadata.avatar_url}
+						alt="Profile Picture"
+						class="profile-picture"
+					/>
+				{:else}
+					<span class="placeholder-icon">👤</span>
+				{/if}
+			</a>
+		{/if}
+	</div>
+
+
+	<div class="nav-menu" style="transform: translateX({menuOpen ? '0%' : '-100%'});">
 		{#if currentUser}
 			<a href="/">HUB</a>
 			<div class="logout-container">
@@ -140,18 +142,14 @@
 	@import url('https://fonts.googleapis.com/css2?family=Shadows+Into+Light&display=swap');
 
 	.navbar-container {
-		position: relative;
-		width: 100%;
 		display: flex;
-		justify-content: flex-end;
+		justify-content: space-between;
 		align-items: center;
-		padding: 30px 40px;
-		box-sizing: border-box;
+		padding: 20px
 	}
 
 	.logo{
-		width: 50%;
-		padding-top: 20px;
+		width: 30rem;
 	}
 
 	.hamburger {
@@ -196,7 +194,7 @@
 	.nav-menu {
 		position: fixed;
 		top: 0;
-		right: 0;
+		left: 0%; 
 		height: 100%;
 		width: 100%;
 		opacity: 1;
@@ -208,7 +206,6 @@
 		justify-content: center;
 		transition: transform 0.3s ease-in-out;
 		z-index: 998;
-		transform: translateX(100%);
 	}
 
 	.nav-menu a {
@@ -231,11 +228,6 @@
 		color: white;
 		text-decoration: none;
 		margin: 10px;
-	}
-
-	.header-container {
-		position: absolute;
-		left: 35%;
 	}
 
 	h1 {
@@ -366,10 +358,6 @@
 		border-radius: 50%;
 	}
 
-	.profile-container {
-		padding-right: 20px;
-	}
-
 	.placeholder-icon {
 		font-size: 2rem;
 	}
@@ -380,7 +368,7 @@
 			left: 7%;
 		}
 		.logo{
-			width: 30%;
+			width: 50%;
 		}
 	}
 </style>
