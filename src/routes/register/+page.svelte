@@ -53,14 +53,14 @@
 				avatar_url = publicUrlData.publicUrl;
 			}
 
-			// Sign up the user with additional user metadata
+			// Sign up the user with additional user metadata, including display_name
 			const { error } = await supabase.auth.signUp({
 				email,
 				password,
 				options: {
 					data: {
 						avatar_url,
-						username
+						display_name: username // Store the username as display_name in user metadata
 					}
 				}
 			});
@@ -88,7 +88,6 @@
 
 {#if loading}
 	<p>Loading...</p>
-	<!-- Display loading message until session is checked -->
 {:else}
 	<h1>Register</h1>
 
@@ -126,5 +125,4 @@
 {/if}
 
 <style>
-	/* Add any styles you need here */
 </style>

@@ -33,17 +33,14 @@
 			<span class="placeholder-icon">👤</span>
 		{/if}
 		<p>Email: {currentUser.email}</p>
-		<p>Username: {currentUser.user_metadata.username || 'Not set'}</p>
-		<!-- Add more profile information as needed -->
+		<p>Username: {currentUser.user_metadata.display_name || 'Not set'}</p>
 	</div>
 {:else}
 	<p>Redirecting to login...</p>
 {/if}
 
 <style>
-	/* Add your styles here */
 	.profile-container {
-		/* Styles for the profile container */
 	}
 
 	.profile-picture {
