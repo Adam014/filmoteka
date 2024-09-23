@@ -252,7 +252,7 @@
 		}
 
 		.supabase{
-			padding-top: 50px;
+			padding-top: 20px;
 		}
 
 		form{
@@ -267,8 +267,17 @@
 
 
     @media (max-width: 768px){
+        input[type="email"],
+        input[type="password"],
+        input[type="text"],
+        input[type="file"] {
+            padding: 5px;
+        }
+        .logo-container{
+            width: 80px;
+        }   
 		h1{
-			font-size: 2rem;
+			font-size: 1.8rem;
 		}
 
     	form{
@@ -276,6 +285,8 @@
 		}
 		.form-wrapper{
 			width: 100%;
+            padding: 4vh;
+            margin: 1rem;
 		}
     }
 </style>
