@@ -1,141 +1,138 @@
 <script>
-	import { goto } from '$app/navigation';
-	import { loadMovies } from '../lib/utils.js';
-	import { supabase } from '../lib/db/supabaseClient.js';
-	import { onDestroy, onMount } from 'svelte';
-	import { user } from '../stores/user.js';
-	import logo from "../lib/assets/Filmoteka_logo.svg"
+    import { goto } from '$app/navigation';
+    import { loadMovies } from '../lib/utils.js';
+    import { supabase } from '../lib/db/supabaseClient.js';
+    import { onDestroy, onMount } from 'svelte';
+    import { user } from '../stores/user.js';
+    import logo from "../lib/assets/Filmoteka_logo.svg";
 
-	let currentUser;
-	let menuOpen = false;
+    let currentUser;
+    let menuOpen = false;
 
-	const unsubscribe = user.subscribe((value) => {
-		currentUser = value;
-	});
+    const unsubscribe = user.subscribe((value) => {
+        currentUser = value;
+    });
 
-	async function toggleMenu() {
-		menuOpen = !menuOpen;
-	}
+    function toggleMenu() {
+        menuOpen = !menuOpen;
+    }
 
-	// Close menu and uncheck hamburger if clicking outside
-	function closeMenuOnOutsideClick(event) {
-		const hamburger = document.querySelector('.hamburger input');
-		if (menuOpen && !event.target.closest('.nav-menu') && !event.target.closest('.hamburger')) {
-			menuOpen = false;
-			if (hamburger) {
-				hamburger.checked = false; // Uncheck the hamburger icon
-			}
-		}
-	}
+    // Close menu when clicking outside
+    function closeMenuOnOutsideClick(event) {
+        const hamburger = document.querySelector('.hamburger input');
+        if (menuOpen && !event.target.closest('.nav-menu') && !event.target.closest('.hamburger')) {
+            menuOpen = false;
+            if (hamburger) {
+                hamburger.checked = false;
+            }
+        }
+    }
 
-	async function goToFirstPage(event) {
-		event.preventDefault();
-		const movies = JSON.parse(localStorage.getItem('movies_page_1'));
-		if (movies) {
-			window.dispatchEvent(new CustomEvent('movies-loaded', { detail: { movies, page: 1 } }));
-			goto('/?page=1', { replaceState: true });
-		} else {
-			await loadMovies(1);
-			goto('/?page=1', { replaceState: true });
-		}
-	}
+    async function goToFirstPage(event) {
+        event.preventDefault();
+        const movies = JSON.parse(localStorage.getItem('movies_page_1'));
+        if (movies) {
+            window.dispatchEvent(new CustomEvent('movies-loaded', { detail: { movies, page: 1 } }));
+            goto('/?page=1', { replaceState: true });
+        } else {
+            await loadMovies(1);
+            goto('/?page=1', { replaceState: true });
+        }
+    }
 
-	async function signOut() {
-		const { error } = await supabase.auth.signOut();
-		if (error) {
-			alert('Error signing out: ' + error.message);
-		} else {
-			goto('/');
-			menuOpen = false;
-		}
-	}
+    async function signOut() {
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+            alert('Error signing out: ' + error.message);
+        } else {
+            goto('/');
+            menuOpen = false;
+        }
+    }
 
-	// Ensure this code only runs in the browser
-	onMount(() => {
-		if (typeof document !== 'undefined') {
-			document.addEventListener('click', closeMenuOnOutsideClick);
-		}
-	});
+    onMount(() => {
+        if (typeof document !== 'undefined') {
+            document.addEventListener('click', closeMenuOnOutsideClick);
+        }
+    });
 
-	onDestroy(() => {
-		if (typeof document !== 'undefined') {
-			document.removeEventListener('click', closeMenuOnOutsideClick);
-		}
-	});
+    onDestroy(() => {
+        if (typeof document !== 'undefined') {
+            document.removeEventListener('click', closeMenuOnOutsideClick);
+        }
+    });
 </script>
 
-<nav class="navbar-container">
+<nav class="navbar-container {currentUser ? 'logged-in' : 'logged-out'}">
+    {#if currentUser}
+        <label class="hamburger">
+            <input type="checkbox" on:click={toggleMenu} />
+            <svg viewBox="0 0 36 36">
+                <path
+                    class="line line-top-bottom"
+                    d="M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22"
+                />
+                <path class="line" d="M7 16 27 16" />
+            </svg>
+        </label>
+    {/if}
 
-	{#if currentUser}
-		<label class="hamburger">
-			<input type="checkbox" on:click={toggleMenu} />
-			<svg viewBox="0 0 36 36">
-				<path
-					class="line line-top-bottom"
-					d="M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22"
-				/>
-				<path class="line" d="M7 16 27 16" />
-			</svg>
-		</label>
-		{:else}
-			<a href="/register">Sign Up</a>
-	{/if}
+    <div class="header-container">
+        <a href="/?page=1" on:click={goToFirstPage}>
+            <img src={logo} alt="logo" class="logo" />
+        </a>
+    </div>
 
-	<div class="header-container">
-		<a href="/?page=1" on:click={goToFirstPage}>
-			<img src={logo} alt="logo" class="logo"/>
-		</a>
-	</div>
+    {#if currentUser}
+        <div class="profile-container">
+            <a href="/profile">
+                {#if currentUser.user_metadata && currentUser.user_metadata.avatar_url}
+                    <img
+                        src={currentUser.user_metadata.avatar_url}
+                        alt="Profile Picture"
+                        class="profile-picture"
+                    />
+                {:else}
+                    <span class="placeholder-icon">👤</span>
+                {/if}
+            </a>
+        </div>
+    {:else}
+        <a href="/register" class="signup-link">Sign Up</a>
+    {/if}
 
-	<div class="profile-container">
-		{#if currentUser}
-			<a href="/profile">
-				{#if currentUser.user_metadata && currentUser.user_metadata.avatar_url}
-					<img
-						src={currentUser.user_metadata.avatar_url}
-						alt="Profile Picture"
-						class="profile-picture"
-					/>
-				{:else}
-					<span class="placeholder-icon">👤</span>
-				{/if}
-			</a>
-		{/if}
-	</div>
-
-
-	<div class="nav-menu" style="transform: translateX({menuOpen ? '0%' : '-100%'});">
-		{#if currentUser}
-			<a href="/">HUB</a>
-			<div class="logout-container">
-				<div class="profile-logout-container">
-					<a href="/profile">
-						{#if currentUser.user_metadata && currentUser.user_metadata.avatar_url}
-							<img
-								src={currentUser.user_metadata.avatar_url}
-								alt="Profile Picture"
-								class="profile-picture"
-							/>
-						{:else}
-							<span class="placeholder-icon">👤</span>
-						{/if}
-					</a>
-				</div>
-				<button class="Btn" on:click={signOut}>
-					<div class="sign">
-						<svg viewBox="0 0 512 512"
-							><path
-								d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"
-							/></svg
-						>
-					</div>
-				</button>
-			</div>
-		{:else}
-			<a href="/login">Login </a>
-			<a href="/register">Register</a>
-		{/if}
-	</div>
+    <div class="nav-menu" style="transform: translateX({menuOpen ? '0%' : '-100%'});">
+        {#if currentUser}
+            <a href="/">HUB</a>
+            <div class="logout-container">
+                <div class="profile-logout-container">
+                    <a href="/profile">
+                        {#if currentUser.user_metadata && currentUser.user_metadata.avatar_url}
+                            <img
+                                src={currentUser.user_metadata.avatar_url}
+                                alt="Profile Picture"
+                                class="profile-picture"
+                            />
+                        {:else}
+                            <span class="placeholder-icon">👤</span>
+                        {/if}
+                    </a>
+                </div>
+                <button class="Btn" on:click={signOut}>
+                    <div class="sign">
+                        <svg viewBox="0 0 512 512">
+                            <path
+                                d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"
+                            />
+                        </svg>
+                    </div>
+                </button>
+            </div>
+        {:else}
+            <a href="/login">Login</a>
+            <a href="/register">Register</a>
+        {/if}
+    </div>
 </nav>
 
 <style>
@@ -145,11 +142,31 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 20px
+		padding: 20px;
+	}
+
+	.logged-out .navbar-container {
+		justify-content: center;
+	}
+
+	.logged-out .signup-link {
+		position: absolute;
+		right: 20px;
+	}
+
+	.logged-in .navbar-container {
+		justify-content: space-between;
+	}
+
+	.header-container {
+		flex-grow: 1;
+		display: flex;
+		justify-content: center;
 	}
 
 	.logo{
 		width: 30rem;
+	max-width: 30rem;
 	}
 
 	.hamburger {
@@ -358,17 +375,23 @@
 		border-radius: 50%;
 	}
 
+.profile-container {
+    margin-left: auto;
+}
+
+.signup-link {
+    margin-left: auto;
+}
+
+
 	.placeholder-icon {
 		font-size: 2rem;
 	}
 
 	@media (max-width: 768px) {
-		.header-container {
-			transform: none;
-			left: 7%;
-		}
 		.logo{
-			width: 50%;
+			width: 150px;
+			max-width: 150px;
 		}
 	}
 </style>

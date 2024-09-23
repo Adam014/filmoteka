@@ -203,7 +203,10 @@
 				class="pagination-input"
 			/>
 			<div class="tmdb-reference">
-				<a href="https://www.themoviedb.org"> TMDB.org </a>
+				<a href="https://www.themoviedb.org">Powered by TMDB.org</a> 
+			</div>
+			<div class="myself">
+				<a href="https://github.com/Adam014">Crafted by Adam Stádník</a>
 			</div>
 		</div>
 	{:else}
@@ -212,6 +215,10 @@
 </section>
 
 <style>
+	.myself{
+		padding-left: 20px;
+	}
+
 	.input-wrapper {
 		position: relative;
 	}
