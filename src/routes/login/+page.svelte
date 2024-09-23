@@ -180,8 +180,7 @@
   @media (max-width: 1024px) {
     .form-wrapper {
       width: 60%;
-      background-color: rgba(26, 26, 26, 0.9); /* Dark glassy effect */
-      backdrop-filter: blur(10px); /* Glassy effect */
+      background-color: rgba(26, 26, 26, 0.9); 
       color: #fff;
     }
 
