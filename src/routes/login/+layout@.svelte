@@ -21,8 +21,6 @@
     .form-container {
         display: flex;
         width: 100%;
-        height: 100vh;
-        position: relative;
     }
 
     img {
@@ -40,9 +38,6 @@
     }
 
     @media (max-width: 1024px) {
-        .form-container {
-            position: relative;
-        }
 
         img {
             position: absolute;
