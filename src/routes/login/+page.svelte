@@ -185,8 +185,8 @@
     }
 
     h1 {
-      padding-bottom: 10px;
       font-size: 2.5rem;
+      padding-bottom: 0px !important;
     }
 
     .logo-container img {
@@ -220,12 +220,30 @@
   }
 
   @media (max-width: 768px) {
+    input[type="email"],
+    input[type="password"],
+    input[type="text"],
+    input[type="file"] {
+        padding: 5px;
+    }
     form {
       width: 100%;
     }
 
+	  h1{
+			font-size: 1.8rem;
+		}
+
     .form-wrapper {
       width: 100%;
     }
+    .logo-container img{
+      width: 80px;
+    }
+		.form-wrapper{
+			width: 100%;
+            padding: 4vh;
+            margin: 1rem;
+		}
   }
 </style>

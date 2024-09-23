@@ -239,8 +239,8 @@
         }
 
 		h1{
-			padding-bottom: 10px;
 			font-size: 2.5rem;
+            padding-bottom: 0px !important;
 		}
 
         .logo-container img {
@@ -273,7 +273,7 @@
         input[type="file"] {
             padding: 5px;
         }
-        .logo-container{
+        .logo-container img{
             width: 80px;
         }   
 		h1{
