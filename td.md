@@ -1,3 +1,3 @@
-TODO: Make better /login, /profile
+TODO: Make better /profile
 TODO: Add favorites films to user
 TODO: Add categories to /
