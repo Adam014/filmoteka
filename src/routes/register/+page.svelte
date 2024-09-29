@@ -4,6 +4,7 @@
     import { onMount } from 'svelte';
     import supabase_logo from '../../lib/assets/supabase.svg';
     import filmoteka_transparent from '../../lib/assets/filmoteka_transparent.svg';
+	import toast from 'svelte-french-toast';
 
     let email = '';
     let password = '';
@@ -63,9 +64,10 @@
 
             if (error) {
                 errorMessage = error.message;
+                alert.error(error.message);
             } else {
-                alert('Registration successful! Please check your email to confirm your account.');
                 goto('/login');
+                toast.success("Registration successful! Please check your email to confirm your account.", { duration: 10000, })
             }
         } catch (error) {
             console.error('Error during registration:', error);

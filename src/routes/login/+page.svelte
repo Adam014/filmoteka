@@ -4,6 +4,7 @@
   import { onMount } from 'svelte';
   import supabase_logo from '../../lib/assets/supabase.svg';
   import filmoteka_transparent from '../../lib/assets/filmoteka_transparent.svg';
+	import toast from 'svelte-french-toast';
 
   let email = '';
   let password = '';
@@ -34,9 +35,11 @@
 
     if (error) {
       errorMessage = error.message;
+      toast.error(error.message);
     } else {
       // Redirect to home page after successful login
       goto('/');
+      toast.success("You are logged in!", { duration: 10000 })
     }
   }
 </script>
@@ -62,10 +65,6 @@
           <label for="password">Password:</label>
           <input id="password" type="password" bind:value={password} required />
         </div>
-
-        {#if errorMessage}
-          <p class="error">{errorMessage}</p>
-        {/if}
 
         <button type="submit">Login</button>
       </form>
