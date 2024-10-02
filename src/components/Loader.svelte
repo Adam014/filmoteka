@@ -41,12 +41,6 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    var(--bg-color) 10%,
-    transparent 30%,
-    transparent 70%,
-    var(--bg-color) 90%
-  );
   z-index: 20;
 }
 
@@ -54,7 +48,7 @@
   display: block;
   height: 100%;
   padding-left: 6px;
-  color: #956afa;
+  color: #7a1cac;
   animation: spin_4991 4s infinite;
 }
 

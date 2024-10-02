@@ -146,7 +146,7 @@
 	button {
 		width: 100%;
 		padding: 10px;
-		background-color: #2e073f;
+		background-color: #7a1cac;
 		border: none;
 		border-radius: 4px;
 		color: #fff;
@@ -155,7 +155,7 @@
 	}
 
 	button:hover {
-		background-color: #7a1cac;
+		background-color: #2e073f;
 	}
 
 	button:disabled {
