@@ -1,5 +1,6 @@
 <script>
 	import PopularMovies from '../components/PopularMovies.svelte';
+	import Loader from '../components/Loader.svelte'
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { loadMovies, cacheFirstPage, handleSearch } from '../lib/utils.js';
@@ -210,7 +211,7 @@
 			</div>
 		</div>
 	{:else}
-		<p>Loading...</p>
+		<Loader />
 	{/if}
 </section>
 
