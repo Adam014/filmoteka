@@ -2,7 +2,7 @@
 	import { inject } from '@vercel/analytics';
 	import { Toaster } from 'svelte-french-toast';
 	import Navbar from '../components/Navbar.svelte';
-	import { page } from '$app/stores'; 
+	import { page } from '$app/stores';
 
 	if (process.env.NODE_ENV === 'production') {
 		inject();
@@ -14,7 +14,7 @@
 </script>
 
 {#if !$page.url.pathname.startsWith('/register') && !$page.url.pathname.startsWith('/login')}
-<Navbar {session} />
+	<Navbar {session} />
 {/if}
 
 <main>
