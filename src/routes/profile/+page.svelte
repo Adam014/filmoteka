@@ -1,3 +1,7 @@
+<svelte:head>
+	<title>Profile | Filmoteka</title>
+</svelte:head>
+
 <script>
 	import { user } from '../../stores/user';
 	import { goto } from '$app/navigation';
@@ -36,10 +40,10 @@
 				<span class="placeholder-icon">👤</span>
 			{/if}
 			<div class="profile-details">
-				<p>Email: {currentUser.email}</p>
-				<p>Username: {currentUser.user_metadata.display_name || 'Not set'}</p>
-				<p>Created at: {currentUser.created_at}</p>
-				<p>Last sign in: {currentUser.last_sign_in_at}</p>
+				<p>Email: <b>{currentUser.email}</b></p>
+				<p>Username: <b>{currentUser.user_metadata.display_name || 'Not set'}</b></p>
+				<p>Created at: <b>{currentUser.created_at}</b></p>
+				<p>Last sign in: <b>{currentUser.last_sign_in_at}</b></p>
 			</div>
 		</div>
 	</div>
@@ -57,8 +61,6 @@
 		display: grid;
 		justify-content: left;
 		padding: 2rem 0rem 0rem 3rem
-	}
-	.profile-container {
 	}
 
 	.profile-picture {
@@ -78,5 +80,23 @@
 
 	.placeholder-icon {
 		font-size: 5rem;
+	}
+
+	@media (max-width: 768px){
+		.container{
+			padding: 0px;
+			display: grid;
+			justify-content: center;
+		}
+		p{
+			font-size: 1rem;
+		}
+		.profile-picture{
+			width: 100px;
+			height: 100px;
+		}
+		h1{
+			font-size: 2.5rem;
+		}
 	}
 </style>

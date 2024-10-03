@@ -1,6 +1,10 @@
+<svelte:head>
+	<title>{original_title} | Filmoteka</title>
+</svelte:head>
 <script>
 	import { onMount } from 'svelte';
 	import { getBestAvailableVideoWithCheck, formatCurrency } from '../../../lib/utils';
+	import Loader from "../../../components/Loader.svelte"
 
 	export let data;
 
@@ -68,7 +72,7 @@
 
 	<!-- Show Loading... when trailer is being fetched -->
 	{#if isLoading}
-		<p class="loading">Loading trailer...</p>
+		<Loader />
 	{:else if finalTrailer}
 		<div class="video-container">
 			<iframe

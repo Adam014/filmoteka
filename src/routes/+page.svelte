@@ -1,3 +1,7 @@
+<svelte:head>
+	<title>Library | Filmoteka</title>
+</svelte:head>
+
 <script>
 	import PopularMovies from '../components/PopularMovies.svelte';
 	import Loader from '../components/Loader.svelte'
@@ -154,6 +158,7 @@
 				<ul class="suggestions">
 					{#each topPopularMovies as movie}
 						<li>
+							<img src={'https://image.tmdb.org/t/p/w500' + movie.poster_path} alt={movie.title} />
 							<a
 								href={`/movie/${movie.id}`}
 								class="suggestion-link"
@@ -163,7 +168,7 @@
 								}}
 								on:keydown={(e) => e.key === 'Enter' && goto(`/movie/${movie.id}`)}
 							>
-								{movie.title}
+								{movie.title} | {movie.popularity}
 							</a>
 						</li>
 					{/each}
@@ -218,6 +223,16 @@
 <style>
 	.myself {
 		padding-left: 20px;
+	}
+
+	ul li {
+		display: flex;
+		align-items: center;
+	}
+
+	ul li img {
+		height: 40px;
+		width: 40px;
 	}
 
 	.input-wrapper {
@@ -435,7 +450,7 @@
 		}
 
 		.suggestion-link {
-			padding: 0;
+			padding-left: 15px;
 		}
 
 		.search-popup {

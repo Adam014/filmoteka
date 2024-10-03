@@ -17,6 +17,14 @@
 		menuOpen = !menuOpen;
 	}
 
+	function closeMenu() {
+		menuOpen = false;
+		const hamburger = document.querySelector('.hamburger input');
+		if (hamburger) {
+			hamburger.checked = false;
+		}
+	}
+
 	// Close menu when clicking outside
 	function closeMenuOnOutsideClick(event) {
 		const hamburger = document.querySelector('.hamburger input');
@@ -103,7 +111,8 @@
 
 	<div class="nav-menu" style="transform: translateX({menuOpen ? '0%' : '-100%'});">
 		{#if currentUser}
-			<a href="/">HUB</a>
+			<a href="/" on:click={closeMenu}>Library</a>
+			<a href="/profile" on:click={closeMenu}>Profile</a>
 			<div class="logout-container">
 				<div class="profile-logout-container">
 					<a href="/profile">
@@ -143,19 +152,6 @@
 		justify-content: space-between;
 		align-items: center;
 		padding: 20px;
-	}
-
-	.logged-out .navbar-container {
-		justify-content: center;
-	}
-
-	.logged-out .signup-link {
-		position: absolute;
-		right: 20px;
-	}
-
-	.logged-in .navbar-container {
-		justify-content: space-between;
 	}
 
 	.header-container {
@@ -226,18 +222,11 @@
 	}
 
 	.nav-menu a {
-		text-transform: uppercase;
-		font-family: 'Shadows Into Light', cursive;
-		font-size: 2rem;
+		font-size: 5rem;
 	}
 
-	.close-menu {
-		position: absolute;
-		top: 20px;
-		right: 20px;
-		font-size: 2rem;
-		color: white;
-		cursor: pointer;
+	.nav-menu a:hover{
+		text-decoration: underline;
 	}
 
 	a,
@@ -247,63 +236,13 @@
 		margin: 10px;
 	}
 
-	h1 {
-		font-family: 'Shadows Into Light', cursive;
-		font-size: 3rem;
-		color: #e5e5e5;
-		margin: 0;
-	}
-
 	.hamburger {
 		display: flex;
 		flex-direction: column;
-		justify-content: space-between;
+		justify-content: sace-between;
 		width: 30px;
 		height: 25px;
 		cursor: pointer;
-	}
-
-	.bar {
-		width: 100%;
-		height: 3px;
-		background-color: white;
-		border-radius: 2px;
-		transition: transform 0.3s ease, opacity 0.3s ease;
-	}
-
-	.menu.open .hamburger .bar:nth-child(1) {
-		transform: translateY(10px) rotate(45deg);
-	}
-
-	.menu.open .hamburger .bar:nth-child(2) {
-		opacity: 0;
-	}
-
-	.menu.open .hamburger .bar:nth-child(3) {
-		transform: translateY(-10px) rotate(-45deg);
-	}
-
-	.menu {
-		display: flex;
-		flex-direction: column;
-		position: absolute;
-		right: 0;
-		top: 70px;
-		width: 200px;
-		background-color: rgba(0, 0, 0, 0.9);
-		padding: 20px;
-		border-radius: 10px;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-		transform: translateY(-20px);
-		opacity: 0;
-		visibility: hidden;
-		transition: opacity 0.3s ease, transform 0.3s ease;
-	}
-
-	.menu.open {
-		opacity: 1;
-		visibility: visible;
-		transform: translateY(0);
 	}
 
 	a {
@@ -391,6 +330,9 @@
 		.logo {
 			width: 150px;
 			max-width: 150px;
+		}
+		.nav-menu a {
+			font-size: 2.5rem;
 		}
 	}
 </style>
