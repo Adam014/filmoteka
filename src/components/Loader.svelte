@@ -19,7 +19,7 @@
   border-radius: 1.25rem;
 }
 .loader {
-  color: rgb(124, 124, 124);
+  color: white;
   font-family: "Poppins", sans-serif;
   font-weight: 500;
   font-size: 25px;

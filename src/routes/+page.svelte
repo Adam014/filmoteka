@@ -275,11 +275,11 @@
 
 	.pagination button:hover {
 		color: white;
-		background-color: #b7999c;
+		background-color: #7a1cac;
 	}
 
 	.pagination button.active {
-		background-color: #eb5160;
+		background-color: #430c5c;
 		color: white;
 		font-weight: bold;
 	}

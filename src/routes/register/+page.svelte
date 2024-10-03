@@ -214,7 +214,7 @@
 	}
 
 	button:hover {
-		background-color: #2e073f;
+		background-color: #430c5c;
 	}
 
 	button:disabled {
