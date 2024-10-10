@@ -8,6 +8,8 @@
 
 	export let data;
 
+	console.log(data);
+
 	const movieDetails = data?.details || {};
 	const movieVideos = data?.videos?.results || [];
 
@@ -87,13 +89,20 @@
 		<p class="no-trailer">No trailer available.</p>
 	{/if}
 
+	<!-- Add images right under the trailer, lets say 5-6 images -->
+
 	<div>
 		<h1>{imdb_id} | {original_title}</h1>
 		<p class="overview">{overview}</p>
+
+		<!-- Here add top 6-7 actors in the movie, api reference is /credits -->
+
 		<p class="tagline">{tagline !== '' ? '"' + tagline + '"' : ''}</p>
 		<p>{budget === 0 ? '' : 'movie budget -> ' + formattedBudget}</p>
 		<p>{revenue === 0 ? '' : 'movie revenue -> ' + formattedRevenue}</p>
 	</div>
+
+	<!-- reviews from people, make it a grid, left side stats and right side reviews underthemselve, on mobile everything underthemsekves, api reference /reviews -->
 
 	<div class="stats-container">
 		<div class="idk">
@@ -125,6 +134,8 @@
 				</ul>
 			</div>
 		{/if}
+
+		<!-- In the bottom, top similar movies in cards, api reference /similar -->
 	</div>
 </section>
 
