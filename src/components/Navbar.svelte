@@ -222,10 +222,10 @@
 	}
 
 	.nav-menu a {
-		font-size: 5rem;
+		font-size: 3rem;
 	}
 
-	.nav-menu a:hover{
+	.nav-menu a:hover {
 		text-decoration: underline;
 	}
 

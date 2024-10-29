@@ -1,10 +1,7 @@
-<svelte:head>
-	<title>{original_title} | Filmoteka</title>
-</svelte:head>
 <script>
 	import { onMount } from 'svelte';
 	import { getBestAvailableVideoWithCheck, formatCurrency } from '../../../lib/utils';
-	import Loader from "../../../components/Loader.svelte"
+	import Loader from '../../../components/Loader.svelte';
 
 	export let data;
 
@@ -48,6 +45,10 @@
 	const formattedBudget = formatCurrency(budget);
 	const formattedRevenue = formatCurrency(revenue);
 </script>
+
+<svelte:head>
+	<title>{original_title} | Filmoteka</title>
+</svelte:head>
 
 <section class="movie-details">
 	<div class="movie-title-container">

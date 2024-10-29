@@ -269,3 +269,102 @@ export async function getDetailedMovie(id) {
 		return null;
 	}
 }
+
+// Format date function
+export function formatDate(dateString) {
+	const date = new Date(dateString);
+	return date.toLocaleString('en-GB', {
+		day: '2-digit',
+		month: '2-digit',
+		year: 'numeric',
+		hour: 'numeric',
+		minute: 'numeric',
+		hour12: true,
+	});
+}
+
+// Fetch favorite movies function
+export async function fetchFavoriteMovies(currentUser) {
+	if (!currentUser) return [];
+
+	try {
+		const { data, error } = await supabase.storage.from('favorites').list(currentUser.email);
+
+		if (error) {
+			console.error('Error listing favorites:', error.message);
+			return [];
+		}
+
+		if (data && data.length > 0) {
+			const moviePromises = data.map(async (file) => {
+				const { data: fileData, error: downloadError } = await supabase.storage
+					.from('favorites')
+					.download(`${currentUser.email}/${file.name}`);
+
+				if (downloadError) {
+					console.error(`Error fetching file ${file.name}:`, downloadError.message);
+					return null;
+				}
+				if (fileData) {
+					const text = await fileData.text();
+					try {
+						return JSON.parse(text);
+					} catch (parseError) {
+						console.error(`Error parsing JSON for ${file.name}:`, parseError.message);
+						return null;
+					}
+				}
+			});
+
+			const fetchedMovies = (await Promise.all(moviePromises)).filter(Boolean);
+			return fetchedMovies;
+		} else {
+			console.log('No favorite movies found.');
+			return [];
+		}
+	} catch (err) {
+		console.error('Error in fetchFavoriteMovies:', err.message);
+		return [];
+	}
+}
+
+// Function to generate the list of pages to display
+export function generatePageNumbers(currentPage, totalPages) {
+	const pages = [];
+
+	for (let i = 1; i <= totalPages; i++) {
+		pages.push(i);
+	}
+
+	return pages;
+}
+
+export async function isFavoriteMovie(movieId) {
+	const user = await supabase.auth.getUser();
+	const { data, error } = await supabase.storage.from('favorites').list(user.data.user.email);
+	if (error) {
+		console.error('Error fetching favorites:', error.message);
+		return false;
+	}
+	return data.some((file) => file.name === `${movieId}.json`);
+}
+
+export async function toggleFavoriteStatus(movieDetails, isFavorite) {
+	const user = await supabase.auth.getUser();
+	const filePath = `${user.data.user.email}/${movieDetails.id}.json`;
+
+	if (isFavorite) {
+		// Remove favorite
+		const { error } = await supabase.storage.from('favorites').remove([filePath]);
+		if (error) console.error('Error removing favorite:', error.message);
+		return false;
+	} else {
+		// Add favorite
+		const { error } = await supabase.storage.from('favorites').upload(filePath, JSON.stringify(movieDetails), {
+			cacheControl: '3600',
+			upsert: true,
+		});
+		if (error) console.error('Error adding favorite:', error.message);
+		return true;
+	}
+}

@@ -1,7 +1,3 @@
-<svelte:head>
-	<title>Login | Filmoteka</title>
-</svelte:head>
-
 <script>
 	import { supabase } from '../../lib/db/supabaseClient';
 	import { goto } from '$app/navigation';
@@ -47,6 +43,10 @@
 		}
 	}
 </script>
+
+<svelte:head>
+	<title>Login | Filmoteka</title>
+</svelte:head>
 
 {#if loading}
 	<p>Loading...</p>

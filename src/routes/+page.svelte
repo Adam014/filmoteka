@@ -1,13 +1,9 @@
-<svelte:head>
-	<title>Library | Filmoteka</title>
-</svelte:head>
-
 <script>
 	import PopularMovies from '../components/PopularMovies.svelte';
-	import Loader from '../components/Loader.svelte'
+	import Loader from '../components/Loader.svelte';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { loadMovies, cacheFirstPage, handleSearch } from '../lib/utils.js';
+	import { loadMovies, cacheFirstPage, handleSearch, generatePageNumbers } from '../lib/utils.js';
 	import { toast } from 'svelte-french-toast';
 	import ShortcutKey from '../components/ShortcutKey.svelte';
 
@@ -28,19 +24,6 @@
 
 	function selectTopPopularMovies() {
 		topPopularMovies = [...movieResults].sort((a, b) => b.popularity - a.popularity).slice(0, 5);
-	}
-
-	// Function to generate the list of pages to display
-	function generatePageNumbers(currentPage, totalPages, pageRange = 2) {
-		const startPage = Math.max(1, currentPage - pageRange);
-		const endPage = Math.min(totalPages, currentPage + pageRange);
-		const pages = [];
-
-		for (let i = startPage; i <= endPage; i++) {
-			pages.push(i);
-		}
-
-		return pages;
 	}
 
 	async function updateMoviesFromUrl() {
@@ -126,6 +109,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Library | Filmoteka</title>
+</svelte:head>
+
 <section class="container">
 	<div class="search-input-container">
 		<div class="input-wrapper">
@@ -181,10 +168,6 @@
 		<PopularMovies movies={movieResults} />
 		<div class="pagination">
 			<div class="paginate-container">
-				<button on:click={() => changePage(currentPage - 1)} disabled={currentPage === 1}
-					>Previous</button
-				>
-
 				<div>
 					{#each generatePageNumbers(currentPage, totalPages) as page}
 						<button class:active={page === currentPage} on:click={() => changePage(page)}>
@@ -192,27 +175,25 @@
 						</button>
 					{/each}
 				</div>
-
-				<button on:click={() => changePage(currentPage + 1)} disabled={currentPage === totalPages}
-					>Next</button
-				>
 			</div>
-			<input
-				type="number"
-				min="1"
-				max={totalPages}
-				bind:value={inputPage}
-				placeholder="Enter page"
-				on:keypress={(e) => {
-					if (e.key === 'Enter') changePage(parseInt(inputPage, 10));
-				}}
-				class="pagination-input"
-			/>
-			<div class="tmdb-reference">
-				<a href="https://www.themoviedb.org">Powered by TMDB.org</a>
-			</div>
-			<div class="myself">
-				<a href="https://github.com/Adam014">Crafted by Adam Stádník</a>
+			<div class="footer-pagination">
+				<input
+					type="number"
+					min="1"
+					max={totalPages}
+					bind:value={inputPage}
+					placeholder="Enter page"
+					on:keypress={(e) => {
+						if (e.key === 'Enter') changePage(parseInt(inputPage, 10));
+					}}
+					class="pagination-input"
+				/>
+				<div class="tmdb-reference">
+					<a href="https://www.themoviedb.org">Powered by TMDB.org</a>
+				</div>
+				<div class="myself">
+					<a href="https://github.com/Adam014">Crafted by Adam Stádník</a>
+				</div>
 			</div>
 		</div>
 	{:else}
@@ -240,7 +221,7 @@
 	}
 
 	.container {
-		padding-top: 20px;
+		padding: 20px;
 	}
 
 	.search-input {
@@ -268,14 +249,24 @@
 	}
 
 	.pagination {
-		display: flex;
+		display: grid;
 		justify-content: center;
 		align-items: center;
 		margin: 20px 0;
 	}
 
-	.paginate-container {
+	.footer-pagination {
 		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding-top: 20px;
+	}
+
+	.paginate-container { 
+		gap: 10px;	
+		display: grid;
+		grid-template-columns: repeat(300px, minmax(0px, 1fr));
+
 	}
 
 	.pagination button {
@@ -283,7 +274,7 @@
 		cursor: pointer;
 		background: none;
 		color: white;
-		border: 0;
+		/* border: 0; */
 		transition: background-color 0.3s;
 		padding: 10px;
 	}
@@ -297,10 +288,6 @@
 		background-color: #430c5c;
 		color: white;
 		font-weight: bold;
-	}
-
-	.pagination span {
-		margin: 0 10px;
 	}
 
 	.pagination-input {
@@ -419,6 +406,11 @@
 
 	@media screen and (max-width: 600px) {
 		.pagination {
+			flex-direction: column;
+			gap: 15px;
+		}
+
+		.footer-pagination {
 			flex-direction: column;
 			gap: 15px;
 		}
