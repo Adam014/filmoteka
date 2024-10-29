@@ -2,17 +2,24 @@
 	import { onMount } from 'svelte';
 	import { getBestAvailableVideoWithCheck, formatCurrency } from '../../../lib/utils';
 	import Loader from '../../../components/Loader.svelte';
+	import { supabase } from '../../../lib/db/supabaseClient';
+	import toast from 'svelte-french-toast';
+	import { user } from '../../../stores/user';
 
 	export let data;
 
-	console.log(data);
+	let currentUser;
+	const unsubscribe = user.subscribe((value) => {
+		currentUser = value;
+	});
 
 	const movieDetails = data?.details || {};
 	const movieVideos = data?.videos?.results || [];
 
 	const {
-		original_language = 'N/A',
+		id = 'N/A',
 		original_title = 'N/A',
+		original_language = 'N/A',
 		status = 'N/A',
 		release_date = 'N/A',
 		tagline = '',
@@ -20,30 +27,93 @@
 		genres = [],
 		budget = 0,
 		adult = false,
-		id = 'N/A',
 		imdb_id = 'N/A',
 		overview = 'No overview available.',
 		production_companies = [],
 		production_countries = [],
-		homepage = ''
+		homepage = '',
+		poster_path = '',
+		popularity = 0
 	} = movieDetails;
 
 	let finalTrailer = null;
 	let isLoading = true;
+	let isFavorite = false;
 
-	// Asynchronous function to get the best available video
+	// Function to get the best available video
 	async function fetchBestAvailableVideo() {
 		finalTrailer = await getBestAvailableVideoWithCheck(movieVideos);
 		isLoading = false;
 	}
 
-	onMount(() => {
-		fetchBestAvailableVideo();
-	});
+	// Check if the movie is already in favorites
+	async function checkIfFavorite() {
+		if (currentUser) {
+			const { data, error } = await supabase.storage
+				.from('favorites')
+				.list(currentUser.email, { search: id.toString() });
+
+			isFavorite = data && data.length > 0;
+		}
+	}
+
+	// Toggle favorite status with structured data from the "films" table
+	async function toggleFavorite() {
+		const path = `${currentUser.email}/${movieDetails.id}.json`;
+
+		try {
+			if (isFavorite) {
+				// Remove from favorites
+				const { error } = await supabase.storage.from('favorites').remove([path]);
+				if (error) throw error;
+				isFavorite = false;
+				toast.success(`${movieDetails.original_title} removed from favorites.`);
+			} else {
+				// Fetch the movie data from the "films" table
+				const { data: filmData, error: fetchError } = await supabase
+					.from('films')
+					.select('*')
+					.eq('id', movieDetails.id)
+					.single();
+
+				if (fetchError) throw fetchError;
+
+				// Prepare the object with "id" and "data" format
+				const favoriteData = {
+					id: movieDetails.id,
+					data: filmData
+				};
+
+				// Add to favorites with JSON format using structured data from "films" table
+				const { error: uploadError } = await supabase.storage.from('favorites').upload(
+					path,
+					JSON.stringify(favoriteData),
+					{
+						upsert: true,
+						contentType: 'application/json',
+					}
+				);
+				if (uploadError) throw uploadError;
+
+				isFavorite = true;
+				toast.success(`${movieDetails.original_title} added to favorites.`);
+			}
+		} catch (err) {
+			console.error('Error toggling favorite:', err.message);
+			toast.error('Failed to update favorites.');
+		}
+	}
 
 	// Format the budget and revenue
 	const formattedBudget = formatCurrency(budget);
 	const formattedRevenue = formatCurrency(revenue);
+
+	onMount(() => {
+		fetchBestAvailableVideo();
+		checkIfFavorite();
+
+		return () => unsubscribe();
+	});
 </script>
 
 <svelte:head>
@@ -71,6 +141,10 @@
 		{#if homepage}
 			<h3><a href={homepage}>HomePage</a></h3>
 		{/if}
+
+		<div class="favorite-icon" on:click={toggleFavorite} class:isFavorite>
+			{isFavorite ? '★' : '☆'}
+		</div>
 	</div>
 
 	<!-- Show Loading... when trailer is being fetched -->
@@ -147,6 +221,24 @@
 		padding: 50px 2.5rem 50px 2.5rem;
 	}
 
+	.favorite-icon {
+		font-size: 2rem;
+		cursor: pointer;
+		color: rgba(255, 215, 0, 0.8);
+		text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.6);
+		transition: color 0.3s ease, transform 0.3s ease;
+		padding: 0rem 2.5rem 0rem 2.5rem;
+	}
+
+	.favorite-icon.isFavorite {
+		color: gold;
+	}
+
+	.favorite-icon:hover {
+		transform: scale(1.1);
+		color: gold;
+	}
+
 	h3,
 	h1,
 	p {
@@ -187,6 +279,7 @@
 
 	.movie-title-container {
 		display: flex;
+		align-items: center;
 	}
 	.tagline {
 		font-family: 'Indie Flower', cursive;

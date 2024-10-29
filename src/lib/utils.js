@@ -338,33 +338,3 @@ export function generatePageNumbers(currentPage, totalPages) {
 
 	return pages;
 }
-
-export async function isFavoriteMovie(movieId) {
-	const user = await supabase.auth.getUser();
-	const { data, error } = await supabase.storage.from('favorites').list(user.data.user.email);
-	if (error) {
-		console.error('Error fetching favorites:', error.message);
-		return false;
-	}
-	return data.some((file) => file.name === `${movieId}.json`);
-}
-
-export async function toggleFavoriteStatus(movieDetails, isFavorite) {
-	const user = await supabase.auth.getUser();
-	const filePath = `${user.data.user.email}/${movieDetails.id}.json`;
-
-	if (isFavorite) {
-		// Remove favorite
-		const { error } = await supabase.storage.from('favorites').remove([filePath]);
-		if (error) console.error('Error removing favorite:', error.message);
-		return false;
-	} else {
-		// Add favorite
-		const { error } = await supabase.storage.from('favorites').upload(filePath, JSON.stringify(movieDetails), {
-			cacheControl: '3600',
-			upsert: true,
-		});
-		if (error) console.error('Error adding favorite:', error.message);
-		return true;
-	}
-}

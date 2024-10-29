@@ -3,6 +3,7 @@
 	import { user } from '../stores/user';
 	import { supabase } from '../lib/db/supabaseClient';
 	import { createEventDispatcher } from 'svelte';
+	import toast from 'svelte-french-toast';
 
 	export let movie;
 	export let sizeClass; // Receive the size class from the parent
@@ -50,6 +51,7 @@
 					contentType: 'application/json'
 				});
 			if (error) console.error('Error adding favorite:', error.message);
+			toast.success(`${movie.title} added to favorites.`);
 		}
 		isFavorite = !isFavorite;
 

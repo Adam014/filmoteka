@@ -67,7 +67,7 @@
 				<h2>Your Favorite Movies ({favoriteMovies.length})</h2>
 				<div class="favorite-movies">
 					{#each favoriteMovies as movie (movie.data?.id)}
-						<MovieCard movie={movie.data} on:unfavorite={handleUnfavorite} sizeClass="width1"/>
+						<MovieCard movie={movie.data} on:unfavorite={handleUnfavorite}/>
 					{/each}
 				</div>
 			{:else if !loading && favoriteMovies.length === 0}
@@ -100,12 +100,11 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		background-color: #222; /* Dark background for contrast */
+		background-color: #222; 
 		border-radius: 12px;
 		padding: 2rem;
 		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 		max-width: 300px;
-		margin: 1rem auto;
 		text-align: center;
 		color: #eee;
 	}
@@ -117,7 +116,12 @@
 	}
 
 	.favorites-container {
-		width: 100%;
+		width: 90%;
+		background-color: #222;
+		height: auto;
+		padding: 2rem;
+		border-radius: 12px;
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 	}
 
 	.favorite-movies {
@@ -177,7 +181,8 @@
 
 		.profile-container,
 		.favorites-container {
-			max-width: none;
+			max-width: 90%;
+			width: 100%;
 			text-align: center;
 		}
 
