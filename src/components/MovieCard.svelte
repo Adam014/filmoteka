@@ -4,6 +4,7 @@
 	import { supabase } from '../lib/db/supabaseClient';
 	import { createEventDispatcher } from 'svelte';
 	import toast from 'svelte-french-toast';
+	import { goto } from '$app/navigation';
 
 	export let movie;
 	export let sizeClass; // Receive the size class from the parent
@@ -35,7 +36,9 @@
 	}
 
 	async function toggleFavorite() {
-		if (!currentUser) return;
+		if (!currentUser) {
+			goto("/login");
+		};
 
 		const path = `${currentUser.email}/${movie?.id.toString()}.json`;
 
@@ -66,12 +69,10 @@
 	<a href={`/movie/${movie?.id}`}>
 		<img src={'https://image.tmdb.org/t/p/w500' + movie?.poster_path} alt={movie?.title} />
 	</a>
-	{#if currentUser}
 		<div class="favorite-icon" on:click={toggleFavorite} class:isFavorite>
 			{isFavorite ? '★' : '☆'}
 		</div>
-	{/if}
-</div>
+	</div>
 
 <style>
 	.movie-card {

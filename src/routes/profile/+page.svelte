@@ -153,7 +153,7 @@
 	}
 
 	.profile-details p b {
-		color: #7a1cac;
+		text-decoration: underline;
 		margin-left: 0.5rem;
 		white-space: nowrap; 
 	}

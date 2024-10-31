@@ -203,7 +203,12 @@
 
 <style>
 	.myself {
-		padding-left: 20px;
+		text-decoration: underline;
+	}
+
+	.myself a {
+		text-decoration: none;
+		color: white;
 	}
 
 	ul li {

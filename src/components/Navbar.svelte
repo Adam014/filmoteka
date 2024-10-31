@@ -239,7 +239,7 @@
 	.hamburger {
 		display: flex;
 		flex-direction: column;
-		justify-content: sace-between;
+		justify-content: space-between;
 		width: 30px;
 		height: 25px;
 		cursor: pointer;
