@@ -21,7 +21,7 @@
 	const movieCredits = data?.credits?.cast || [];
 
 	// Get top 5 actors by popularity
-	const topActors = movieCredits.sort((a, b) => b.popularity - a.popularity).slice(0, 5);
+	const topActors = movieCredits.sort((a, b) => b.popularity - a.popularity).slice(0, 6);
 
 	const {
 		id = 'N/A',
@@ -180,7 +180,7 @@
 		<h2>Actors:</h2>
 		<div class="actors-container">
 			{#each topActors as actor}
-				<ActorCard image={actor.profile_path} name={actor.name} role={actor.character} />
+				<ActorCard actor={actor} />
 			{/each}
 		</div>
 

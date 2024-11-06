@@ -1,18 +1,16 @@
 <script>
-	export let image = '';
-	export let name = 'Unknown Actor';
-	export let role = 'Unknown Role';
+    export let actor;
 </script>
 
 <div class="actor-card">
-	{#if image}
-		<img src={`https://image.tmdb.org/t/p/w200${image}`} alt={name} class="actor-image" />
+	{#if actor.profile_path}
+		<img src={`https://image.tmdb.org/t/p/w200${actor.profile_path}`} alt={actor.name} class="actor-image" />
 	{:else}
 		<div class="placeholder-image">No Image</div>
 	{/if}
 	<div class="actor-info">
-		<h3 class="actor-name">{name}</h3>
-		<p class="actor-role">{role}</p>
+		<h3 class="actor-name">{actor.id} | {actor.name}</h3>
+		<p class="actor-role">{actor.character}</p>
 	</div>
 </div>
 
