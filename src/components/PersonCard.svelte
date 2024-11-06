@@ -2,19 +2,26 @@
     export let person;
 </script>
 
-<div class="actor-card">
-	{#if person.profile_path}
-		<img src={`https://image.tmdb.org/t/p/w200${person.profile_path}`} alt={person.name} class="actor-image" />
-	{:else}
-		<div class="placeholder-image">No Image</div>
-	{/if}
-	<div class="actor-info">
-		<h3 class="actor-name">{person.id} | {person.name}</h3>
-		<p class="actor-role">{person.character}</p>
+<a href={`/person/${person?.id}`}>
+	<div class="actor-card">
+		{#if person.profile_path}
+			<img src={`https://image.tmdb.org/t/p/w200${person.profile_path}`} alt={person.name} class="actor-image" />
+		{:else}
+			<div class="placeholder-image">No Image</div>
+		{/if}
+		<div class="actor-info">
+			<h3 class="actor-name">{person.id} | {person.name}</h3>
+			<p class="actor-role">{person.character}</p>
+		</div>
 	</div>
-</div>
+</a>
 
 <style>
+	a{
+		text-decoration: none;
+		color: white;
+	}
+
 	.actor-card {
 		display: flex;
 		flex-direction: column;
