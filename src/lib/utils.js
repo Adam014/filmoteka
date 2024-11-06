@@ -279,7 +279,7 @@ export function formatDate(dateString) {
 		year: 'numeric',
 		hour: 'numeric',
 		minute: 'numeric',
-		hour12: true,
+		hour12: true
 	});
 }
 

@@ -35,7 +35,6 @@
 	});
 </script>
 
-
 <svelte:head>
 	<title>Profile | Filmoteka</title>
 </svelte:head>
@@ -67,7 +66,7 @@
 				<h2>Your Favorite Movies ({favoriteMovies.length})</h2>
 				<div class="favorite-movies">
 					{#each favoriteMovies as movie (movie.data?.id)}
-						<MovieCard movie={movie.data} on:unfavorite={handleUnfavorite}/>
+						<MovieCard movie={movie.data} on:unfavorite={handleUnfavorite} />
 					{/each}
 				</div>
 			{:else if !loading && favoriteMovies.length === 0}
@@ -100,7 +99,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		background-color: #222; 
+		background-color: #222;
 		border-radius: 12px;
 		padding: 2rem;
 		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -155,7 +154,7 @@
 	.profile-details p b {
 		text-decoration: underline;
 		margin-left: 0.5rem;
-		white-space: nowrap; 
+		white-space: nowrap;
 	}
 
 	.placeholder-icon {

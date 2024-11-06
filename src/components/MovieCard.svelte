@@ -37,8 +37,8 @@
 
 	async function toggleFavorite() {
 		if (!currentUser) {
-			goto("/login");
-		};
+			goto('/login');
+		}
 
 		const path = `${currentUser.email}/${movie?.id.toString()}.json`;
 
@@ -69,10 +69,10 @@
 	<a href={`/movie/${movie?.id}`}>
 		<img src={'https://image.tmdb.org/t/p/w500' + movie?.poster_path} alt={movie?.title} />
 	</a>
-		<div class="favorite-icon" on:click={toggleFavorite} class:isFavorite>
-			{isFavorite ? '★' : '☆'}
-		</div>
+	<div class="favorite-icon" on:click={toggleFavorite} class:isFavorite>
+		{isFavorite ? '★' : '☆'}
 	</div>
+</div>
 
 <style>
 	.movie-card {
@@ -94,6 +94,13 @@
 		color: rgba(255, 215, 0, 0.8);
 		text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.6);
 		transition: color 0.3s ease, transform 0.3s ease;
+	}
+
+	@media screen and (max-width: 600px) {
+		.favorite-icon {
+			right: 0px;
+			top: -5px;
+		}
 	}
 
 	.favorite-icon.isFavorite {

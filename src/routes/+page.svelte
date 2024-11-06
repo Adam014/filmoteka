@@ -267,11 +267,10 @@
 		padding-top: 20px;
 	}
 
-	.paginate-container { 
-		gap: 10px;	
+	.paginate-container {
+		gap: 10px;
 		display: grid;
 		grid-template-columns: repeat(300px, minmax(0px, 1fr));
-
 	}
 
 	.pagination button {

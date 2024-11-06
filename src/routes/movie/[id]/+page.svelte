@@ -5,6 +5,7 @@
 	import { supabase } from '../../../lib/db/supabaseClient';
 	import toast from 'svelte-french-toast';
 	import { user } from '../../../stores/user';
+	import ActorCard from '../../../components/ActorCard.svelte';
 
 	export let data;
 
@@ -15,6 +16,12 @@
 
 	const movieDetails = data?.details || {};
 	const movieVideos = data?.videos?.results || [];
+
+	// Destructure data
+	const movieCredits = data?.credits?.cast || [];
+
+	// Get top 5 actors by popularity
+	const topActors = movieCredits.sort((a, b) => b.popularity - a.popularity).slice(0, 5);
 
 	const {
 		id = 'N/A',
@@ -85,14 +92,12 @@
 				};
 
 				// Add to favorites with JSON format using structured data from "films" table
-				const { error: uploadError } = await supabase.storage.from('favorites').upload(
-					path,
-					JSON.stringify(favoriteData),
-					{
+				const { error: uploadError } = await supabase.storage
+					.from('favorites')
+					.upload(path, JSON.stringify(favoriteData), {
 						upsert: true,
-						contentType: 'application/json',
-					}
-				);
+						contentType: 'application/json'
+					});
 				if (uploadError) throw uploadError;
 
 				isFavorite = true;
@@ -170,9 +175,15 @@
 		<h1>{imdb_id} | {original_title}</h1>
 		<p class="overview">{overview}</p>
 
-		<!-- Here add top 6-7 actors in the movie, api reference is /credits -->
-
 		<p class="tagline">{tagline !== '' ? '"' + tagline + '"' : ''}</p>
+
+		<h2>Actors:</h2>
+		<div class="actors-container">
+			{#each topActors as actor}
+				<ActorCard image={actor.profile_path} name={actor.name} role={actor.character} />
+			{/each}
+		</div>
+
 		<p>{budget === 0 ? '' : 'movie budget -> ' + formattedBudget}</p>
 		<p>{revenue === 0 ? '' : 'movie revenue -> ' + formattedRevenue}</p>
 	</div>
@@ -239,7 +250,17 @@
 		color: gold;
 	}
 
+	.actors-container {
+		display: flex;
+		gap: 1rem;
+		flex-wrap: wrap;
+		justify-content: left;
+		padding: 20px 0px 20px 40px;
+		width: 90%;
+	}
+
 	h3,
+	h2,
 	h1,
 	p {
 		padding: 0rem 2.5rem 0rem 2.5rem;

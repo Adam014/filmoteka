@@ -46,13 +46,39 @@ export async function load({ fetch, params }) {
 		}
 
 		// Attempt to retrieve detailed data from the local database using getDetailedMovie
-		const detailedData = await getDetailedMovie(params.id);
+		let detailedData = await getDetailedMovie(params.id);
 
-		// If data is found in the database, return it
+		// If detailed data exists but credits are missing, fetch and update credits
+		if (detailedData && !detailedData.credits) {
+			const creditsUrl = `https://api.themoviedb.org/3/movie/${params.id}/credits?api_key=${TMDB_API_KEY}&language=en-US`;
+			const creditsResponse = await fetch(creditsUrl);
+
+			if (creditsResponse.ok) {
+				const creditsData = await creditsResponse.json();
+
+				// Update only the credits field in film_detailed
+				const { error: updateCreditsError } = await supabase
+					.from('film_detailed')
+					.update({ credits: creditsData })
+					.eq('id', params.id);
+
+				if (updateCreditsError) {
+					console.error('Error updating credits in Supabase:', updateCreditsError);
+				}
+
+				// Update the local detailedData to include the new credits
+				detailedData.credits = creditsData;
+			} else {
+				throw new Error('Failed to fetch credits data from TMDB');
+			}
+		}
+
+		// If detailed data is found in the database, return it
 		if (detailedData) {
 			return {
 				details: detailedData,
-				videos: detailedData.videos || null
+				videos: detailedData.videos || null,
+				credits: detailedData.credits || null
 			};
 		}
 
@@ -60,18 +86,21 @@ export async function load({ fetch, params }) {
 		const baseUrl = `https://api.themoviedb.org/3/movie/${params.id}`;
 		const detailsUrl = `${baseUrl}?api_key=${TMDB_API_KEY}&language=en-US`;
 		const videosUrl = `${baseUrl}/videos?api_key=${TMDB_API_KEY}&language=en-US`;
+		const creditsUrl = `${baseUrl}/credits?api_key=${TMDB_API_KEY}&language=en-US`;
 
-		const [detailsResponse, videosResponse] = await Promise.all([
+		const [detailsResponse, videosResponse, creditsResponse] = await Promise.all([
 			fetch(detailsUrl),
-			fetch(videosUrl)
+			fetch(videosUrl),
+			fetch(creditsUrl)
 		]);
 
-		if (!detailsResponse.ok || !videosResponse.ok) {
+		if (!detailsResponse.ok || !videosResponse.ok || !creditsResponse.ok) {
 			throw new Error('Failed to fetch data from the external API');
 		}
 
 		const detailsData = await detailsResponse.json();
 		const videosData = await videosResponse.json();
+		const creditsData = await creditsResponse.json();
 
 		// Only include columns present in film_detailed when inserting
 		const filmDetailedData = {
@@ -93,6 +122,7 @@ export async function load({ fetch, params }) {
 			status: detailsData.status,
 			tagline: detailsData.tagline,
 			videos: videosData,
+			credits: creditsData, // Add credits data
 			original_title: detailsData.title,
 			release_date: detailsData.release_date
 		};
@@ -109,13 +139,15 @@ export async function load({ fetch, params }) {
 		// Return the fetched detailed data
 		return {
 			details: detailsData,
-			videos: videosData
+			videos: videosData,
+			credits: creditsData
 		};
 	} catch (error) {
 		console.error('Error loading movie data:', error);
 		return {
 			details: null,
 			videos: null,
+			credits: null,
 			error: true
 		};
 	}
