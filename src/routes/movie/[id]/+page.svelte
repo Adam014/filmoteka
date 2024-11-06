@@ -5,7 +5,7 @@
 	import { supabase } from '../../../lib/db/supabaseClient';
 	import toast from 'svelte-french-toast';
 	import { user } from '../../../stores/user';
-	import ActorCard from '../../../components/ActorCard.svelte';
+	import PersonCard from '../../../components/PersonCard.svelte';
 
 	export let data;
 
@@ -20,8 +20,12 @@
 	// Destructure data
 	const movieCredits = data?.credits?.cast || [];
 
-	// Get top 5 actors by popularity
-	const topActors = movieCredits.sort((a, b) => b.popularity - a.popularity).slice(0, 6);
+	const topActors = movieCredits
+	.filter((actor) => actor.known_for_department === "Acting")
+	.sort((a, b) => b.popularity - a.popularity)
+	.slice(0, 6);
+
+	const directors = movieCredits.filter((director) => director.known_for_department === "Directing")
 
 	const {
 		id = 'N/A',
@@ -119,6 +123,8 @@
 
 		return () => unsubscribe();
 	});
+
+	console.log(directors);
 </script>
 
 <svelte:head>
@@ -177,12 +183,29 @@
 
 		<p class="tagline">{tagline !== '' ? '"' + tagline + '"' : ''}</p>
 
+		<hr />
 		<h2>Actors:</h2>
 		<div class="actors-container">
 			{#each topActors as actor}
-				<ActorCard actor={actor} />
+				<PersonCard person={actor} />
 			{/each}
 		</div>
+
+		{#if directors.length > 1}
+			<h2>Directors:</h2>
+			<div class="directors-container">
+			{#each directors as director}
+				<PersonCard person={director} />
+			{/each}
+			</div>
+		{:else if directors.length === 1}
+			<h2>Director:</h2>
+			<div class="directors-container">
+			<PersonCard person={directors[0]} />
+			</div>
+		{/if}
+
+		<hr />
 
 		<p>{budget === 0 ? '' : 'movie budget -> ' + formattedBudget}</p>
 		<p>{revenue === 0 ? '' : 'movie revenue -> ' + formattedRevenue}</p>
@@ -232,6 +255,10 @@
 		padding: 50px 2.5rem 50px 2.5rem;
 	}
 
+	hr{
+		margin: 15px 40px 15px 40px;
+	}
+
 	.favorite-icon {
 		font-size: 2rem;
 		cursor: pointer;
@@ -250,7 +277,7 @@
 		color: gold;
 	}
 
-	.actors-container {
+	.actors-container, .directors-container {
 		display: flex;
 		gap: 1rem;
 		flex-wrap: wrap;
