@@ -1,11 +1,15 @@
 <script>
-    export let person;
+	export let person;
 </script>
 
 <a href={`/person/${person?.id}`}>
 	<div class="actor-card">
 		{#if person.profile_path}
-			<img src={`https://image.tmdb.org/t/p/w200${person.profile_path}`} alt={person.name} class="actor-image" />
+			<img
+				src={`https://image.tmdb.org/t/p/w200${person.profile_path}`}
+				alt={person.name}
+				class="actor-image"
+			/>
 		{:else}
 			<div class="placeholder-image">No Image</div>
 		{/if}
@@ -17,7 +21,7 @@
 </a>
 
 <style>
-	a{
+	a {
 		text-decoration: none;
 		color: white;
 	}

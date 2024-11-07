@@ -69,12 +69,18 @@
 <div class="movie-card">
 	{#if showNotAvailable && !isMovieType}
 		<!-- Render the overlay when showNotAvailable is true and the type isn't "movie" -->
-		<img src={`https://image.tmdb.org/t/p/w500${movie?.poster_path || movie?.file_path}`} alt={movie?.title || movie?.media?.title} />
+		<img
+			src={`https://image.tmdb.org/t/p/w500${movie?.poster_path || movie?.file_path}`}
+			alt={movie?.title || movie?.media?.title}
+		/>
 		<div class="not-available-overlay">Not Available on Filmoteka</div>
 	{:else}
 		<!-- Render the link and favorite icon normally if type is "movie" or showNotAvailable is false -->
 		<a href={`/movie/${movieId}`}>
-			<img src={`https://image.tmdb.org/t/p/w500${movie?.poster_path || movie?.file_path}`} alt={movie?.title || movie?.media?.title} />
+			<img
+				src={`https://image.tmdb.org/t/p/w500${movie?.poster_path || movie?.file_path}`}
+				alt={movie?.title || movie?.media?.title}
+			/>
 		</a>
 		<div class="favorite-icon" on:click={toggleFavorite} class:isFavorite>
 			{isFavorite ? '★' : '☆'}
@@ -113,7 +119,8 @@
 		color: gold;
 	}
 
-	a img, img {
+	a img,
+	img {
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
@@ -145,7 +152,7 @@
 	}
 
 	@media screen and (max-width: 700px) {
-		.movie-card{
+		.movie-card {
 			height: 15rem;
 			width: 9rem;
 		}

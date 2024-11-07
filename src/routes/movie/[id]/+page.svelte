@@ -21,11 +21,13 @@
 	const movieCredits = data?.credits?.cast || [];
 
 	const topActors = movieCredits
-	.filter((actor) => actor.known_for_department === "Acting")
-	.sort((a, b) => b.popularity - a.popularity)
-	.slice(0, 6);
+		.filter((actor) => actor.known_for_department === 'Acting')
+		.sort((a, b) => b.popularity - a.popularity)
+		.slice(0, 6);
 
-	const directors = movieCredits.filter((director) => director.known_for_department === "Directing")
+	const directors = movieCredits.filter(
+		(director) => director.known_for_department === 'Directing'
+	);
 
 	const {
 		id = 'N/A',
@@ -194,14 +196,14 @@
 		{#if directors.length > 1}
 			<h2>Directors:</h2>
 			<div class="directors-container">
-			{#each directors as director}
-				<PersonCard person={director} />
-			{/each}
+				{#each directors as director}
+					<PersonCard person={director} />
+				{/each}
 			</div>
 		{:else if directors.length === 1}
 			<h2>Director:</h2>
 			<div class="directors-container">
-			<PersonCard person={directors[0]} />
+				<PersonCard person={directors[0]} />
 			</div>
 		{/if}
 
@@ -255,7 +257,7 @@
 		padding: 50px 2.5rem 50px 2.5rem;
 	}
 
-	hr{
+	hr {
 		margin: 15px 40px 15px 40px;
 	}
 
@@ -277,7 +279,8 @@
 		color: gold;
 	}
 
-	.actors-container, .directors-container {
+	.actors-container,
+	.directors-container {
 		display: flex;
 		gap: 1rem;
 		flex-wrap: wrap;
