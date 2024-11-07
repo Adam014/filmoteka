@@ -143,4 +143,11 @@
 		text-align: center;
 		border-radius: 20px;
 	}
+
+	@media screen and (max-width: 700px) {
+		.movie-card{
+			height: 15rem;
+			width: 9rem;
+		}
+	}
 </style>
