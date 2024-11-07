@@ -151,7 +151,7 @@
 		border-radius: 20px;
 	}
 
-	@media screen and (max-width: 700px) {
+	@media screen and (max-width: 768px) {
 		.movie-card {
 			height: 15rem;
 			width: 9rem;
