@@ -1,10 +1,20 @@
 <script>
+    import MovieCard from '../../../components/MovieCard.svelte';
+
     export let data;
 
     const person = data.person;
 
     // Format the date to be more readable
     const formatDate = (date) => new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(date));
+
+    // Filter out duplicate movies based on unique `media.id`
+    const uniqueMovies = person.movies.results.filter(
+        (movie, index, self) =>
+            index === self.findIndex((m) => m.media?.id === movie.media?.id)
+    );
+
+    console.log(uniqueMovies); // To verify the filtered unique movies
 </script>
 
 <svelte:head>
@@ -56,9 +66,25 @@
         </div>
     </div>
     <p class="person-biography">{person?.biography || 'No biography available.'}</p>
+    <h1 class="person-movies-title">Movies</h1>
+    <div class="person-movies">
+        {#each uniqueMovies as movie (movie.media?.id)}
+            <MovieCard {movie} showNotAvailable={true}/>
+        {/each}
+    </div>
 </div>
 
 <style>
+    .person-movies-title{
+        padding-top: 30px;
+    }
+
+    .person-movies{
+        padding-top: 20px;
+        display: flex;
+		flex-wrap: wrap;
+        width: 90%;
+    }
     .container {
         padding: 20px 0px 20px 40px;
     }
@@ -78,7 +104,6 @@
         justify-content: space-between;
         align-items: center;
         padding-bottom: 20px;
-        width: 100%;
     }
 
     .person-element p {
@@ -89,8 +114,9 @@
 
     .person-element h1 {
         font-size: 1.8rem; 
-        flex-basis: 70%;
+        flex-basis: 130%;
         margin-left: 10px;
+        text-decoration: underline #7a1cac;
     }
 
     .person-element h1 a {
@@ -105,6 +131,16 @@
 
     img {
         border-radius: 10px;
+    }
+
+    @media screen and (max-width: 1200px) {
+        .person-element p{
+            font-size: 1rem;
+            flex-basis: 40%;
+        }
+        .person-element h1{
+            font-size: 1.4rem;
+        }
     }
 
     @media screen and (max-width: 1000px) {
@@ -126,7 +162,7 @@
             font-size: 1.1rem
         }
     }
-    @media screen and (max-width: 1000px) {
+    @media screen and (max-width: 800px) {
         .person-element{
             display: grid;
         }

@@ -7,24 +7,23 @@
 	import { goto } from '$app/navigation';
 
 	export let movie;
-	export let sizeClass; // Receive the size class from the parent
+	export let sizeClass;
+	export let showNotAvailable = false; // Flag to conditionally show the overlay
 
 	let isFavorite = false;
 	let currentUser = null;
 
 	const dispatch = createEventDispatcher();
 
-	// Subscribe to user authentication state
 	const unsubscribe = user.subscribe((value) => {
 		currentUser = value;
-		checkIfFavorite(); // Check favorite status on load if the user is logged in
+		checkIfFavorite();
 	});
 
 	onMount(() => {
 		return () => unsubscribe();
 	});
 
-	// Check if the movie is already a favorite
 	async function checkIfFavorite() {
 		if (currentUser) {
 			const { data, error } = await supabase.storage
@@ -38,40 +37,49 @@
 	async function toggleFavorite() {
 		if (!currentUser) {
 			goto('/login');
+			return;
 		}
 
-		const path = `${currentUser.email}/${movie?.id.toString()}.json`;
+		const path = `${currentUser.email}/${movie?.id || movie?.media?.id}.json`;
 
 		if (isFavorite) {
-			// Remove from favorites
 			const { error } = await supabase.storage.from('favorites').remove([path]);
 			if (error) console.error('Error removing favorite:', error.message);
+			toast.success(`${movie.title || movie.media?.title} removed from favorites.`);
 		} else {
-			// Add to favorites
 			const { error } = await supabase.storage
 				.from('favorites')
 				.upload(path, JSON.stringify({ id: movie?.id, data: movie }), {
 					contentType: 'application/json'
 				});
 			if (error) console.error('Error adding favorite:', error.message);
-			toast.success(`${movie.title} added to favorites.`);
+			toast.success(`${movie.title || movie.media?.title} added to favorites.`);
 		}
 		isFavorite = !isFavorite;
 
-		// Dispatch an event if unfavorited to notify the parent
 		if (!isFavorite) {
-			dispatch('unfavorite', movie.id);
+			dispatch('unfavorite', movie.id || movie.media?.id);
 		}
 	}
+
+	let movieId = /^\d+$/.test(movie?.id) ? movie.id : movie?.media?.id;
+	let isMovieType = movie?.media_type === 'movie';
 </script>
 
-<div class={`movie-card ${sizeClass}`}>
-	<a href={`/movie/${movie?.id}`}>
-		<img src={'https://image.tmdb.org/t/p/w500' + movie?.poster_path} alt={movie?.title} />
-	</a>
-	<div class="favorite-icon" on:click={toggleFavorite} class:isFavorite>
-		{isFavorite ? '★' : '☆'}
-	</div>
+<div class="movie-card">
+	{#if showNotAvailable && !isMovieType}
+		<!-- Render the overlay when showNotAvailable is true and the type isn't "movie" -->
+		<img src={`https://image.tmdb.org/t/p/w500${movie?.poster_path || movie?.file_path}`} alt={movie?.title || movie?.media?.title} />
+		<div class="not-available-overlay">Not Available on Filmoteka</div>
+	{:else}
+		<!-- Render the link and favorite icon normally if type is "movie" or showNotAvailable is false -->
+		<a href={`/movie/${movieId}`}>
+			<img src={`https://image.tmdb.org/t/p/w500${movie?.poster_path || movie?.file_path}`} alt={movie?.title || movie?.media?.title} />
+		</a>
+		<div class="favorite-icon" on:click={toggleFavorite} class:isFavorite>
+			{isFavorite ? '★' : '☆'}
+		</div>
+	{/if}
 </div>
 
 <style>
@@ -80,10 +88,10 @@
 		position: relative;
 		overflow: hidden;
 		border-radius: 20px;
-		height: 100px;
+		height: 20rem;
 		margin: 10px;
-		width: calc(25% - 20px); /* Default width, transition will handle resizing */
-		transition: all 0.5s ease-in-out; /* Smooth transition for movement and resizing */
+		width: 15rem;
+		transition: all 0.5s ease-in-out;
 	}
 
 	.favorite-icon {
@@ -96,13 +104,6 @@
 		transition: color 0.3s ease, transform 0.3s ease;
 	}
 
-	@media screen and (max-width: 600px) {
-		.favorite-icon {
-			right: 0px;
-			top: -5px;
-		}
-	}
-
 	.favorite-icon.isFavorite {
 		color: gold;
 	}
@@ -112,27 +113,34 @@
 		color: gold;
 	}
 
-	.movie-card.width1 {
-		width: calc(25% - 20px);
-	}
-	.movie-card.width2 {
-		width: calc(50% - 20px);
-	}
-	.movie-card.width3 {
-		width: calc(75% - 20px);
-	}
-
-	a img {
+	a img, img {
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
 		position: absolute;
 		top: 0;
 		left: 0;
-		transition: transform 0.5s ease; /* Smooth scaling on hover */
+		transition: transform 0.5s ease;
 	}
 
 	a:hover img {
 		transform: scale(1.05);
+	}
+
+	.not-available-overlay {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.7);
+		color: #ff5555;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 1.5rem;
+		font-weight: bold;
+		text-align: center;
+		border-radius: 20px;
 	}
 </style>
