@@ -2,6 +2,9 @@
     export let data;
 
     const person = data.person;
+
+    // Format the date to be more readable
+    const formatDate = (date) => new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(date));
 </script>
 
 <svelte:head>
@@ -10,54 +13,130 @@
 
 <div class="container">
     <div class="person-title-container">
-        <img src={'https://image.tmdb.org/t/p/w300' + person?.profile_path} alt={person?.name} />
+        <div class="image-container">
+            <img src={'https://image.tmdb.org/t/p/w300' + person?.profile_path} alt={person?.name} />
+        </div>
         <div class="person-info">
-            <h1>{person?.name} | {person?.imdb_id}</h1>
-            <h3>{person?.birthday ? "born at " + new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(person.birthday)) + " in " + person?.place_of_birth : 'N/A'}</h3>
-            <h3>{person?.deathday ? "died at " + new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(person.deathday)) : ""}</h3>
-            <h3>{person?.known_for_department}</h3>
-            <p>Gender: 
-                {#if person?.gender === 1}
-                  Female
-                {:else if person?.gender === 2}
-                  Male
-                {:else if person?.gender === 3}
-                  Non-binary
-                {:else}
-                  Not set / not specified
-                {/if}
-              </p>
+            <div class="person-element">
+                <p>Name and IMDb ID:</p>
+                <h1>{person?.name} | {person?.imdb_id || 'N/A'}</h1>
+            </div>
+            <div class="person-element">
+                <p>Born:</p>
+                <h1>{person?.birthday ? formatDate(person.birthday) + " in " + person?.place_of_birth : 'N/A'}</h1>
+            </div>
+            {#if person?.deathday}
+                <div class="person-element">
+                    <p>Died:</p>
+                    <h1>{formatDate(person.deathday)}</h1>
+                </div>
+            {/if}
+            <div class="person-element">
+                <p>Department:</p>
+                <h1>{person?.known_for_department || 'N/A'}</h1>
+            </div>
+            {#if person?.also_known_as?.length > 0}
+            <div class="person-element">
+                <p>Also Known As:</p>
+                <h1>{person.also_known_as.join(', ')}</h1>
+            </div>
+            {/if}
+            {#if person?.homepage}
+                <div class="person-element">
+                    <p>Homepage:</p>
+                    <h1>
+                        {#if person?.homepage}
+                            <a href={person.homepage} target="_blank" rel="noopener noreferrer">{person.homepage}</a>
+                        {:else}
+                            N/A
+                        {/if}
+                    </h1>
+                </div>
+            {/if}
         </div>
     </div>
-    <p class="person-biography">{person?.biography}</p>
-
+    <p class="person-biography">{person?.biography || 'No biography available.'}</p>
 </div>
 
 <style>
-    .container{
+    .container {
         padding: 20px 0px 20px 40px;
     }
 
-    .person-title-container{
+    .person-title-container {
         display: flex;
-        justify-content: left;
+        justify-content: flex-start;
+        gap: 20px;
     }
-    .person-info{
+
+    .person-info {
         padding: 15px;
     }
 
-    .person-biography{
+    .person-element {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 20px;
+        width: 100%;
+    }
+
+    .person-element p {
+        font-size: 1.2rem;
+        font-weight: bold;
+        flex-basis: 30%;
+    }
+
+    .person-element h1 {
+        font-size: 1.8rem; 
+        flex-basis: 70%;
+        margin-left: 10px;
+    }
+
+    .person-element h1 a {
+        color: inherit;
+        text-decoration: underline;
+    }
+
+    .person-biography {
         width: 80%;
         padding-top: 40px;
     }
 
-    @media screen and (max-width: 800px) {
-        .person-title-container{
+    img {
+        border-radius: 10px;
+    }
+
+    @media screen and (max-width: 1000px) {
+        .person-title-container {
             display: grid;
         }
-        .person-title-container img{
-            width: 100%;
-            
+        .person-title-container img {
+            width: 13rem;
+            height: 13rem;
+            object-fit: cover;
+        }
+        .image-container{
+            padding-left: 20px;
+        }
+        .person-element p{
+            font-size: 1rem;
+        }
+        .person-element h1{
+            font-size: 1.1rem
+        }
+    }
+    @media screen and (max-width: 1000px) {
+        .person-element{
+            display: grid;
+        }
+        .person-element h1{
+            padding: 10px 0px 20px 0px !important;
+            font-weight: lighter;
+            margin-left: 0px;
+        }
+        .person-biography{
+            padding-left: 18px;
         }
     }
 </style>
