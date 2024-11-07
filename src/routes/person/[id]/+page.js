@@ -19,13 +19,22 @@ export async function load({ fetch, params }) {
     // If person is not in the table, fetch from the TMDB API and insert into Supabase
     if (!existingPerson) {
       const personUrl = `https://api.themoviedb.org/3/person/${personId}?api_key=${TMDB_API_KEY}&language=en-US`;
-      const response = await fetch(personUrl);
+      const personMoviesUrl = `https://api.themoviedb.org/3/person/${personId}/tagged_images?api_key=${TMDB_API_KEY}&language=en-US`;
+      const personImagesUrl = `https://api.themoviedb.org/3/person/${personId}/images?api_key=${TMDB_API_KEY}&language=en-US`
+      
+      const [personDataResponse, personMoviesResponse, personImagesResponse] = await Promise.all([
+        fetch(personUrl),
+        fetch(personMoviesUrl),
+        fetch(personImagesUrl)
+      ]);
 
-      if (!response.ok) {
+      if (!personDataResponse.ok || !personMoviesResponse.ok || !personImagesResponse.ok) {
         throw new Error('Failed to fetch person data from TMDB');
       }
 
-      const personData = await response.json();
+      const personData = await personDataResponse.json();
+      const personMovies = await personMoviesResponse.json();
+      const personImages = await personImagesResponse.json();
 
       // Prepare the data for insertion
       const personDetailedData = {
@@ -42,7 +51,9 @@ export async function load({ fetch, params }) {
         place_of_birth: personData.place_of_birth,
         popularity: personData.popularity,
         profile_path: personData.profile_path,
-        created_at: new Date()
+        created_at: new Date(),
+        movies: personMovies,
+        images: personImages,
       };
 
       // Insert into the person_detailed table
