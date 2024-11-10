@@ -106,13 +106,17 @@
 			</a>
 		</div>
 	{:else}
-		<a href="/register" class="signup-link">Sign Up</a>
+		<a href="/register" class="signup-link">Register</a>
+		<a href="/login" class="signup-link">Login</a>
 	{/if}
 
 	<div class="nav-menu" style="transform: translateX({menuOpen ? '0%' : '-100%'});">
 		{#if currentUser}
-			<a href="/" on:click={closeMenu}>Library</a>
-			<a href="/profile" on:click={closeMenu}>Profile</a>
+			<div class="nav-menu-items">
+				<a href="/" on:click={closeMenu}>Library</a> <hr />
+				<a href="/profile" on:click={closeMenu}>Profile</a>  <hr />
+				<a href="/random" on:click={closeMenu}>Random-Movie</a>
+			</div>
 			<div class="logout-container">
 				<div class="profile-logout-container">
 					<a href="/profile">
@@ -227,6 +231,7 @@
 
 	.nav-menu a:hover {
 		text-decoration: underline;
+		color: #a05cd5;
 	}
 
 	a,

@@ -1,5 +1,5 @@
 <script>
-	import { onMount } from 'svelte';
+	import { onMount, afterUpdate } from 'svelte';
 	import { user } from '../stores/user';
 	import { supabase } from '../lib/db/supabaseClient';
 	import { createEventDispatcher } from 'svelte';
@@ -17,30 +17,48 @@
 
 	const unsubscribe = user.subscribe((value) => {
 		currentUser = value;
-		checkIfFavorite();
+		checkIfFavorite(); // Initial check when the component is mounted
 	});
 
+	// Ensure we clean up the subscription
 	onMount(() => {
 		return () => unsubscribe();
 	});
 
+	// Check if the movie is already marked as favorite
 	async function checkIfFavorite() {
-		if (currentUser) {
+		if (!currentUser || !movie) {
+			isFavorite = false;
+			return;
+		}
+
+		try {
 			const { data, error } = await supabase.storage
 				.from('favorites')
-				.list(currentUser.email, { search: movie?.id.toString() });
+				.list(currentUser.email);
 
-			isFavorite = data && data.length > 0;
+			if (error) {
+				console.error('Error fetching favorites:', error.message);
+				isFavorite = false;
+				return;
+			}
+
+			// Match movie ID in favorites
+			isFavorite = data.some((file) => file.name === `${movie.id}.json`);
+		} catch (err) {
+			console.error('Error checking favorite status:', err.message);
+			isFavorite = false;
 		}
 	}
 
+	// Toggle favorite status for the current movie
 	async function toggleFavorite() {
 		if (!currentUser) {
 			goto('/login');
 			return;
 		}
 
-		const path = `${currentUser.email}/${movie?.id || movie?.media?.id}.json`;
+		const path = `${currentUser.email}/${movie?.id}.json`;
 
 		if (isFavorite) {
 			const { error } = await supabase.storage.from('favorites').remove([path]);
@@ -50,17 +68,24 @@
 			const { error } = await supabase.storage
 				.from('favorites')
 				.upload(path, JSON.stringify({ id: movie?.id, data: movie }), {
-					contentType: 'application/json'
+					contentType: 'application/json',
 				});
 			if (error) console.error('Error adding favorite:', error.message);
 			toast.success(`${movie.title || movie.media?.title} added to favorites.`);
 		}
+
 		isFavorite = !isFavorite;
 
+		// Dispatch an event if the movie was unfavorited
 		if (!isFavorite) {
-			dispatch('unfavorite', movie.id || movie.media?.id);
+			dispatch('unfavorite', movie.id);
 		}
 	}
+
+	// Re-check favorite status whenever the movie changes
+	afterUpdate(() => {
+		checkIfFavorite();
+	});
 
 	let movieId = /^\d+$/.test(movie?.id) ? movie.id : movie?.media?.id;
 	let isMovieType = movie?.media_type === 'movie';

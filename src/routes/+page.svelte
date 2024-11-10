@@ -202,13 +202,15 @@
 </section>
 
 <style>
-	.myself {
-		text-decoration: underline;
-	}
-
 	.myself a {
 		text-decoration: none;
 		color: white;
+		font-size: 0.9rem;
+	}
+
+	.myself a:hover {
+		color: #7a1cac;
+		text-decoration: underline;
 	}
 
 	ul li {
@@ -250,57 +252,86 @@
 	.tmdb-reference a {
 		text-decoration: none;
 		color: #e5e5e5;
+		font-size: 0.9rem;
 		padding-left: 15px;
 	}
 
 	.pagination {
-		display: grid;
-		justify-content: center;
+		display: flex;
+		flex-direction: column;
 		align-items: center;
+		gap: 15px;
 		margin: 20px 0;
+	}
+
+	.paginate-container {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10px;
+		justify-content: center;
 	}
 
 	.footer-pagination {
 		display: flex;
+		flex-wrap: wrap;
 		justify-content: space-between;
 		align-items: center;
-		padding-top: 20px;
-	}
-
-	.paginate-container {
 		gap: 10px;
-		display: grid;
-		grid-template-columns: repeat(300px, minmax(0px, 1fr));
+		padding-top: 20px;
+		width: 100%;
+		max-width: 600px;
+		margin: auto;
 	}
 
 	.pagination button {
+		background-color: transparent;
+		color: #fff;
+		padding: 10px 15px;
 		font-size: 1rem;
+		font-weight: bold;
 		cursor: pointer;
-		background: none;
-		color: white;
-		/* border: 0; */
-		transition: background-color 0.3s;
-		padding: 10px;
+		transition: all 0.2s ease;
 	}
 
+
 	.pagination button:hover {
-		color: white;
 		background-color: #7a1cac;
+		color: #fff;
 	}
 
 	.pagination button.active {
-		background-color: #430c5c;
-		color: white;
+		background-color: #7a1cac;
+		color: #fff;
 		font-weight: bold;
+		border: 1px solid #7a1cac;
+	}
+
+	.pagination button:disabled {
+		background-color: #222;
+		color: #666;
+		cursor: not-allowed;
+		border: 1px solid #444;
+	}
+
+	.pagination button:focus {
+		outline: 2px solid #7a1cac;
 	}
 
 	.pagination-input {
-		width: 80px;
-		padding: 11px;
-		border-radius: 4px;
-		border: 1px solid #ccc;
+		width: 100px;
+		padding: 10px;
+		border-radius: 8px;
+		border: 1px solid #555;
 		text-align: center;
-		margin-left: 10px;
+		font-size: 1rem;
+		color: #fff;
+		background-color: #222;
+		transition: border-color 0.2s ease;
+	}
+
+	.pagination-input:focus {
+		border-color: #7a1cac;
+		outline: none;
 	}
 
 	.search-input-container {
