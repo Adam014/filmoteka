@@ -1,89 +1,88 @@
 <script>
 	import MovieCard from '../../components/MovieCard.svelte';
 	import { supabase } from '../../lib/db/supabaseClient';
-    import { onDestroy } from 'svelte';
-    import { user } from '../../stores/user';
+	import { onDestroy } from 'svelte';
+	import { user } from '../../stores/user';
 	import { toast } from 'svelte-french-toast';
 
 	let movies = [];
 	let isLoading = false;
-    let currentUser;
+	let currentUser;
 	let movieCount = 1; // Default value
 
-	console.log(movieCount);
-    
 	const unsubscribe = user.subscribe((value) => {
 		currentUser = value;
 	});
 
-    onDestroy(() => {
+	onDestroy(() => {
 		unsubscribe();
 	});
 
-    // Check if a movie is a favorite
-    async function checkIfFavorite(movie) {
-        if (!currentUser) {
-            return false;
-        }
+	// Check if a movie is a favorite
+	async function checkIfFavorite(movie) {
+		if (!currentUser) {
+			return false;
+		}
 
-        try {
-            const { data: favoriteFiles, error } = await supabase.storage
-                .from('favorites')
-                .list(currentUser.email);
+		try {
+			const { data: favoriteFiles, error } = await supabase.storage
+				.from('favorites')
+				.list(currentUser.email);
 
-            if (error) {
-                console.error('Error fetching favorites:', error.message);
-                return false;
-            }
+			if (error) {
+				console.error('Error fetching favorites:', error.message);
+				return false;
+			}
 
-            return favoriteFiles.some((file) => file.name === `${movie.id}.json`);
-        } catch (err) {
-            console.error('Error checking favorite status:', err.message);
-            return false;
-        }
-    }
+			return favoriteFiles.some((file) => file.name === `${movie.id}.json`);
+		} catch (err) {
+			console.error('Error checking favorite status:', err.message);
+			return false;
+		}
+	}
 
-    async function fetchRandomMovies() {
-        try {
-            isLoading = true;
+	async function fetchRandomMovies() {
+		try {
+			isLoading = true;
 
-            // Fetch random movies based on the count requested
-            const { data: randomMovies, error } = await supabase
-                .rpc('get_random_movies', { count: movieCount }); // Custom RPC function
+			// Fetch random movies based on the count requested
+			const { data: randomMovies, error } = await supabase.rpc('get_random_movies', {
+				count: movieCount
+			}); // Custom RPC function
 
-            if (error) throw error;
+			if (error) throw error;
 
-            if (!randomMovies || randomMovies.length === 0) {
-                toast.error('No random movies found.');
-                movies = [];
-                return;
-            }
+			if (!randomMovies || randomMovies.length === 0) {
+				toast.error('No random movies found.');
+				movies = [];
+				return;
+			}
 
-            // Update movies and their favorite status
-            movies = await Promise.all(
-                randomMovies.map(async (movie) => {
-                    movie.isFavorite = await checkIfFavorite(movie);
-                    return movie;
-                })
-            );
-        } catch (error) {
-            console.error('Error fetching random movies:', error.message);
+			// Update movies and their favorite status
+			movies = await Promise.all(
+				randomMovies.map(async (movie) => {
+					movie.isFavorite = await checkIfFavorite(movie);
+					return movie;
+				})
+			);
+		} catch (error) {
+			console.error('Error fetching random movies:', error.message);
 			toast.error('Error fetching random movies:', error.message);
-            movies = [];
-        } finally {
-            isLoading = false;
-        }
-    }
+			movies = [];
+		} finally {
+			isLoading = false;
+		}
+	}
 
-    // Reset favorites for the current movies when a movie's favorite status changes
-    async function resetFavorites() {
-        movies = await Promise.all(
-            movies.map(async (movie) => {
-                movie.isFavorite = await checkIfFavorite(movie);
-                return movie;
-            })
-        );
-    }
+	// Reset favorites for the current movies when a movie's favorite status changes
+	async function resetFavorites() {
+		movies = await Promise.all(
+			movies.map(async (movie) => {
+				movie.isFavorite = await checkIfFavorite(movie);
+				return movie;
+			})
+		);
+	}
 
 	// Handle manual movieCount selection
 	function handleSelect(event) {

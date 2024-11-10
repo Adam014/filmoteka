@@ -7,7 +7,7 @@ const config = {
 		include: ['src/**/*.{test,spec}.{js,ts}']
 	},
 	build: {
-		target: 'es2019', // or 'es2020' if you need slightly more modern features
+		target: 'es2019' // or 'es2020' if you need slightly more modern features
 	}
 };
 

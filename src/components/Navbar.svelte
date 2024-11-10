@@ -113,8 +113,10 @@
 	<div class="nav-menu" style="transform: translateX({menuOpen ? '0%' : '-100%'});">
 		{#if currentUser}
 			<div class="nav-menu-items">
-				<a href="/" on:click={closeMenu}>Library</a> <hr />
-				<a href="/profile" on:click={closeMenu}>Profile</a>  <hr />
+				<a href="/" on:click={closeMenu}>Library</a>
+				<hr />
+				<a href="/profile" on:click={closeMenu}>Profile</a>
+				<hr />
 				<a href="/random" on:click={closeMenu}>Random-Movie</a>
 			</div>
 			<div class="logout-container">

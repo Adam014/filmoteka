@@ -33,9 +33,7 @@
 		}
 
 		try {
-			const { data, error } = await supabase.storage
-				.from('favorites')
-				.list(currentUser.email);
+			const { data, error } = await supabase.storage.from('favorites').list(currentUser.email);
 
 			if (error) {
 				console.error('Error fetching favorites:', error.message);
@@ -68,7 +66,7 @@
 			const { error } = await supabase.storage
 				.from('favorites')
 				.upload(path, JSON.stringify({ id: movie?.id, data: movie }), {
-					contentType: 'application/json',
+					contentType: 'application/json'
 				});
 			if (error) console.error('Error adding favorite:', error.message);
 			toast.success(`${movie.title || movie.media?.title} added to favorites.`);

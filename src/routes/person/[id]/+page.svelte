@@ -70,9 +70,9 @@
 		</div>
 	</div>
 	<p class="person-biography">{person?.biography || 'No biography available.'}</p>
-    {#if person.movies.results.lenght != null}
-	    <h1 class="person-movies-title">Movies</h1>
-    {/if}
+	{#if person.movies.results.lenght != null}
+		<h1 class="person-movies-title">Movies</h1>
+	{/if}
 	<div class="person-movies">
 		{#each uniqueMovies as movie (movie.media?.id)}
 			<MovieCard {movie} showNotAvailable={true} />
