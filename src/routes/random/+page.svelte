@@ -10,6 +10,8 @@
 	let currentUser;
 	let movieCount = 1; // Default value
 
+	// console.log(movieCount);
+
 	const unsubscribe = user.subscribe((value) => {
 		currentUser = value;
 	});
