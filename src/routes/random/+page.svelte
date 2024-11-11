@@ -149,22 +149,27 @@
 <section class="random-movie-section">
 	<h1>Random Movies</h1>
 	<div class="controls">
-		<label for="movie-count">Number of Movies:</label>
-		<select id="movie-count" on:change={handleSelect} class="custom-select">
-			<option value="1" selected={movieCount === 1}>1</option>
-			<option value="5" selected={movieCount === 5}>5</option>
-			<option value="10" selected={movieCount === 10}>10</option>
-			<option value="15" selected={movieCount === 15}>15</option>
-			<option value="30" selected={movieCount === 30}>30</option>
-		</select>
-		<label for="genre-select">Genre:</label>
-		<select id="genre-select" bind:value={selectedGenre} class="custom-select">
-			<option value={null} selected={selectedGenre === null}>All Genres</option>
-			{#each genres as genre}
-				<option value={genre.id}>{genre.name}</option>
-			{/each}
-		</select>
+		<div class="control">
+			<label for="movie-count">Count:</label>
+			<select id="movie-count" on:change={handleSelect} class="custom-select">
+				<option value="1" selected={movieCount === 1}>1</option>
+				<option value="5" selected={movieCount === 5}>5</option>
+				<option value="10" selected={movieCount === 10}>10</option>
+				<option value="15" selected={movieCount === 15}>15</option>
+				<option value="30" selected={movieCount === 30}>30</option>
+			</select>
+		</div>
+		<div class="control">
+			<label for="genre-select">Genre:</label>
+			<select id="genre-select" bind:value={selectedGenre} class="custom-select">
+				<option value={null} selected={selectedGenre === null}>All Genres</option>
+				{#each genres as genre}
+					<option value={genre.id}>{genre.name}</option>
+				{/each}
+			</select>
+		</div>
 	</div>
+	<div></div>
 	<button on:click={fetchRandomMovies} class="random-button">
 		{isLoading ? 'Loading...' : 'Get Random Movies'}
 	</button>
@@ -188,6 +193,15 @@
 		justify-content: center;
 		min-height: 80vh;
 		text-align: center;
+	}
+
+	.control{
+		display: flex;
+		align-items: center;
+	}
+
+	.control label{
+		padding-right: 20px;
 	}
 
 	.controls {
@@ -237,5 +251,18 @@
 	.placeholder {
 		color: #888;
 		font-size: 1.2rem;
+	}
+
+	@media (max-width: 768px) {
+		.controls{
+			display: block;
+		}
+		.control{
+			padding: 10px;
+		}
+
+		.control select{
+			width: 100%
+		}
 	}
 </style>
