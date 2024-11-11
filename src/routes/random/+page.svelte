@@ -1,7 +1,7 @@
 <script>
 	import MovieCard from '../../components/MovieCard.svelte';
 	import { supabase } from '../../lib/db/supabaseClient';
-	import { onDestroy } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { user } from '../../stores/user';
 	import { toast } from 'svelte-french-toast';
 
@@ -9,6 +9,8 @@
 	let isLoading = false;
 	let currentUser;
 	let movieCount = 1; // Default value
+	let genres = []; // All available genres
+	let selectedGenre = null; // Selected genre
 
 	// console.log(movieCount);
 
@@ -19,6 +21,40 @@
 	onDestroy(() => {
 		unsubscribe();
 	});
+
+	
+	// Fetch all genres from the database
+	async function fetchGenres() {
+		try {
+			const { data: moviesWithGenres, error } = await supabase
+				.from('film_detailed')
+				.select('genres');
+
+			if (error) throw error;
+
+			if (!moviesWithGenres || moviesWithGenres.length === 0) {
+				toast.error('No genres found.');
+				return;
+			}
+
+			// Extract unique genres
+			const uniqueGenres = new Map();
+
+			moviesWithGenres.forEach((movie) => {
+				movie.genres.forEach((genre) => {
+					if (!uniqueGenres.has(genre.id)) {
+						uniqueGenres.set(genre.id, genre.name);
+					}
+				});
+			});
+
+			// Convert to an array for the select dropdown
+			genres = Array.from(uniqueGenres, ([id, name]) => ({ id, name }));
+		} catch (error) {
+			console.error('Error fetching genres:', error.message);
+			toast.error('Error fetching genres.');
+		}
+	}
 
 	// Check if a movie is a favorite
 	async function checkIfFavorite(movie) {
@@ -47,10 +83,20 @@
 		try {
 			isLoading = true;
 
-			// Fetch random movies based on the count requested
-			const { data: randomMovies, error } = await supabase.rpc('get_random_movies', {
-				count: movieCount
-			}); // Custom RPC function
+			let randomMovies, error;
+
+			if (selectedGenre) {
+				// Fetch movies filtered by genre
+				({ data: randomMovies, error } = await supabase.rpc('get_random_movies_by_genre', {
+					count: movieCount,
+					genre_id: selectedGenre
+				}));
+			} else {
+				// Fetch purely random movies
+				({ data: randomMovies, error } = await supabase.rpc('get_all_random_movies', {
+					count: movieCount
+				}));
+			}
 
 			if (error) throw error;
 
@@ -69,7 +115,7 @@
 			);
 		} catch (error) {
 			console.error('Error fetching random movies:', error.message);
-			toast.error('Error fetching random movies:', error.message);
+			toast.error('Error fetching random movies.');
 			movies = [];
 		} finally {
 			isLoading = false;
@@ -90,6 +136,10 @@
 	function handleSelect(event) {
 		movieCount = parseInt(event.target.value, 10);
 	}
+
+	onMount(() => {
+		fetchGenres(); // Fetch genres when the component mounts
+	});
 </script>
 
 <svelte:head>
@@ -106,6 +156,13 @@
 			<option value="10" selected={movieCount === 10}>10</option>
 			<option value="15" selected={movieCount === 15}>15</option>
 			<option value="30" selected={movieCount === 30}>30</option>
+		</select>
+		<label for="genre-select">Genre:</label>
+		<select id="genre-select" bind:value={selectedGenre} class="custom-select">
+			<option value={null} selected={selectedGenre === null}>All Genres</option>
+			{#each genres as genre}
+				<option value={genre.id}>{genre.name}</option>
+			{/each}
 		</select>
 	</div>
 	<button on:click={fetchRandomMovies} class="random-button">
