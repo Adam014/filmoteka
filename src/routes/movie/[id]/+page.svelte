@@ -26,7 +26,7 @@
 		.slice(0, 6);
 
 	const directors = movieCredits.filter(
-		(director) => director.known_for_department === 'Directing'
+		(director) => director.known_for_department === 'Production'
 	);
 
 	const {
