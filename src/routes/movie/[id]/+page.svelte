@@ -18,15 +18,16 @@
 	const movieVideos = data?.videos?.results || [];
 
 	// Destructure data
-	const movieCredits = data?.credits?.cast || [];
+	const cast = data?.credits?.cast || [];
+	const crew = data?.credits?.crew || [];
 
-	const topActors = movieCredits
+	const topActors = cast
 		.filter((actor) => actor.known_for_department === 'Acting')
 		.sort((a, b) => b.popularity - a.popularity)
 		.slice(0, 6);
 
-	const directors = movieCredits.filter(
-		(director) => director.known_for_department === 'Production'
+	const directors = crew.filter(
+		(director) => director.job === 'Director' 
 	);
 
 	const {
@@ -125,8 +126,6 @@
 
 		return () => unsubscribe();
 	});
-
-	console.log(directors);
 </script>
 
 <svelte:head>

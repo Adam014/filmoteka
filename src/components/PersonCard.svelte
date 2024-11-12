@@ -15,7 +15,9 @@
 		{/if}
 		<div class="actor-info">
 			<h3 class="actor-name">{person.id} | {person.name}</h3>
-			<p class="actor-role">{person.character}</p>
+			{#if person?.character != null}
+				<p class="actor-role">{person?.character}</p>
+			{/if}
 		</div>
 	</div>
 </a>
