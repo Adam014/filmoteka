@@ -9,7 +9,7 @@
 
 	let movieResults = [];
 	let currentPage = 1;
-	let totalPages = 500;
+	let totalPages = Math.ceil(500 / 3);
 	let inputPage = '';
 	let searchQuery = '';
 	let isSearchPopupOpen = false; // Controls the visibility of the search popup
@@ -98,6 +98,7 @@
 	onMount(() => {
 		cacheFirstPage();
 		updateMoviesFromUrl();
+
 		window.addEventListener('keydown', handleKeydown);
 		window.addEventListener('movies-loaded', handleMoviesLoaded);
 

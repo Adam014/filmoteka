@@ -199,19 +199,33 @@ export async function getBestAvailableVideoWithCheck(videoList) {
  * @returns {Promise<void>}
  */
 export async function loadMovies(page, setMovieResults) {
+	const moviesPerPage = 60; // Adjusting to 60 movies per page
 	let cachedMovies = JSON.parse(localStorage.getItem(`movies_page_${page}`));
 
 	if (!cachedMovies) {
-		const url = `https://api.themoviedb.org/3/movie/popular?api_key=6b6f517b5228ea3d3ea85b1649b6a34a&language=en-US&page=${page}`;
-		const res = await fetch(url);
+		const startPage = (page - 1) * (moviesPerPage / 20) + 1; // Start TMDB page
+		const endPage = startPage + (moviesPerPage / 20) - 1; // End TMDB page
+		const allMovies = [];
 
-		if (res.ok) {
-			const data = await res.json();
-			cachedMovies = data.results;
-			localStorage.setItem(`movies_page_${page}`, JSON.stringify(cachedMovies));
+		// Fetch data from TMDB for the required range
+		for (let currentPage = startPage; currentPage <= endPage; currentPage++) {
+			const url = `https://api.themoviedb.org/3/movie/popular?api_key=6b6f517b5228ea3d3ea85b1649b6a34a&language=en-US&page=${currentPage}`;
+			const res = await fetch(url);
+
+			if (res.ok) {
+				const data = await res.json();
+				allMovies.push(...data.results);
+			} else {
+				console.error(`Failed to fetch movies for page ${currentPage}`);
+			}
 		}
+
+		// Trim the list to exactly 60 movies
+		cachedMovies = allMovies.slice(0, moviesPerPage);
+		localStorage.setItem(`movies_page_${page}`, JSON.stringify(cachedMovies));
 	}
 
+	// Set the movies for rendering
 	if (setMovieResults) {
 		setMovieResults(cachedMovies);
 	}
