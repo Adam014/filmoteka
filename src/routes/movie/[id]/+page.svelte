@@ -20,8 +20,8 @@
 	const movieDetails = data?.details || {};
 	const movieVideos = data?.videos?.results || [];
 
-	const similarMovies = data?.similar_movies.results
-	
+	const similarMovies = data?.similar_movies?.results
+
 	// Destructure data
 	const cast = data?.credits?.cast || [];
 	const crew = data?.credits?.crew || [];
