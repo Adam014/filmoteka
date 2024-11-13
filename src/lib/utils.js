@@ -344,11 +344,11 @@ export async function fetchFavoriteMovies(currentUser) {
 
 // Function to generate the list of pages to display
 export function generatePageNumbers(currentPage, totalPages) {
-	const pages = [];
+    const pages = [];
 
-	for (let i = 1; i <= totalPages; i++) {
-		pages.push(i);
-	}
-
-	return pages;
+    for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+    }
+	
+    return pages;
 }

@@ -9,7 +9,8 @@
 
 	let movieResults = [];
 	let currentPage = 1;
-	let totalPages = Math.ceil(500 / 3);
+	const MOVIES_PER_PAGE = 60;
+	let totalPages = Math.ceil(500 / MOVIES_PER_PAGE);
 	let inputPage = '';
 	let searchQuery = '';
 	let isSearchPopupOpen = false; // Controls the visibility of the search popup

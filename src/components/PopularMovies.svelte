@@ -4,7 +4,7 @@
 </script>
 
 <div class="popular-movies">
-	{#each movies as movie (movie.id)}
+	{#each movies as movie, index (movie.id || index)}
 		<MovieCard {movie} />
 	{/each}
 </div>
