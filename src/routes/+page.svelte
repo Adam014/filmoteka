@@ -169,6 +169,7 @@
 
 	{#if movieResults.length > 0}
 		<PopularMovies movies={movieResults} />
+		<!-- TODO: Limit pagination when user isnt logged in to 3 pages and disable the ability to search, he can view only the movies that are in in the 3 pages -->
 		<div class="pagination">
 			<div class="paginate-container">
 				<div>
