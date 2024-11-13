@@ -8,10 +8,9 @@
 	import ShortcutKey from '../components/ShortcutKey.svelte';
 
 	let movieResults = [];
-	let currentPage = 1;
-	// TODO: Need to resolve this, we have more data in supabase than we are viewing
-	const MOVIES_PER_PAGE = 60;
-	let totalPages = Math.ceil(500 / MOVIES_PER_PAGE);
+	export let data;
+	export let currentPage = data?.currentPage;
+	let totalPages = Math.ceil(data.count / 60);
 	let inputPage = '';
 	let searchQuery = '';
 	let isSearchPopupOpen = false; // Controls the visibility of the search popup

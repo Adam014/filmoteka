@@ -5,11 +5,23 @@ export async function load({ fetch, url }) {
 	const page = parseInt(url.searchParams.get('page')) || 1;
 
 	try {
+		// Fetch total movies count from Supabase
+		const { count, error: countError } = await supabase
+			.from('films')
+			.select('*', { count: 'exact', head: true });
+
+		if (countError) {
+			console.error('Error fetching total movies count:', countError.message);
+			throw new Error('Failed to fetch movies count');
+		}
+
 		let films = await getAllMovies(page);
 
 		if (films && films.length > 0) {
 			return {
-				data: { results: films }
+				data: { results: films },
+				count, 
+				currentPage: page 
 			};
 		}
 
@@ -45,7 +57,9 @@ export async function load({ fetch, url }) {
 			}
 
 			return {
-				data
+				data,
+				count,
+				currentPage: page
 			};
 		} else {
 			throw new Error('Failed to load data from TMDB');
@@ -54,6 +68,8 @@ export async function load({ fetch, url }) {
 		console.error('Error during data fetching process:', error);
 		return {
 			data: null,
+			count: 0,
+			currentPage: page,
 			error: 'Failed to load data'
 		};
 	}

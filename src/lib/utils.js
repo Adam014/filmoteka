@@ -193,41 +193,37 @@ export async function getBestAvailableVideoWithCheck(videoList) {
 }
 
 /**
- * Loads the popular movies for the specified page, either from cache or from the API.
+ * Loads the popular movies for the specified page from the Supabase `films` table.
  * @param {number} page - The page number to load movies for.
  * @param {Function} setMovieResults - Callback function to set the movie results.
  * @returns {Promise<void>}
  */
 export async function loadMovies(page, setMovieResults) {
-	const moviesPerPage = 60; // Adjusting to 60 movies per page
-	let cachedMovies = JSON.parse(localStorage.getItem(`movies_page_${page}`));
+	const moviesPerPage = 60; // Number of movies per page
+	const startIndex = (page - 1) * moviesPerPage; // Calculate the starting index
+	const endIndex = startIndex + moviesPerPage - 1; // Calculate the ending index
 
-	if (!cachedMovies) {
-		const startPage = (page - 1) * (moviesPerPage / 20) + 1; // Start TMDB page
-		const endPage = startPage + (moviesPerPage / 20) - 1; // End TMDB page
-		const allMovies = [];
+	try {
+		// Fetch movies from Supabase with the updated range
+		const { data: movies, error } = await supabase
+			.from('films')
+			.select('*')
+			.range(startIndex, endIndex);
 
-		// Fetch data from TMDB for the required range
-		for (let currentPage = startPage; currentPage <= endPage; currentPage++) {
-			const url = `https://api.themoviedb.org/3/movie/popular?api_key=6b6f517b5228ea3d3ea85b1649b6a34a&language=en-US&page=${currentPage}`;
-			const res = await fetch(url);
-
-			if (res.ok) {
-				const data = await res.json();
-				allMovies.push(...data.results);
-			} else {
-				console.error(`Failed to fetch movies for page ${currentPage}`);
-			}
+		if (error) {
+			console.error('Error fetching movies from Supabase:', error.message);
+			throw new Error('Failed to fetch movies from Supabase');
 		}
 
-		// Trim the list to exactly 60 movies
-		cachedMovies = allMovies.slice(0, moviesPerPage);
-		localStorage.setItem(`movies_page_${page}`, JSON.stringify(cachedMovies));
-	}
-
-	// Set the movies for rendering
-	if (setMovieResults) {
-		setMovieResults(cachedMovies);
+		// If movies are fetched successfully, pass them to the callback
+		if (setMovieResults) {
+			setMovieResults(movies || []);
+		}
+	} catch (error) {
+		console.error('Unexpected error in loadMovies:', error.message);
+		if (setMovieResults) {
+			setMovieResults([]);
+		}
 	}
 }
 
