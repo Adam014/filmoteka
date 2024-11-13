@@ -252,13 +252,14 @@
 
 		<!-- In the bottom, top similar movies in cards, api reference /similar -->
 	</div>
-	<h2 class="similar-movies-title">Similar Movies</h2>
-	<div class="similar-movies">
-		{#each similarMovies as movie}
-			<MovieCard {movie} />
-		{/each}
-
-	</div>
+	{#if similarMovies}
+		<h2 class="similar-movies-title">Similar Movies</h2>
+		<div class="similar-movies">
+			{#each similarMovies as movie}
+				<MovieCard {movie} />
+			{/each}
+		</div>
+	{/if}
 </section>
 
 <style>

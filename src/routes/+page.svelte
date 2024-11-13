@@ -9,6 +9,7 @@
 
 	let movieResults = [];
 	let currentPage = 1;
+	// TODO: Need to resolve this, we have more data in supabase than we are viewing
 	const MOVIES_PER_PAGE = 60;
 	let totalPages = Math.ceil(500 / MOVIES_PER_PAGE);
 	let inputPage = '';
