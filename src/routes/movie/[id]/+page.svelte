@@ -5,9 +5,12 @@
 	import { supabase } from '../../../lib/db/supabaseClient';
 	import toast from 'svelte-french-toast';
 	import { user } from '../../../stores/user';
+	import MovieCard from "../../../components/MovieCard.svelte"
 	import PersonCard from '../../../components/PersonCard.svelte';
 
 	export let data;
+
+	// TODO: Need to add reactivity to each variable
 
 	let currentUser;
 	const unsubscribe = user.subscribe((value) => {
@@ -17,6 +20,8 @@
 	const movieDetails = data?.details || {};
 	const movieVideos = data?.videos?.results || [];
 
+	const similarMovies = data?.similar_movies.results
+	
 	// Destructure data
 	const cast = data?.credits?.cast || [];
 	const crew = data?.credits?.crew || [];
@@ -247,10 +252,24 @@
 
 		<!-- In the bottom, top similar movies in cards, api reference /similar -->
 	</div>
+
+	<div class="similar-movies">
+		{#each similarMovies as movie}
+			<MovieCard {movie} />
+		{/each}
+
+	</div>
 </section>
 
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap');
+
+	.similar-movies {
+		display: flex;
+		flex-wrap: wrap;
+		padding: 20px;
+		justify-content: center;
+	}
 
 	.no-trailer {
 		padding: 50px 2.5rem 50px 2.5rem;

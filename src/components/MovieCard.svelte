@@ -7,7 +7,6 @@
 	import { goto } from '$app/navigation';
 
 	export let movie;
-	export let sizeClass;
 	export let showNotAvailable = false; // Flag to conditionally show the overlay
 
 	let isFavorite = false;
