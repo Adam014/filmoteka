@@ -29,8 +29,8 @@
 			peopleQuery = peopleQuery.ilike('name', `%${query}%`).order('popularity', { ascending: false }).limit(5);
 		} else {
 			// Fetch random results when the query is empty
-			movieQuery = movieQuery.order('popularity', { ascending: false }).limit(10);
-			peopleQuery = peopleQuery.order('popularity', { ascending: false }).limit(10);
+			movieQuery = movieQuery.order('popularity', { ascending: false }).limit(5);
+			peopleQuery = peopleQuery.order('popularity', { ascending: false }).limit(5);
 		}
 
 		const [movies, people] = await Promise.all([movieQuery, peopleQuery]);
@@ -43,28 +43,28 @@
 			console.error('Error fetching people:', people.error.message);
 		}
 
-		// Combine results and limit to 5 items
-		const combined = [
-			...(movies.data || []).map((movie) => ({
+		const moviesData = movies.data || [];
+		const peopleData = people.data || [];
+
+		// Combine results
+		suggestions = [
+			...moviesData.map((movie) => ({
 				type: 'movie',
 				id: movie.id,
 				name: movie.title,
 				poster_path: movie.poster_path,
 				popularity: movie.popularity,
 			})),
-			...(people.data || []).map((person) => ({
+			...peopleData.map((person) => ({
 				type: 'person',
 				id: person.id,
 				name: person.name,
 				poster_path: person.profile_path,
 				popularity: person.popularity,
 			})),
-		];
-
-		// Shuffle and limit to 5 items
-		suggestions = combined
-			.sort(() => Math.random() - 0.5) // Shuffle
-			.slice(0, 5);
+		]
+			.sort(() => Math.random() - 0.5) // Shuffle results
+			.slice(0, 5); // Limit to 5 items
 
 		isLoading = false;
 	}
@@ -147,10 +147,9 @@
 						{#each suggestions as suggestion}
 							<li>
 								<img
-									src={'https://image.tmdb.org/t/p/w500' + suggestion.poster_path}
-									alt={suggestion.name}
+									src={'https://image.tmdb.org/t/p/w500' + (suggestion.poster_path || '/placeholder.jpg')}
+									alt={suggestion.name || 'Unknown'}
 								/>
-                        
 								<a
 									href={`/${suggestion.type}/${suggestion.id}`}
 									on:click={(e) => {
@@ -159,7 +158,7 @@
 										closeSearchPopup();
 									}}
 								>
-									{suggestion.name} ({suggestion.type === 'movie' ? 'Movie' : 'Person'})
+									{suggestion.name || 'No Name'} ({suggestion.type === 'movie' ? 'Movie' : 'Person'})
 								</a>
 							</li>
 						{/each}
