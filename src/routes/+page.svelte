@@ -3,20 +3,15 @@
 	import Loader from '../components/Loader.svelte';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { loadMovies, cacheFirstPage, handleSearch, generatePageNumbers } from '../lib/utils.js';
+	import { loadMovies, cacheFirstPage, generatePageNumbers } from '../lib/utils.js';
 	import { toast } from 'svelte-french-toast';
-	import ShortcutKey from '../components/ShortcutKey.svelte';
 
 	let movieResults = [];
 	export let data;
 	export let currentPage = data?.currentPage;
 	let totalPages = Math.ceil(data.count / 60);
 	let inputPage = '';
-	// let searchQuery = '';
-	// let isSearchPopupOpen = false; // Controls the visibility of the search popup
-	// let isFadingOut = false; // Flag for fade-out animation
 	let topPopularMovies = [];
-	// let preventClose = false; // Flag to prevent immediate closing
 
 	function setMovieResults(movies) {
 		movieResults = movies;
@@ -51,46 +46,6 @@
 		goto(`/?page=${page}`, { replaceState: true });
 	}
 
-	async function handleSearchEvent(event) {
-		event.preventDefault();
-		await handleSearch(searchQuery, closeSearchPopup, toast);
-	}
-
-	function openSearchPopup() {
-		isSearchPopupOpen = true;
-		preventClose = true;
-		selectTopPopularMovies();
-
-		setTimeout(() => {
-			preventClose = false;
-			document.addEventListener('click', handleClickOutside);
-		}, 200);
-	}
-
-	function closeSearchPopup() {
-		isFadingOut = true; // Start fade-out animation
-		setTimeout(() => {
-			isSearchPopupOpen = false; // Close the popup after the fade-out animation
-			isFadingOut = false; // Reset fade-out flag
-			document.removeEventListener('click', handleClickOutside);
-		}, 500); // Match this duration with the CSS animation duration
-	}
-
-	function handleClickOutside(event) {
-		if (!preventClose && isSearchPopupOpen && !event.target.closest('.search-popup-content')) {
-			closeSearchPopup();
-		}
-	}
-
-	function handleKeydown(event) {
-		if (event.ctrlKey && event.key === 'k') {
-			event.preventDefault();
-			openSearchPopup();
-		} else if (event.key === 'Escape' && isSearchPopupOpen) {
-			closeSearchPopup();
-		}
-	}
-
 	function handleMoviesLoaded(event) {
 		setMovieResults(event.detail.movies);
 		currentPage = event.detail.page;
@@ -99,14 +54,10 @@
 	onMount(() => {
 		cacheFirstPage();
 		updateMoviesFromUrl();
-
-		window.addEventListener('keydown', handleKeydown);
 		window.addEventListener('movies-loaded', handleMoviesLoaded);
 
 		return () => {
-			window.removeEventListener('keydown', handleKeydown);
 			window.removeEventListener('movies-loaded', handleMoviesLoaded);
-			document.removeEventListener('click', handleClickOutside);
 		};
 	});
 </script>
@@ -116,56 +67,6 @@
 </svelte:head>
 
 <section class="container">
-	<!-- <div class="search-input-container">
-		<div class="input-wrapper">
-			<input
-				type="text"
-				bind:value={searchQuery}
-				placeholder="Search for a movie..."
-				class="search-input"
-				on:focus={openSearchPopup}
-			/>
-			<ShortcutKey keyLabel="Ctrl+K" class="shortcut-key-ctrlk" />
-		</div>
-	</div>
-
-	{#if isSearchPopupOpen}
-		<div class="search-popup {isFadingOut ? 'fade-out' : ''}">
-			<div class="search-popup-content">
-				<div class="input-wrapper">
-					<form on:submit={handleSearchEvent}>
-						<input
-							type="text"
-							bind:value={searchQuery}
-							placeholder="Search for a movie..."
-							class="search-popup-input"
-							autofocus
-						/>
-						<ShortcutKey keyLabel="Esc" class="shortcut-key-esc" />
-					</form>
-				</div>
-				<ul class="suggestions">
-					{#each topPopularMovies as movie}
-						<li>
-							<img src={'https://image.tmdb.org/t/p/w500' + movie.poster_path} alt={movie.title} />
-							<a
-								href={`/movie/${movie.id}`}
-								class="suggestion-link"
-								on:click={(e) => {
-									e.preventDefault();
-									goto(`/movie/${movie.id}`);
-								}}
-								on:keydown={(e) => e.key === 'Enter' && goto(`/movie/${movie.id}`)}
-							>
-								{movie.title} | {movie.popularity}
-							</a>
-						</li>
-					{/each}
-				</ul>
-			</div>
-		</div>
-	{/if} -->
-
 	{#if movieResults.length > 0}
 		<PopularMovies movies={movieResults} />
 		<!-- TODO: Limit pagination when user isnt logged in to 3 pages and disable the ability to search, he can view only the movies that are in in the 3 pages -->
@@ -216,41 +117,10 @@
 		text-decoration: underline;
 	}
 
-	ul li {
-		display: flex;
-		align-items: center;
-	}
-
-	ul li img {
-		height: 40px;
-		width: 40px;
-	}
-
-	.input-wrapper {
-		position: relative;
-	}
-
 	.container {
 		padding: 20px;
 	}
 
-	.search-input {
-		width: 75%;
-		padding: 8px 10px;
-		font-size: 1rem;
-		border: 1px solid #ccc;
-		border-radius: 4px;
-		background-color: #222;
-		color: #fff;
-		transition: all 0.3s ease;
-		outline: none;
-		padding-right: 60px;
-	}
-
-	.search-input:focus {
-		transform: scale(1.03);
-		box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-	}
 
 	.tmdb-reference a {
 		text-decoration: none;
@@ -336,50 +206,6 @@
 		outline: none;
 	}
 
-	.search-input-container {
-		position: relative;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-	}
-
-	.search-popup {
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		background: rgba(0, 0, 0, 0.8);
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		z-index: 1000;
-		padding: 20px;
-		overflow-y: auto;
-		transition: opacity 0.5s ease, visibility 0.5s ease; /* Adjusted for both opacity and visibility */
-		opacity: 1;
-		visibility: visible;
-	}
-
-	.search-popup.fade-out {
-		opacity: 0;
-		visibility: hidden; /* This hides the element after the fade-out */
-	}
-
-	.search-popup-content {
-		position: relative;
-		background: #1a1a1a;
-		padding: 20px;
-		border-radius: 8px;
-		box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-		width: 100%;
-		max-width: 600px;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		animation: fadeIn 0.5s ease forwards;
-	}
-
 	@keyframes fadeIn {
 		from {
 			opacity: 0;
@@ -389,56 +215,6 @@
 			opacity: 1;
 			transform: scale(1);
 		}
-	}
-
-	.search-popup-input {
-		width: 75%;
-		padding: 15px;
-		font-size: 1.2rem;
-		border-radius: 4px;
-		border: 1px solid #333;
-		background-color: #2c2c2c;
-		color: #fff;
-		transition: all 0.3s ease;
-		padding-right: 60px;
-	}
-
-	form {
-		align-items: center;
-		display: flex;
-	}
-
-	.search-popup-input:focus {
-		transform: scale(1.03);
-		box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-	}
-
-	.suggestions {
-		list-style: none;
-		padding: 20px 0 0 0;
-		margin: 0;
-		width: 100%;
-	}
-
-	.suggestion-link {
-		text-decoration: none;
-		color: inherit;
-		display: block;
-		padding: 10px;
-		width: 100%;
-	}
-
-	.suggestions li {
-		padding: 10px;
-		background-color: #444;
-		border-radius: 4px;
-		margin-bottom: 5px;
-		cursor: pointer;
-		transition: background-color 0.3s;
-	}
-
-	.suggestions li:hover {
-		background-color: #666;
 	}
 
 	@media screen and (max-width: 600px) {
@@ -455,45 +231,6 @@
 		.pagination-input {
 			width: 80%;
 			text-align: center;
-		}
-
-		.search-input:focus {
-			width: 100%;
-		}
-
-		.search-popup-content {
-			max-width: 70%;
-			border-radius: 0;
-			padding: 15px;
-		}
-
-		.search-popup-input {
-			font-size: 1rem;
-			padding: 12px;
-			width: auto;
-		}
-
-		.suggestions li {
-			padding: 12px;
-			font-size: 1rem;
-		}
-
-		.suggestion-link {
-			padding-left: 15px;
-		}
-
-		.search-popup {
-			padding: 0;
-		}
-
-		.search-input-container {
-			padding: 0 15px;
-		}
-
-		.search-input {
-			width: 92%;
-			font-size: 1rem;
-			padding: 10px;
 		}
 	}
 </style>
