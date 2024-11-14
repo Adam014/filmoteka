@@ -1,10 +1,12 @@
 <script>
 	import { supabase } from '../lib/db/supabaseClient';
 	import { goto } from '$app/navigation';
-	import { debounce } from 'lodash';
 	import ShortcutKey from '../components/ShortcutKey.svelte';
 	import { onMount } from 'svelte';
-
+	import lodash from 'lodash';
+	
+	const { debounce } = lodash;
+	
 	let searchQuery = '';
 	let suggestions = [];
 	let isSearchPopupOpen = false;
