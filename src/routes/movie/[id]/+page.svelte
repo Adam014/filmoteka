@@ -253,7 +253,7 @@
 		<!-- In the bottom, top similar movies in cards, api reference /similar -->
 	</div>
 	{#if similarMovies}
-		<h2 class="similar-movies-title">Similar Movies</h2>
+		<h2 class="similar-movies-title">Another movies you might like</h2>
 		<div class="similar-movies">
 			{#each similarMovies as movie}
 				<MovieCard {movie} />
@@ -268,7 +268,6 @@
 	.similar-movies {
 		display: flex;
 		flex-wrap: wrap;
-		padding: 20px;
 		justify-content: center;
 	}
 
@@ -299,6 +298,7 @@
 	}
 
 	.actors-container,
+	.similar-movies,
 	.directors-container {
 		display: flex;
 		gap: 1rem;

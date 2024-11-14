@@ -5,6 +5,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { user } from '../stores/user.js';
 	import logo from '../lib/assets/Filmoteka_logo.svg';
+	import Search from "./Search.svelte";
 
 	let currentUser;
 	let menuOpen = false;
@@ -92,18 +93,21 @@
 	</div>
 
 	{#if currentUser}
-		<div class="profile-container">
-			<a href="/profile">
-				{#if currentUser.user_metadata && currentUser.user_metadata.avatar_url}
-					<img
-						src={currentUser.user_metadata.avatar_url}
-						alt="Profile Picture"
-						class="profile-picture"
-					/>
-				{:else}
-					<span class="placeholder-icon">👤</span>
-				{/if}
-			</a>
+		<div class="nav-links">
+			<Search placeholder="Search for a movie or person..." />
+			<div class="profile-container">
+				<a href="/profile">
+					{#if currentUser.user_metadata && currentUser.user_metadata.avatar_url}
+						<img
+							src={currentUser.user_metadata.avatar_url}
+							alt="Profile Picture"
+							class="profile-picture"
+						/>
+					{:else}
+						<span class="placeholder-icon">👤</span>
+					{/if}
+				</a>
+			</div>
 		</div>
 	{:else}
 		<a href="/register" class="signup-link">Register</a>
@@ -152,6 +156,25 @@
 
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Shadows+Into+Light&display=swap');
+
+	.nav-links {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+
+	@media (max-width: 1024px) {
+		.nav-links {
+			flex-direction: column;
+			align-items: flex-start;
+			width: 100%;
+		}
+
+		.search-container {
+			width: 100%;
+			margin-top: 1rem;
+		}
+	}
 
 	.navbar-container {
 		display: flex;

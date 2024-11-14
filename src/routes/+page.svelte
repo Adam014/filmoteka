@@ -12,11 +12,11 @@
 	export let currentPage = data?.currentPage;
 	let totalPages = Math.ceil(data.count / 60);
 	let inputPage = '';
-	let searchQuery = '';
-	let isSearchPopupOpen = false; // Controls the visibility of the search popup
-	let isFadingOut = false; // Flag for fade-out animation
+	// let searchQuery = '';
+	// let isSearchPopupOpen = false; // Controls the visibility of the search popup
+	// let isFadingOut = false; // Flag for fade-out animation
 	let topPopularMovies = [];
-	let preventClose = false; // Flag to prevent immediate closing
+	// let preventClose = false; // Flag to prevent immediate closing
 
 	function setMovieResults(movies) {
 		movieResults = movies;
@@ -116,7 +116,7 @@
 </svelte:head>
 
 <section class="container">
-	<div class="search-input-container">
+	<!-- <div class="search-input-container">
 		<div class="input-wrapper">
 			<input
 				type="text"
@@ -164,7 +164,7 @@
 				</ul>
 			</div>
 		</div>
-	{/if}
+	{/if} -->
 
 	{#if movieResults.length > 0}
 		<PopularMovies movies={movieResults} />
