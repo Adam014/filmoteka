@@ -147,6 +147,14 @@
 				{:else if suggestions.length > 0}
 					<ul class="suggestions">
 						{#each suggestions as suggestion}
+						<a
+								href={`/${suggestion.type}/${suggestion.id}`}
+								on:click={(e) => {
+									e.preventDefault();
+									goto(`/${suggestion.type}/${suggestion.id}`);
+									closeSearchPopup();
+								}}
+							>
 							<li>
 								<img
 									src={'https://image.tmdb.org/t/p/w500' + (suggestion.poster_path || '/placeholder.jpg')}
@@ -161,8 +169,8 @@
 									}}
 								>
 									{suggestion.name || 'No Name'} ({suggestion.type === 'movie' ? 'Movie' : 'Person'})
-								</a>
-							</li>
+								</li>
+							</a>
 						{/each}
 					</ul>
 				{:else}
