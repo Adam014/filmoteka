@@ -1,9 +1,9 @@
 <script>
 	import { goto } from '$app/navigation';
-	import { loadMovies } from '../lib/utils.js';
+	import { loadMovies } from '../lib/utils';
 	import { supabase } from '../lib/db/supabaseClient.js';
 	import { onDestroy, onMount } from 'svelte';
-	import { user } from '../stores/user.js';
+	import { user } from '../stores/user';
 	import logo from '../lib/assets/Filmoteka_logo.svg';
 	import Search from "./Search.svelte";
 
@@ -63,6 +63,8 @@
 		if (typeof document !== 'undefined') {
 			document.addEventListener('click', closeMenuOnOutsideClick);
 		}
+
+		return () => unsubscribe();
 	});
 
 	onDestroy(() => {
