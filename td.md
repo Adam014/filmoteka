@@ -1,3 +1,4 @@
+TODO: Need to somehow get who is the admin and then have different layouts rendered based on the role etc
 TODO: Limit pagination when user isnt logged in to 3 pages and disable t;he ability to search, he can view only the movies that are in in the 3 pages, block navigation when user tries to view some movie that isnt in the first 3 pages
 TODO: Fix the media queries for navbar + fix the search the a tag, it sucks
 TODO: Edit Suggestions to put the movies with the typed letters instead of top 5 of the current page

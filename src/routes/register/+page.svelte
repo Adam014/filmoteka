@@ -64,7 +64,7 @@
 
 			if (error) {
 				errorMessage = error.message;
-				alert.error(error.message);
+				toast.error(error.message);
 			} else {
 				goto('/login');
 				toast.success('Registration successful! Please check your email to confirm your account.', {
