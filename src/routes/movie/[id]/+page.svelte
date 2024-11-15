@@ -252,7 +252,7 @@
 
 		<!-- In the bottom, top similar movies in cards, api reference /similar -->
 	</div>
-	{#if similarMovies}
+	{#if similarMovies != null}
 		<h2 class="similar-movies-title">Another movies you might like</h2>
 		<div class="similar-movies">
 			{#each similarMovies as movie}
