@@ -208,8 +208,9 @@
 		background-color: #1a1a1a;
 		padding: 20px;
 		border-radius: 8px;
-		box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-		width: 100%;
+		/* box-shadow: 0 0 15px rgba(0, 0, 0, 0.5); */
+		width: 90%;
+		height: 70%;
 		max-width: 600px;
 		text-align: center;
 	}
