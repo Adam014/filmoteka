@@ -4,9 +4,10 @@
 	import ShortcutKey from '../components/ShortcutKey.svelte';
 	import { onMount } from 'svelte';
 	import lodash from 'lodash';
+	import { handleSearch } from '../lib/utils'; // Import the handleSearch function
 	
 	const { debounce } = lodash;
-	
+
 	let searchQuery = '';
 	let suggestions = [];
 	let isSearchPopupOpen = false;
@@ -105,6 +106,9 @@
 			openSearchPopup();
 		} else if (event.key === 'Escape' && isSearchPopupOpen) {
 			closeSearchPopup();
+		} else if (event.key === 'Enter' && !suggestions.length) {
+			// If no suggestions, trigger handleSearch
+			handleSearch(searchQuery, closeSearchPopup);
 		}
 	}
 
@@ -147,7 +151,7 @@
 				{:else if suggestions.length > 0}
 					<ul class="suggestions">
 						{#each suggestions as suggestion}
-						<a
+							<a
 								href={`/${suggestion.type}/${suggestion.id}`}
 								on:click={(e) => {
 									e.preventDefault();
@@ -155,26 +159,18 @@
 									closeSearchPopup();
 								}}
 							>
-							<li>
-								<img
-									src={'https://image.tmdb.org/t/p/w500' + (suggestion.poster_path || '/placeholder.jpg')}
-									alt={suggestion.name || 'Unknown'}
-								/>
-								<a
-									href={`/${suggestion.type}/${suggestion.id}`}
-									on:click={(e) => {
-										e.preventDefault();
-										goto(`/${suggestion.type}/${suggestion.id}`);
-										closeSearchPopup();
-									}}
-								>
+								<li>
+									<img
+										src={'https://image.tmdb.org/t/p/w500' + (suggestion.poster_path || '/placeholder.jpg')}
+										alt={suggestion.name || 'Unknown'}
+									/>
 									{suggestion.name || 'No Name'} ({suggestion.type === 'movie' ? 'Movie' : 'Person'})
 								</li>
 							</a>
 						{/each}
 					</ul>
 				{:else}
-					<p>No results found.</p>
+					<p>No results found. Press Enter to search globally.</p>
 				{/if}
 			</div>
 		</div>

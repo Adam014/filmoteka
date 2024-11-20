@@ -29,7 +29,7 @@
 	const topActors = cast
 		.filter((actor) => actor.known_for_department === 'Acting')
 		.sort((a, b) => b.popularity - a.popularity)
-		.slice(0, 6);
+		.slice(0, 20);
 
 	const directors = crew.filter(
 		(director) => director.job === 'Director' 
