@@ -17,7 +17,16 @@
 	<Navbar {session} />
 {/if}
 
-<main>
+<main class="main-content">
 	<Toaster position="bottom-right" />
 	<slot />
 </main>
+
+<style>
+	@media (max-width: 768px) {
+		.main-content{
+			padding-top: 60px;
+		}
+	}
+
+</style>
