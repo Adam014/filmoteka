@@ -20,4 +20,10 @@
 		border: 1px solid #444;
 		pointer-events: none;
 	}
+
+	@media (max-width: 768px) {
+		.shortcut-key{
+			display: none;
+		}
+	}
 </style>

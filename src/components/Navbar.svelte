@@ -95,8 +95,10 @@
 	</div>
 
 	{#if currentUser}
-		<div class="nav-links">
+		<div class="search-container">
 			<Search placeholder="Search for a movie or person..." />
+		</div>
+		<div class="nav-links">
 			<div class="profile-container">
 				<a href="/profile">
 					{#if currentUser.user_metadata && currentUser.user_metadata.avatar_url}
@@ -165,7 +167,7 @@
 		gap: 1rem;
 	}
 
-	@media (max-width: 1024px) {
+	@media (max-width: 768px) {
 		.nav-links {
 			flex-direction: column;
 			align-items: flex-start;
@@ -173,8 +175,10 @@
 		}
 
 		.search-container {
-			width: 100%;
-			margin-top: 1rem;
+			position: absolute;
+			top: 11%;
+			left: 29%;
+			width: 44%
 		}
 	}
 
