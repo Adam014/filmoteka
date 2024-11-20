@@ -210,9 +210,10 @@
 		border-radius: 8px;
 		/* box-shadow: 0 0 15px rgba(0, 0, 0, 0.5); */
 		width: 90%;
-		height: 70%;
 		max-width: 600px;
 		text-align: center;
+		position: absolute;
+		top: 15%;
 	}
 
 	.search-popup-input {
