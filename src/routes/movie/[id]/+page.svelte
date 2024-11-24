@@ -10,62 +10,87 @@
 
 	export let data;
 
-	// TODO: Need to add reactivity to each variable
-
 	let currentUser;
+	let movieDetails = {};
+	let movieVideos = [];
+	let similarMovies = [];
+	let cast = [];
+	let crew = [];
+	let topActors = [];
+	let directors = [];
+	let isFavorite = false;
+	let finalTrailer = null;
+	let isLoading = true;
+
+	// Initialize variables with default values
+	let id = 'N/A';
+	let original_title = 'N/A';
+	let original_language = 'N/A';
+	let status = 'N/A';
+	let release_date = 'N/A';
+	let tagline = '';
+	let revenue = 0;
+	let genres = [];
+	let budget = 0;
+	let adult = false;
+	let imdb_id = 'N/A';
+	let overview = 'No overview available.';
+	let production_companies = [];
+	let production_countries = [];
+	let homepage = '';
+	let poster_path = '';
+	let popularity = 0;
+
 	const unsubscribe = user.subscribe((value) => {
 		currentUser = value;
 	});
 
-	const movieDetails = data?.details || {};
-	const movieVideos = data?.videos?.results || [];
+	// Reactively update variables when `data` changes
+	$: if (data) {
+		movieDetails = data.details || {};
+		movieVideos = data.videos?.results || [];
+		similarMovies = data.similar_movies?.results || [];
+		cast = data.credits?.cast || [];
+		crew = data.credits?.crew || [];
 
-	const similarMovies = data?.similar_movies?.results
+		// Update top actors and directors
+		topActors = cast
+			.filter((actor) => actor.known_for_department === 'Acting')
+			.sort((a, b) => b.popularity - a.popularity)
+			.slice(0, 20);
 
-	// Destructure data
-	const cast = data?.credits?.cast || [];
-	const crew = data?.credits?.crew || [];
+		directors = crew.filter((director) => director.job === 'Director');
 
-	const topActors = cast
-		.filter((actor) => actor.known_for_department === 'Acting')
-		.sort((a, b) => b.popularity - a.popularity)
-		.slice(0, 20);
+		// Update destructured variables
+		id = movieDetails.id || 'N/A';
+		original_title = movieDetails.original_title || 'N/A';
+		original_language = movieDetails.original_language || 'N/A';
+		status = movieDetails.status || 'N/A';
+		release_date = movieDetails.release_date || 'N/A';
+		tagline = movieDetails.tagline || '';
+		revenue = movieDetails.revenue || 0;
+		genres = movieDetails.genres || [];
+		budget = movieDetails.budget || 0;
+		adult = movieDetails.adult || false;
+		imdb_id = movieDetails.imdb_id || 'N/A';
+		overview = movieDetails.overview || 'No overview available.';
+		production_companies = movieDetails.production_companies || [];
+		production_countries = movieDetails.production_countries || [];
+		homepage = movieDetails.homepage || '';
+		poster_path = movieDetails.poster_path || '';
+		popularity = movieDetails.popularity || 0;
 
-	const directors = crew.filter(
-		(director) => director.job === 'Director' 
-	);
+		// Fetch the best available video and check if the movie is a favorite
+		fetchBestAvailableVideo();
+		checkIfFavorite();
+	}
 
-	const {
-		id = 'N/A',
-		original_title = 'N/A',
-		original_language = 'N/A',
-		status = 'N/A',
-		release_date = 'N/A',
-		tagline = '',
-		revenue = 0,
-		genres = [],
-		budget = 0,
-		adult = false,
-		imdb_id = 'N/A',
-		overview = 'No overview available.',
-		production_companies = [],
-		production_countries = [],
-		homepage = '',
-		poster_path = '',
-		popularity = 0
-	} = movieDetails;
-
-	let finalTrailer = null;
-	let isLoading = true;
-	let isFavorite = false;
-
-	// Function to get the best available video
 	async function fetchBestAvailableVideo() {
+		isLoading = true;
 		finalTrailer = await getBestAvailableVideoWithCheck(movieVideos);
 		isLoading = false;
 	}
 
-	// Check if the movie is already in favorites
 	async function checkIfFavorite() {
 		if (currentUser) {
 			const { data, error } = await supabase.storage
@@ -76,19 +101,16 @@
 		}
 	}
 
-	// Toggle favorite status with structured data from the "films" table
 	async function toggleFavorite() {
 		const path = `${currentUser.email}/${movieDetails.id}.json`;
 
 		try {
 			if (isFavorite) {
-				// Remove from favorites
 				const { error } = await supabase.storage.from('favorites').remove([path]);
 				if (error) throw error;
 				isFavorite = false;
 				toast.success(`${movieDetails.original_title} removed from favorites.`);
 			} else {
-				// Fetch the movie data from the "films" table
 				const { data: filmData, error: fetchError } = await supabase
 					.from('films')
 					.select('*')
@@ -97,13 +119,11 @@
 
 				if (fetchError) throw fetchError;
 
-				// Prepare the object with "id" and "data" format
 				const favoriteData = {
 					id: movieDetails.id,
 					data: filmData
 				};
 
-				// Add to favorites with JSON format using structured data from "films" table
 				const { error: uploadError } = await supabase.storage
 					.from('favorites')
 					.upload(path, JSON.stringify(favoriteData), {
@@ -121,7 +141,6 @@
 		}
 	}
 
-	// Format the budget and revenue
 	const formattedBudget = formatCurrency(budget);
 	const formattedRevenue = formatCurrency(revenue);
 

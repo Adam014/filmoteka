@@ -1,12 +1,5 @@
-Search
-    TODO: When nothing gets found in the search, we need to use the handleSearch function
-    
 movie/id
-    TODO: Fix when we redirect on movie from search, than redirect again on anything from search the page doesnt rerender, the /movie/id must be reactive
     TODO: Add more details to MovieCard = reviews
-
-Navbar
-    TODO: Fix the media queries for navbar
 
 /root
     TODO: Need to somehow get who is the admin and then have different layouts rendered based on the role etc
