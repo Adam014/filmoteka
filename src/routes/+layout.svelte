@@ -6,10 +6,9 @@
 	import toast from 'svelte-french-toast';
 	import { onMount } from 'svelte';
 
-	toast.err
-
 	if (process.env.NODE_ENV === 'production') {
 		inject();
+		console.warn = () => {};
 	}
 
 	// Access the data returned from the server load function

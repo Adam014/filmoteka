@@ -3,7 +3,7 @@
 
 	export let data;
 
-	const person = data.person;
+	const person = data?.person;
 
 	// Format the date to be more readable
 	const formatDate = (date) =>
@@ -12,7 +12,7 @@
 		);
 
 	// Filter out duplicate movies based on unique `media.id`
-	const uniqueMovies = person.movies.results.filter(
+	const uniqueMovies = person?.movies.results.filter(
 		(movie, index, self) => index === self.findIndex((m) => m.media?.id === movie.media?.id)
 	);
 </script>
@@ -70,7 +70,7 @@
 		</div>
 	</div>
 	<p class="person-biography">{person?.biography || 'No biography available.'}</p>
-	{#if person.movies.results.lenght != null}
+	{#if person?.movies.results.lenght != null}
 		<h1 class="person-movies-title">Movies</h1>
 	{/if}
 	<div class="person-movies">

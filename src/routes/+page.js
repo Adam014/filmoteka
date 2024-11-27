@@ -10,10 +10,14 @@ export async function load({ fetch, url }) {
 			.from('films')
 			.select('*', { count: 'exact', head: true });
 
-		if (countError) {
-			console.error('Error fetching total movies count:', countError.message);
-			throw new Error('Failed to fetch movies count');
-		}
+			if (countError || count === 0) {
+				console.warn('Count query failed or returned zero. Falling back to estimate.');
+				return {
+					data: { results: films },
+					count: 0,
+					currentPage: page,
+				};
+			}
 
 		let films = await getAllMovies(page);
 
@@ -62,7 +66,12 @@ export async function load({ fetch, url }) {
 				currentPage: page
 			};
 		} else {
-			throw new Error('Failed to load data from TMDB');
+			return {
+				data: { results: [] },
+				count,
+				currentPage: page,
+				error: 'No results for this page.',
+			};
 		}
 	} catch (error) {
 		console.error('Error during data fetching process:', error);
