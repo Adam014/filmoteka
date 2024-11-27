@@ -3,6 +3,9 @@
 	import { Toaster } from 'svelte-french-toast';
 	import Navbar from '../components/Navbar.svelte';
 	import { page } from '$app/stores';
+	import toast from 'svelte-french-toast';
+
+	toast.err
 
 	if (process.env.NODE_ENV === 'production') {
 		inject();
@@ -11,6 +14,13 @@
 	// Access the data returned from the server load function
 	export let data;
 	const { session } = data;
+
+	toast(
+		"We’re experiencing higher-than-usual traffic! 🚀 Some features might be slower or temporarily unavailable. Thank you for your patience as we work to get everything running smoothly. 🙏",
+		{
+			duration: 10000
+		}
+	);
 </script>
 
 {#if !$page.url.pathname.startsWith('/register') && !$page.url.pathname.startsWith('/login')}
