@@ -1,40 +1,14 @@
-# Just a simple movieDB web, if you don't know what to watch, this is the page!
+movie/id
+    TODO: Add more details to MovieCard = reviews
 
-# create-svelte
+/root
+    TODO: Need to somehow get who is the admin and then have different layouts rendered based on the role etc
+    TODO: Limit pagination when user isnt logged in to 3 pages and disable t;he ability to search, he can view only the movies that are in in the 3 pages, block navigation when user tries to view some movie that isnt in the first 3 pages
+    TODO: Add categories to /
+    TODO: Add with other api endpoint to store a lot more movies than few thousand
+    TODO: Create a skeleton for the library route
+    TODO: Move library to /library and make proper homepage, with top 5 movies something like that and etc, recent reviews 
+        TODO: Add release and features somewhere to let the user know what is new in what version
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
-
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
-
-```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+/profile
+    TODO: Add personalized movies you might like, based on favorite movies

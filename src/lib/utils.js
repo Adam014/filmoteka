@@ -108,88 +108,66 @@ function selectBestMatch(movies, searchQuery) {
 	}
 }
 
-async function isVideoAgeRestricted(videoId) {
-	const url = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${videoId}&key=${API_KEY}`;
-	try {
-		const response = await fetch(url);
-		const data = await response.json();
-		if (data.items && data.items.length > 0) {
-			const contentRating = data.items[0].contentDetails.contentRating;
-			return contentRating?.ytRating === 'ytAgeRestricted';
+async function getVideoDetailsBatch(videoIds) {
+    if (!videoIds || videoIds.length === 0) return [];
+    const ids = videoIds.join(',');
+    const url = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,status,statistics&id=${ids}&key=${API_KEY}`;
+    try {
+        const response = await fetch(url);
+		if (response.status === 403){
+			toast.error("The quota has been reached, try again later.")
+			return [];
 		}
-		return false;
-	} catch (error) {
-		console.error('Error checking video age restriction:', error);
-		return false;
-	}
-}
-
-async function isVideoAvailable(videoId) {
-	const url = `https://www.googleapis.com/youtube/v3/videos?part=status&id=${videoId}&key=${API_KEY}`;
-	try {
-		const response = await fetch(url);
-		const data = await response.json();
-		if (data.items && data.items.length > 0) {
-			const { embeddable, uploadStatus } = data.items[0].status;
-			return embeddable && uploadStatus === 'processed';
-		}
-		return false;
-	} catch (error) {
-		console.error('Error checking video availability:', error);
-		return false;
-	}
-}
-
-async function getVideoDetails(videoId) {
-	const url = `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${videoId}&key=${API_KEY}`;
-	try {
-		const response = await fetch(url);
-		const data = await response.json();
-		if (data.items && data.items.length > 0) {
-			return data.items[0].statistics;
-		}
-		return null;
-	} catch (error) {
-		console.error('Error fetching video details:', error);
-		return null;
-	}
+        if (!response.ok) {
+            console.error(`Error fetching video details: ${response.status} - ${response.statusText}`);
+            return [];
+        } 
+        const data = await response.json();
+        return data.items || [];
+    } catch (error) {
+        console.error('Error fetching video details:', error);
+        return [];
+    }
 }
 
 /**
- * Optimized function to find the best available video by making concurrent requests.
+ * Optimized function to find the best available video by making a single batch request.
  * @param {Array} videoList - List of video objects.
  * @returns {Promise<object|null>} - The best available video based on views, availability, and age restriction.
  */
 export async function getBestAvailableVideoWithCheck(videoList) {
-	const prioritizedTypes = ['Trailer', 'Teaser', 'Clip'];
+    const prioritizedTypes = ['Trailer', 'Teaser', 'Clip'];
 
-	// Filter videos by prioritized types
-	const filteredVideos = videoList.filter(
-		(video) =>
-			prioritizedTypes.includes(video.type) && !video.name.toLowerCase().includes('restricted')
-	);
+    // Filter videos by prioritized types
+    const filteredVideos = videoList.filter(
+        (video) =>
+            prioritizedTypes.includes(video.type) && !video.name.toLowerCase().includes('restricted')
+    );
 
-	// Map through videos and get promises for availability, age restriction, and view count
-	const videoChecks = filteredVideos.map(async (video) => {
-		const [isRestricted, isAvailable, videoDetails] = await Promise.all([
-			isVideoAgeRestricted(video.key),
-			isVideoAvailable(video.key),
-			getVideoDetails(video.key)
-		]);
+    // Extract video keys (IDs) for the batch request
+    const videoIds = filteredVideos.map((video) => video.key);
+    const videoDetails = await getVideoDetailsBatch(videoIds);
 
-		if (!isRestricted && isAvailable && videoDetails) {
-			return { ...video, views: parseInt(videoDetails.viewCount, 10) };
-		}
-		return null;
-	});
+    // Process the fetched details and filter valid videos
+    const validVideos = videoDetails
+        .map((details) => {
+            const video = filteredVideos.find((v) => v.key === details.id);
+            const isRestricted = details.contentDetails.contentRating?.ytRating === 'ytAgeRestricted';
+            const isAvailable =
+                details.status.embeddable && details.status.uploadStatus === 'processed';
+            const views = parseInt(details.statistics.viewCount || '0', 10);
 
-	// Wait for all checks to complete
-	const validVideos = (await Promise.all(videoChecks)).filter((video) => video !== null);
+            if (video && !isRestricted && isAvailable) {
+                return { ...video, views };
+            }
+            return null;
+        })
+        .filter(Boolean);
 
-	// Sort videos by view count in descending order
-	validVideos.sort((a, b) => b.views - a.views);
+    // Sort videos by view count in descending order
+    validVideos.sort((a, b) => b.views - a.views);
 
-	return validVideos.length > 0 ? validVideos[0] : null;
+    return validVideos.length > 0 ? validVideos[0] : null;
 }
 
 /**
