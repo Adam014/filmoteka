@@ -3,7 +3,7 @@
 
 	export let data;
 
-	const person = data.person;
+	$: person = data.person;
 
 	// Format the date to be more readable
 	const formatDate = (date) =>
@@ -12,7 +12,7 @@
 		);
 
 	// Filter out duplicate movies based on unique `media.id`
-	const uniqueMovies = person.movies.results.filter(
+	$: uniqueMovies = person.movies.results.filter(
 		(movie, index, self) => index === self.findIndex((m) => m.media?.id === movie.media?.id)
 	);
 </script>
