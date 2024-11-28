@@ -1,5 +1,8 @@
 movie/id
     TODO: Add more details to MovieCard = reviews
+    TODO: Add recommendations
+    TODO: Add Watch providers, where you can watch the movies
+    TODO: Add release dates https://api.themoviedb.org/3/movie/{movie_id}/release_dates
 
 /root
     TODO: Need to somehow get who is the admin and then have different layouts rendered based on the role etc
@@ -11,4 +14,4 @@ movie/id
         TODO: Add release and features somewhere to let the user know what is new in what version
 
 /profile
-    TODO: Add personalized movies you might like, based on favorite movies
+    TODO: Add personalized movies you might like, based on favorite movies (probably with AI picking the personalized movies)
