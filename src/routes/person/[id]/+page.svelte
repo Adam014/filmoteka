@@ -3,7 +3,7 @@
 
 	export let data;
 
-	const person = data?.person;
+	$: person = data?.person;
 
 	// Format the date to be more readable
 	$: formatDate = (date) =>
