@@ -3,18 +3,18 @@
 
 	export let data;
 
-	const person = data?.person;
+	$: person = data?.person;
 
 	// Format the date to be more readable
-	const formatDate = (date) =>
+	$: formatDate = (date) =>
 		new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(
 			new Date(date)
 		);
 
 	// Filter out duplicate movies based on unique `media.id`
-	const uniqueMovies = person?.movies.results.filter(
-		(movie, index, self) => index === self.findIndex((m) => m.media?.id === movie.media?.id)
-	);
+	$: uniqueMovies = person?.movies.results.filter(
+		(movie, index, self) => index === self.findIndex((m) => m.media?.id === movie.media?.id))
+
 </script>
 
 <svelte:head>

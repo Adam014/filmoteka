@@ -16,41 +16,34 @@
 
 	// Fetch movies and people based on user input or show random results
 	async function fetchSuggestions(query = '') {
-		isLoading = true;
+	isLoading = true;
 
-		let movieQuery = supabase
-			.from('films')
-			.select('id, title, poster_path, popularity');
-
-		let peopleQuery = supabase
-			.from('person_detailed')
-			.select('id, name, profile_path, popularity');
+	try {
+		let movieQuery = supabase.from('films').select('id, title, poster_path, popularity');
+		let peopleQuery = supabase.from('person_detailed').select('id, name, profile_path, popularity');
 
 		if (query) {
 			// Apply search filter when the user types
-			movieQuery = movieQuery.ilike('title', `%${query}%`).order('popularity', { ascending: false }).limit(5);
-			peopleQuery = peopleQuery.ilike('name', `%${query}%`).order('popularity', { ascending: false }).limit(5);
-		} else {
-			// Fetch random results when the query is empty
-			movieQuery = movieQuery.order('popularity', { ascending: false }).limit(5);
-			peopleQuery = peopleQuery.order('popularity', { ascending: false }).limit(5);
+			movieQuery = movieQuery.ilike('title', `%${query}%`);
+			peopleQuery = peopleQuery.ilike('name', `%${query}%`);
 		}
 
 		const [movies, people] = await Promise.all([movieQuery, peopleQuery]);
 
-		if (movies.error) {
-			console.error('Error fetching movies:', movies.error.message);
-		}
-
-		if (people.error) {
-			console.error('Error fetching people:', people.error.message);
+		if (movies.error || people.error) {
+			console.error(
+				'Error fetching data:',
+				movies.error?.message || '',
+				people.error?.message || ''
+			);
+			return;
 		}
 
 		const moviesData = movies.data || [];
 		const peopleData = people.data || [];
 
-		// Combine results
-		suggestions = [
+		// Combine all results
+		const combinedResults = [
 			...moviesData.map((movie) => ({
 				type: 'movie',
 				id: movie.id,
@@ -65,12 +58,17 @@
 				poster_path: person.profile_path,
 				popularity: person.popularity,
 			})),
-		]
-			.sort(() => Math.random() - 0.5) // Shuffle results
-			.slice(0, 5); // Limit to 5 items
+		];
 
+		// Shuffle the combined results and select 5 random items
+		suggestions = lodash.shuffle(combinedResults).slice(0, 5);
+	} catch (error) {
+		console.error('Error fetching suggestions:', error.message);
+	} finally {
 		isLoading = false;
 	}
+}
+
 
 	// Debounced search
 	const debouncedFetch = debounce((query) => fetchSuggestions(query), 300);
@@ -160,10 +158,17 @@
 								}}
 							>
 								<li>
-									<img
-										src={'https://image.tmdb.org/t/p/w500' + (suggestion.poster_path || '/placeholder.jpg')}
-										alt={suggestion.name || 'Unknown'}
-									/>
+									{#if suggestion.poster_path}
+										<img
+											src={'https://image.tmdb.org/t/p/w500' + suggestion.poster_path}
+											alt={suggestion.name || 'Unknown'}
+											class="suggestion-image"
+										/>
+									{:else}
+										<div class="placeholder-image">
+											<span>{suggestion.name ? suggestion.name.charAt(0) : '?'}</span>
+										</div>
+									{/if}
 									{suggestion.name || 'No Name'} ({suggestion.type === 'movie' ? 'Movie' : 'Person'})
 								</li>
 							</a>
@@ -189,6 +194,20 @@
 		border-radius: 4px;
 		background-color: #222;
 		color: #fff;
+	}
+
+	
+	.placeholder-image {
+		width: 60px;
+		height: 90px;
+		background-color: #333; 
+		color: #fff; 
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		border-radius: 4px;
+		font-size: 24px; 
+		font-weight: bold;
 	}
 
 	.search-popup {
