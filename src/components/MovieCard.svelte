@@ -91,26 +91,66 @@
 <div class="movie-card">
 	{#if showNotAvailable && !isMovieType}
 		<!-- Render the overlay when showNotAvailable is true and the type isn't "movie" -->
-		<img
-			src={`https://image.tmdb.org/t/p/w500${movie?.poster_path || movie?.file_path}`}
-			alt={movie?.title || movie?.media?.title}
-		/>
+		{#if movie?.poster_path || movie?.file_path}
+			<img
+				src={`https://image.tmdb.org/t/p/w500${movie?.poster_path || movie?.file_path}`}
+				alt={movie?.title || movie?.media?.title}
+				class="movie-image"
+			/>
+		{:else}
+			<div class="placeholder-image">
+				<span class="">{movie?.title || movie?.media?.title || 'Unknown'}</span>
+			</div>
+		{/if}
 		<div class="not-available-overlay">Not Available on Filmoteka</div>
 	{:else}
 		<!-- Render the link and favorite icon normally if type is "movie" or showNotAvailable is false -->
 		<a href={`/movie/${movieId}`}>
-			<img
-				src={`https://image.tmdb.org/t/p/w500${movie?.poster_path || movie?.file_path}`}
-				alt={movie?.title || movie?.media?.title}
-			/>
+			{#if movie?.poster_path || movie?.file_path}
+				<img
+					src={`https://image.tmdb.org/t/p/w500${movie?.poster_path || movie?.file_path}`}
+					alt={movie?.title || movie?.media?.title}
+					class="movie-image"
+				/>
+			{:else}
+				<div class="placeholder-image">
+					<span class=""><p>{movie?.title || movie?.media?.title || 'Unknown'}</p></span>
+				</div>
+			{/if}
 		</a>
-		<div class="favorite-icon" on:click={toggleFavorite} class:isFavorite>
+		<div
+			class="favorite-icon"
+			on:click={toggleFavorite}
+			class:isFavorite={isFavorite}
+		>
 			{isFavorite ? '★' : '☆'}
 		</div>
 	{/if}
 </div>
 
 <style>
+	span p{
+		font-size: 20px;
+		text-align: center;
+	}
+
+	.movie-card a{
+		text-decoration: none
+	}
+
+	.placeholder-image {
+		width: 100%;
+		height: 100%;
+		background-color: #444; /* Fallback background color */
+		color: #fff;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		font-size: 36px;
+		font-weight: bold;
+		border-radius: 8px;
+	}
+
 	.movie-card {
 		display: block;
 		position: relative;
