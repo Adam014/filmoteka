@@ -12,11 +12,8 @@
 		);
 
 	// Filter out duplicate movies based on unique `media.id`
-	$: uniqueMovies = person.movies.results.filter(
+	$: uniqueMovies = person?.movies.results.filter(
 		(movie, index, self) => index === self.findIndex((m) => m.media?.id === movie.media?.id)
-	);
-</script>
-
 <svelte:head>
 	<title>{person?.name} | Filmoteka</title>
 </svelte:head>
@@ -70,7 +67,7 @@
 		</div>
 	</div>
 	<p class="person-biography">{person?.biography || 'No biography available.'}</p>
-	{#if person.movies.results.lenght != null}
+	{#if person?.movies.results.lenght != null}
 		<h1 class="person-movies-title">Movies</h1>
 	{/if}
 	<div class="person-movies">

@@ -115,7 +115,7 @@ async function getVideoDetailsBatch(videoIds) {
     try {
         const response = await fetch(url);
 		if (response.status === 403){
-			toast.error("The quota has been reached, try again later.")
+			toast.error("The API quota for the youtube trailers has been reached, try again later.")
 			return [];
 		}
         if (!response.ok) {
