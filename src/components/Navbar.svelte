@@ -118,12 +118,20 @@
 
 	<div class="nav-menu" style="transform: translateX({menuOpen ? '0%' : '-100%'});">
 		{#if currentUser}
-			<div class="nav-menu-items">
-				<a href="/" on:click={closeMenu}>Library</a>
-				<hr />
-				<a href="/profile" on:click={closeMenu}>Profile</a>
-				<hr />
-				<a href="/random" on:click={closeMenu}>Random-Movie</a>
+			<div class="nav-items">
+				<div class="left-nav-menu-items">
+					<h2>Games</h2>
+					<a href="/games/daily" on:click={closeMenu}>Daily Challenge</a>
+					<hr />
+				</div>
+				<div class="center-nav-menu-items">
+					<h2>Filmoteka</h2>
+					<a href="/" on:click={closeMenu}>Library</a>
+					<hr />
+					<a href="/profile" on:click={closeMenu}>Profile</a>
+					<hr />
+					<a href="/random" on:click={closeMenu}>Random-Movie</a>
+				</div>
 			</div>
 			<div class="logout-container">
 				<div class="profile-logout-container">
@@ -150,8 +158,13 @@
 				</button>
 			</div>
 		{:else}
-			<a href="/login">Login</a>
-			<a href="/register">Register</a>
+		<div class="nav-items">			
+			<div class="left-nav-menu-items">
+					<h2>User Actions</h2>
+					<a href="/login">Login</a>or
+					<a href="/register">Register</a>
+				</div>	
+			</div>
 		{/if}
 	</div>
 </nav>
@@ -159,13 +172,36 @@
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Shadows+Into+Light&display=swap');
 
+	.nav-items{
+		display: flex;
+		width: 100%;
+		position: absolute;
+		top: 20%;
+	}
+
+	.nav-items div{
+		padding-left: 100px;
+	}
+
 	.nav-links {
 		display: flex;
 		align-items: center;
 		gap: 1rem;
 	}
 
+	@media (max-width: 965px) {
+		.nav-items{
+			display: grid;
+			justify-content: center;
+		}
+		.nav-items div{
+			padding-left: 0px;
+			padding-bottom: 50px;
+		}
+	}
+
 	@media (max-width: 768px) {
+
 		.nav-links {
 			flex-direction: column;
 			align-items: flex-start;
@@ -174,8 +210,8 @@
 
 		.search-container {
 			position: absolute;
-			top: 12%;
-			width: 100%
+			top: 15%;
+			width: 95%;
 		}
 	}
 
@@ -247,7 +283,6 @@
 		box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
 		display: flex;
 		flex-direction: column;
-		align-items: center;
 		justify-content: center;
 		transition: transform 0.3s ease-in-out;
 		z-index: 998;
@@ -358,7 +393,7 @@
 	.placeholder-icon {
 		font-size: 2rem;
 	}
-
+	
 	@media (max-width: 768px) {
 		.logo {
 			width: 150px;

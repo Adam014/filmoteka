@@ -1,7 +1,6 @@
 import { supabase } from '../../../lib/db/supabaseClient';
-import { TMDB_API_KEY } from '../../../lib/utils';
 
-export async function load({ fetch, params }) {
+export async function load({ params }) {
 	try {
 		const personId = params.id;
 
@@ -12,66 +11,17 @@ export async function load({ fetch, params }) {
 			.eq('id', personId)
 			.single();
 
+		if(fetchError){
+			console.log(fetchError)
+			return;
+		}
+
 		// If the person exists in the database, return it
 		if (existingPerson) {
 			return {
 				person: existingPerson
 			};
 		}
-
-		// Proceed to fetch the person from the TMDB API
-		const personUrl = `https://api.themoviedb.org/3/person/${personId}?api_key=${TMDB_API_KEY}&language=en-US`;
-		const personMoviesUrl = `https://api.themoviedb.org/3/person/${personId}/tagged_images?api_key=${TMDB_API_KEY}&language=en-US`;
-		const personImagesUrl = `https://api.themoviedb.org/3/person/${personId}/images?api_key=${TMDB_API_KEY}&language=en-US`;
-
-		const [personDataResponse, personMoviesResponse, personImagesResponse] = await Promise.all([
-			fetch(personUrl),
-			fetch(personMoviesUrl),
-			fetch(personImagesUrl)
-		]);
-
-		// Check for API response errors
-		if (!personDataResponse.ok || !personMoviesResponse.ok || !personImagesResponse.ok) {
-			throw new Error('Failed to fetch person data from TMDB');
-		}
-
-		const personData = await personDataResponse.json();
-		const personMovies = await personMoviesResponse.json();
-		const personImages = await personImagesResponse.json();
-
-		// Prepare the data for insertion
-		const personDetailedData = {
-			id: personData.id,
-			also_known_as: personData.also_known_as,
-			biography: personData.biography,
-			birthday: personData.birthday,
-			deathday: personData.deathday,
-			gender: personData.gender,
-			homepage: personData.homepage,
-			imdb_id: personData.imdb_id,
-			known_for_department: personData.known_for_department,
-			name: personData.name,
-			place_of_birth: personData.place_of_birth,
-			popularity: personData.popularity,
-			profile_path: personData.profile_path,
-			created_at: new Date(),
-			movies: personMovies,
-			images: personImages
-		};
-
-		// Insert the data into the database
-		const { error: insertError } = await supabase
-			.from('person_detailed')
-			.insert([personDetailedData]);
-
-		if (insertError) {
-			console.error('Error inserting person data into Supabase:', insertError);
-		}
-
-		// Return the newly fetched and inserted person data
-		return {
-			person: personDetailedData
-		};
 	} catch (error) {
 		console.error('Error loading person data:', error);
 		return {

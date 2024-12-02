@@ -7,14 +7,20 @@
 
 	// Format the date to be more readable
 	$: formatDate = (date) =>
-		new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(
-			new Date(date)
-		);
+		date
+			? new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(
+					new Date(date)
+			  )
+			: 'N/A';
 
-	// Filter out duplicate movies based on unique `media.id`
-	$: uniqueMovies = person?.movies.results.filter(
-		(movie, index, self) => index === self.findIndex((m) => m.media?.id === movie.media?.id))
-
+	// Safely handle undefined values for person?.movies?.results
+	$: uniqueMovies = person?.movies?.results
+		? person.movies.results.filter(
+				(movie, index, self) =>
+					index === self.findIndex((m) => m.media?.id === movie.media?.id) &&
+					movie.media?.title // Ensure the movie has a valid title
+		  )
+		: [];
 </script>
 
 <svelte:head>
@@ -70,14 +76,14 @@
 		</div>
 	</div>
 	<p class="person-biography">{person?.biography || 'No biography available.'}</p>
-	{#if person?.movies.results.lenght != null}
+	{#if uniqueMovies.length > 0}
 		<h1 class="person-movies-title">Movies</h1>
+		<div class="person-movies">
+			{#each uniqueMovies as movie (movie.media?.id)}
+				<MovieCard {movie} showNotAvailable={true} />
+			{/each}
+		</div>
 	{/if}
-	<div class="person-movies">
-		{#each uniqueMovies as movie (movie.media?.id)}
-			<MovieCard {movie} showNotAvailable={true} />
-		{/each}
-	</div>
 </div>
 
 <style>

@@ -97,7 +97,7 @@
 				.from('favorites')
 				.list(currentUser.email, { search: id.toString() });
 
-			isFavorite = data && data.length > 0;
+			isFavorite = data && data?.length > 0;
 		}
 	}
 
@@ -216,14 +216,14 @@
 			{/each}
 		</div>
 
-		{#if directors.length > 1}
+		{#if directors?.length > 1}
 			<h2>Directors:</h2>
 			<div class="directors-container">
 				{#each directors as director}
 					<PersonCard person={director} />
 				{/each}
 			</div>
-		{:else if directors.length === 1}
+		{:else if directors?.length === 1}
 			<h2>Director:</h2>
 			<div class="directors-container">
 				<PersonCard person={directors[0]} />
@@ -247,7 +247,7 @@
 				{/each}
 			</ul>
 		</div>
-		{#if production_companies.length > 0}
+		{#if production_companies?.length > 0}
 			<div class="loneliness">
 				<p class="loneliness-p">production-companies</p>
 				<ul>
@@ -258,7 +258,7 @@
 			</div>
 		{/if}
 
-		{#if production_countries.length > 0}
+		{#if production_countries?.length > 0}
 			<div class="loneliness">
 				<p class="loneliness-p">production-countries</p>
 				<ul>
