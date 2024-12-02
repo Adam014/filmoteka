@@ -1,8 +1,9 @@
 <script>
 	import { supabase } from '$lib/db/supabaseClient';
 	import { page } from '$app/stores';
+	import { user } from '../../../../stores/user';
 	import lodash from 'lodash';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import Loader from "../../../../components/Loader.svelte";
 
 	let challenge = null;
@@ -14,14 +15,38 @@
 	let incorrectGuess = false; // Show animation for incorrect guess
 	let guessesLeft = 3; // Maximum guesses allowed
 	let isSuggestionsOpen = false; // Tracks if suggestions dropdown is open
+	let alreadyPlayed = false; // Tracks if the user has already played this day
+	let savedState = null; // Holds saved state if revisiting
+	let currentUser = null; // Holds the current user
 	const day = $page.params.day;
+
+	// Subscribe to user store
+	const unsubscribe = user.subscribe((value) => {
+		currentUser = value;
+	});
+
+	// Cleanup subscription
+	onDestroy(() => {
+		unsubscribe();
+	});
 
 	// Debounce setup
 	const { debounce } = lodash;
 	const debouncedFetch = debounce(fetchSuggestions, 300);
 
-	// Fetch the daily challenge
+	// Fetch the current user and check if they have already played this day
 	onMount(async () => {
+		await checkIfPlayed();
+		if (!alreadyPlayed) {
+			await fetchChallenge();
+		} else {
+			// Load the saved state if already played
+			await fetchSavedState();
+		}
+	});
+
+	// Fetch the daily challenge
+	async function fetchChallenge() {
 		const { data, error } = await supabase
 			.from('daily_challenge')
 			.select('*')
@@ -33,12 +58,85 @@
 		} else {
 			challenge = data;
 		}
-	});
+	}
+
+	// Check if the user has already played this day
+	async function checkIfPlayed() {
+		const { data, error } = await supabase.storage
+			.from('games')
+			.list(`daily-challenge/${currentUser?.id}/`, { search: `${day}.json` });
+
+		if (error) {
+			console.error('Error checking game state:', error);
+			return;
+		}
+
+		if (data.length > 0) {
+			alreadyPlayed = true;
+		}
+	}
+
+	// Fetch the saved state if the game was already played
+	async function fetchSavedState() {
+		const filePath = `daily-challenge/${currentUser.id}/${day}.json`;
+
+		const { data, error } = await supabase.storage
+			.from('games')
+			.download(filePath);
+
+		if (error) {
+			console.error('Error fetching saved state:', error);
+			return;
+		}
+
+		try {
+			const text = await data.text();
+			savedState = JSON.parse(text);
+
+			// Apply the saved state to the variables
+			guessedCorrectly = savedState.guessedCorrectly ?? false;
+			guessesLeft = savedState.guessesLeft ?? 3;
+			currentHint = savedState.currentHint ?? 1;
+
+			// Ensure the challenge data is loaded
+			await fetchChallenge();
+		} catch (parseError) {
+			console.error('Error parsing saved state JSON:', parseError);
+		}
+	}
+
+	// Save game result to Supabase storage
+	async function saveGameResult() {
+		const gameResult = {
+			day,
+			guessedCorrectly,
+			guessesLeft,
+			currentHint,
+			completedAt: new Date().toISOString(),
+		};
+
+		const filePath = `daily-challenge/${currentUser.id}/${day}.json`;
+
+		try {
+			const fileContent = new Blob([JSON.stringify(gameResult)], { type: 'application/json' });
+
+			const { error } = await supabase.storage
+				.from('games')
+				.upload(filePath, fileContent, { upsert: true });
+
+			if (error) {
+				throw error;
+			}
+
+		} catch (error) {
+			console.error('Error saving game result to Supabase storage:', error.message);
+		}
+	}
 
 	// Fetch suggestions for the search input
 	async function fetchSuggestions(query) {
 		isLoading = true;
-		isSuggestionsOpen = true; // Open suggestions when fetching
+		isSuggestionsOpen = true;
 		try {
 			const { data, error } = await supabase
 				.from('films')
@@ -70,21 +168,22 @@
 
 		if (userGuess.toLowerCase() === challenge.title.toLowerCase()) {
 			guessedCorrectly = true;
-			userGuess = ''; // Clear input
+			saveGameResult();
+			userGuess = '';
 		} else {
-			incorrectGuess = true; // Trigger animation
-			setTimeout(() => (incorrectGuess = false), 1000); // Reset animation
+			incorrectGuess = true;
+			setTimeout(() => (incorrectGuess = false), 1000);
 			guessesLeft--;
 			currentHint++;
 		}
 
-		// If no guesses left, end the game
 		if (guessesLeft === 0 && !guessedCorrectly) {
-			currentHint = 3; // Show all hints
+			currentHint = 3;
+			saveGameResult();
 		}
 
-		suggestions = []; // Clear suggestions
-		isSuggestionsOpen = false; // Close suggestions
+		suggestions = [];
+		isSuggestionsOpen = false;
 	}
 
 	// Handle skipping the guess
@@ -93,7 +192,8 @@
 			guessesLeft--;
 			currentHint++;
 			if (guessesLeft === 0) {
-				currentHint = 3; // Show all hints if no guesses are left
+				currentHint = 3;
+				saveGameResult();
 			}
 		}
 	}
@@ -105,10 +205,8 @@
 		}
 	}
 
-	// Add click listener to the document
 	onMount(() => {
 		document.addEventListener('click', handleClickOutside);
-
 		return () => {
 			document.removeEventListener('click', handleClickOutside);
 		};
@@ -144,8 +242,17 @@
 			</div>
 		</div>
 
-		<!-- Autocomplete Search -->
+		<!-- Final Message -->
+		{#if alreadyPlayed || guessedCorrectly || guessesLeft === 0}
+			<p class="{guessedCorrectly ? 'success-message fade-in' : 'game-over-message fade-in'}">
+				{guessedCorrectly
+					? `🎉 Correct! The movie is ${challenge.title}!`
+					: `❌ You didn’t guess it! The movie was "${challenge.title}".`}
+			</p>
+		{/if}
+
 		{#if !guessedCorrectly && guessesLeft > 0}
+			<!-- Autocomplete Search -->
 			<div class="search-container fade-in">
 				<input
 					type="text"
@@ -156,7 +263,7 @@
 				/>
 
 				<!-- Suggestions -->
-				{#if isSuggestionsOpen && suggestions.length > 0 && !isLoading}
+				{#if isSuggestionsOpen && suggestions?.length > 0 && !isLoading}
 					<ul class="suggestions">
 						{#each suggestions as suggestion}
 							<li on:click={() => handleGuess(suggestion)}>
@@ -177,16 +284,6 @@
 				<button class="skip-button fade-in" on:click={handleSkip}>Skip Guess</button>
 				<p class="guesses-left fade-in ">Guesses Left: {guessesLeft}</p>
 			</div>
-		{/if}
-
-		<!-- Success Message -->
-		{#if guessedCorrectly}
-			<p class="success-message fade-in">🎉 Correct! The movie is {challenge.title}!</p>
-		{/if}
-
-		<!-- Game Over Message -->
-		{#if guessesLeft === 0 && !guessedCorrectly}
-			<p class="game-over-message fade-in">❌ You didn’t guess it! The movie was "{challenge.title}".</p>
 		{/if}
 	</div>
 {:else}
@@ -268,7 +365,7 @@
 	}
 
 	.search-input {
-		width: 100%;
+		width: 40%;
 		padding: 12px;
 		border-radius: 8px;
 		border: 1px solid var(--hint-color);
@@ -310,7 +407,7 @@
 		margin-top: 20px;
 		display: flex;
 		justify-content: space-between;
-		width: 100%;
+		width: 43%;
 	}
 
 	.skip-button {
@@ -358,12 +455,16 @@
 	.slide-in { animation: slideIn 0.8s ease-in-out; }
 	.shake { animation: shake 0.5s ease-in-out; }
 
-  @media (max-width: 768px){
-    .search-input{
-      width: 90%;
-    }
-    .controls{
-      width: 96%;
-    }
-  }
+	@media (max-width: 768px){
+		.search-input{
+			width: 90%;
+		}
+		.controls{
+			width: 95%;
+		}
+		.challenge-container{
+			padding-top: 60px;
+		}
+	}
+
 </style>

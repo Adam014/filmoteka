@@ -62,14 +62,14 @@
 			</div>
 		</div>
 		<div class="favorites-container">
-			{#if !loading && favoriteMovies.length > 0}
-				<h2>Your Favorite Movies ({favoriteMovies.length})</h2>
+			{#if !loading && favoriteMovies?.length > 0}
+				<h2>Your Favorite Movies ({favoriteMovies?.length})</h2>
 				<div class="favorite-movies">
 					{#each favoriteMovies as movie (movie.data?.id)}
 						<MovieCard movie={movie.data} on:unfavorite={handleUnfavorite} />
 					{/each}
 				</div>
-			{:else if !loading && favoriteMovies.length === 0}
+			{:else if !loading && favoriteMovies?.length === 0}
 				<p>No favorite movies found.</p>
 			{:else if loading}
 				<Loader />

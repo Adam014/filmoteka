@@ -20,7 +20,7 @@
 		// Assign colors cyclically to the challenges
 		return data.map((challenge, index) => ({
 			...challenge,
-			color: colors[index % colors.length],
+			color: colors[index % colors?.length],
 		}));
 	}
 

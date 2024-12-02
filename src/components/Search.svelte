@@ -104,7 +104,7 @@
 			openSearchPopup();
 		} else if (event.key === 'Escape' && isSearchPopupOpen) {
 			closeSearchPopup();
-		} else if (event.key === 'Enter' && !suggestions.length) {
+		} else if (event.key === 'Enter' && !suggestions?.length) {
 			// If no suggestions, trigger handleSearch
 			handleSearch(searchQuery, closeSearchPopup);
 		}
@@ -146,7 +146,7 @@
 				/>
 				{#if isLoading}
 					<p>Loading...</p>
-				{:else if suggestions.length > 0}
+				{:else if suggestions?.length > 0}
 					<ul class="suggestions">
 						{#each suggestions as suggestion}
 							<a

@@ -19,7 +19,7 @@ export async function handleSearch(searchQuery, closeSearchPopup) {
 
 		let selectedMovie = null;
 
-		if (filmData && filmData.length > 0) {
+		if (filmData && filmData?.length > 0) {
 			// Step 2: Apply smart selection logic for the movie
 			selectedMovie = selectBestMatch(filmData, searchQuery);
 
@@ -29,53 +29,6 @@ export async function handleSearch(searchQuery, closeSearchPopup) {
 				closeSearchPopup();
 				return;
 			}
-		}
-
-		// Step 3: If not found or no good match, fetch from the TMDB API
-		const searchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(
-			searchQuery.trim()
-		)}&language=en-US&page=1&include_adult=false`;
-
-		const res = await fetch(searchUrl);
-		const data = await res.json();
-
-		if (data.results && data.results.length > 0) {
-			// Step 4: Apply the same smart selection logic to API results
-			selectedMovie = selectBestMatch(data.results, searchQuery);
-
-			if (selectedMovie) {
-				// Step 5: Insert fetched movie data into the database
-				const { error: insertError } = await supabase.from('film_detailed').upsert([
-					{
-						id: selectedMovie.id,
-						title: selectedMovie.title,
-						overview: selectedMovie.overview,
-						release_date: selectedMovie.release_date,
-						poster_path: selectedMovie.poster_path,
-						backdrop_path: selectedMovie.backdrop_path,
-						vote_average: selectedMovie.vote_average,
-						vote_count: selectedMovie.vote_count,
-						genres: selectedMovie.genre_ids,
-						original_language: selectedMovie.original_language,
-						original_title: selectedMovie.original_title,
-						popularity: selectedMovie.popularity,
-						video: selectedMovie.video,
-						adult: selectedMovie.adult
-					}
-				]);
-
-				if (insertError) {
-					console.error('Error inserting into Supabase:', insertError);
-				}
-
-				// Navigate to the movie's page
-				goto(`/movie/${selectedMovie.id}`);
-				closeSearchPopup();
-			} else {
-				toast.error('Movie not found!');
-			}
-		} else {
-			toast.error('Movie not found!');
 		}
 	}
 }
@@ -88,7 +41,7 @@ function selectBestMatch(movies, searchQuery) {
 	// Set a minimum popularity threshold to filter out irrelevant results
 	const MIN_POPULARITY_THRESHOLD = 50;
 
-	if (exactMatches.length > 0) {
+	if (exactMatches?.length > 0) {
 		// Prioritize exact matches with the highest popularity
 		return exactMatches.reduce((prev, current) => {
 			return current.popularity > MIN_POPULARITY_THRESHOLD && current.popularity > prev.popularity
@@ -98,7 +51,7 @@ function selectBestMatch(movies, searchQuery) {
 	} else {
 		// If no exact match, choose the most popular movie above the popularity threshold
 		const popularMatches = movies.filter((movie) => movie.popularity > MIN_POPULARITY_THRESHOLD);
-		if (popularMatches.length > 0) {
+		if (popularMatches?.length > 0) {
 			return popularMatches.reduce((prev, current) => {
 				return current.popularity > prev.popularity ? current : prev;
 			});
@@ -109,7 +62,7 @@ function selectBestMatch(movies, searchQuery) {
 }
 
 async function getVideoDetailsBatch(videoIds) {
-    if (!videoIds || videoIds.length === 0) return [];
+    if (!videoIds || videoIds?.length === 0) return [];
     const ids = videoIds.join(',');
     const url = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,status,statistics&id=${ids}&key=${API_KEY}`;
     try {
@@ -167,7 +120,7 @@ export async function getBestAvailableVideoWithCheck(videoList) {
     // Sort videos by view count in descending order
     validVideos.sort((a, b) => b.views - a.views);
 
-    return validVideos.length > 0 ? validVideos[0] : null;
+    return validVideos?.length > 0 ? validVideos[0] : null;
 }
 
 /**
@@ -283,7 +236,7 @@ export async function fetchFavoriteMovies(currentUser) {
 			return [];
 		}
 
-		if (data && data.length > 0) {
+		if (data && data?.length > 0) {
 			const moviePromises = data.map(async (file) => {
 				const { data: fileData, error: downloadError } = await supabase.storage
 					.from('favorites')

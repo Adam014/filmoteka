@@ -32,7 +32,7 @@
 
 			if (error) throw error;
 
-			if (!moviesWithGenres || moviesWithGenres.length === 0) {
+			if (!moviesWithGenres || moviesWithGenres?.length === 0) {
 				toast.error('No genres found.');
 				return;
 			}
@@ -100,7 +100,7 @@
 
 			if (error) throw error;
 
-			if (!randomMovies || randomMovies.length === 0) {
+			if (!randomMovies || randomMovies?.length === 0) {
 				toast.error('No random movies found.');
 				movies = [];
 				return;
@@ -174,7 +174,7 @@
 		{isLoading ? 'Loading...' : 'Get Random Movies'}
 	</button>
 
-	{#if movies.length > 0}
+	{#if movies?.length > 0}
 		<div class="movies-display">
 			{#each movies as movie}
 				<MovieCard {movie} on:favorite={resetFavorites} />
