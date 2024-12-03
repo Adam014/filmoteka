@@ -13,7 +13,6 @@
 	let currentUser;
 	let movieDetails = {};
 	let movieVideos = [];
-	let similarMovies = [];
 	let cast = [];
 	let crew = [];
 	let topActors = [];
@@ -49,7 +48,6 @@
 	$: if (data) {
 		movieDetails = data.details || {};
 		movieVideos = data.videos?.results || [];
-		similarMovies = data.similar_movies?.results || [];
 		cast = data.credits?.cast || [];
 		crew = data.credits?.crew || [];
 
@@ -268,17 +266,7 @@
 				</ul>
 			</div>
 		{/if}
-
-		<!-- In the bottom, top similar movies in cards, api reference /similar -->
 	</div>
-	{#if similarMovies != null}
-		<h2 class="similar-movies-title">Another movies you might like</h2>
-		<div class="similar-movies">
-			{#each similarMovies as movie}
-				<MovieCard {movie} />
-			{/each}
-		</div>
-	{/if}
 </section>
 
 <style>
