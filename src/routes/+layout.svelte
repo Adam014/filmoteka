@@ -24,9 +24,10 @@
 		if (!isToastShown) {
 			// Show the toast
 			toast(
-				"We’re experiencing higher-than-usual traffic! 🚀 Some features might be slower or temporarily unavailable. Thank you for your patience as we work to get everything running smoothly. 🙏",
+				"🎮 A new game is available! Check it out in the menu or at filmoteka.app/games/daily 🚀",
 				{
-					duration: 10000
+					duration: 15000,
+					icon: "🎉",
 				}
 			);
 
