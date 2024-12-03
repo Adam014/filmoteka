@@ -85,7 +85,7 @@
 				class="daily-card"
 				style="
 					background-color: {challenge.color}; 
-					border-top: 10px solid {challenge.guessedCorrectly === true ? 'green' : challenge.guessedCorrectly === false ? 'red' : 'transparent'};"
+					border-top: 5px solid {challenge.guessedCorrectly === true ? 'green' : challenge.guessedCorrectly === false ? 'red' : 'transparent'};"
 			>
 				<span class="day-number">{challenge.day}</span>
 			</div>
