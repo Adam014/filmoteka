@@ -1,9 +1,19 @@
 <script>
 	import { supabase } from '$lib/db/supabaseClient';
-	import { onMount } from 'svelte';
+	import { user } from '../../../stores/user';
+	import { onMount, onDestroy } from 'svelte';
 
 	let dailyChallenges = [];
-	const colors = ['#a05cd5', '#2e073f', '#ad49e1', '#7a1cac', '#1a1a1a'];
+	let currentUser = null;
+
+	// Subscribe to user store
+	const unsubscribe = user.subscribe((value) => {
+		currentUser = value;
+	});
+
+	onDestroy(() => {
+		unsubscribe();
+	});
 
 	// Fetch all challenges
 	async function fetchChallenges() {
@@ -17,11 +27,49 @@
 			return [];
 		}
 
-		// Assign colors cyclically to the challenges
-		return data.map((challenge, index) => ({
-			...challenge,
-			color: colors[index % colors?.length],
-		}));
+		// Assign guessed status from storage or Supabase
+		return await Promise.all(
+			data.map(async (challenge) => {
+				const guessedCorrectly = await checkGuessStatus(challenge.day);
+				return {
+					...challenge,
+					color: "#333", // All cards have this color
+					guessedCorrectly, // true if guessed correctly, false otherwise
+				};
+			})
+		);
+	}
+
+	// Check if the user guessed correctly
+	async function checkGuessStatus(day) {
+		if (!currentUser) {
+			// Use localStorage for anonymous users
+			const localState = localStorage.getItem(`daily-challenge-day-${day}`);
+			if (localState) {
+				const parsedState = JSON.parse(localState);
+				return parsedState.guessedCorrectly ?? null;
+			}
+		} else {
+			// Use Supabase for logged-in users
+			const filePath = `daily-challenge/${currentUser.id}/${day}.json`;
+			const { data, error } = await supabase.storage
+				.from('games')
+				.download(filePath);
+
+			if (error) {
+				console.error(`Error fetching game state for day ${day}:`, error);
+				return null;
+			}
+
+			try {
+				const text = await data.text();
+				const parsedState = JSON.parse(text);
+				return parsedState.guessedCorrectly ?? null;
+			} catch (parseError) {
+				console.error('Error parsing saved state JSON:', parseError);
+				return null;
+			}
+		}
 	}
 
 	// Always populate challenges on load
@@ -35,7 +83,9 @@
 		<a href={`/games/daily/day-${challenge.day}`}>
 			<div
 				class="daily-card"
-				style="background-color: {challenge.color}"
+				style="
+					background-color: {challenge.color}; 
+					border-top: 10px solid {challenge.guessedCorrectly === true ? 'green' : challenge.guessedCorrectly === false ? 'red' : 'transparent'};"
 			>
 				<span class="day-number">{challenge.day}</span>
 			</div>
@@ -70,6 +120,7 @@
 		font-weight: bold;
 		cursor: pointer;
 		transition: transform 0.2s ease, box-shadow 0.2s ease;
+		border-top: 10px solid transparent; /* Default border color */
 	}
 
 	.daily-card:hover {
