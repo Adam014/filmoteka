@@ -5,6 +5,7 @@
 	import lodash from 'lodash';
 	import { onMount, onDestroy } from 'svelte';
 	import Loader from "../../../../components/Loader.svelte";
+	import { goto } from '$app/navigation';
 
 	let challenge = null;
 	let currentHint = 1; // Tracks the current hint
@@ -18,7 +19,11 @@
 	let alreadyPlayed = false; // Tracks if the user has already played this day
 	let savedState = null; // Holds saved state if revisiting
 	let currentUser = null; // Holds the current user
-	const day = $page.params.day;
+	let hasPreviousDay = false; // Tracks if there is a previous day
+	let hasNextDay = false; // Tracks if there is a next day
+
+	// Reactively track the day from the page params
+	$: day = parseInt($page.params.day);
 
 	// Subscribe to user store
 	const unsubscribe = user.subscribe((value) => {
@@ -34,16 +39,32 @@
 	const { debounce } = lodash;
 	const debouncedFetch = debounce(fetchSuggestions, 300);
 
-	// Fetch the current user and check if they have already played this day
-	onMount(async () => {
+	// Watch for day changes and update data dynamically
+	$: if (day) {
+		initChallenge();
+	}
+
+	// Initialize challenge data
+	async function initChallenge() {
+		challenge = null;
+		alreadyPlayed = false;
+		savedState = null;
+		currentHint = 1;
+		guessedCorrectly = false;
+		guessesLeft = 3;
+		hasPreviousDay = false;
+		hasNextDay = false;
+
 		await checkIfPlayed();
+		await checkAdjacentDays();
+
 		if (!alreadyPlayed) {
 			await fetchChallenge();
 		} else {
 			// Load the saved state if already played
 			await fetchSavedState();
 		}
-	});
+	}
 
 	// Fetch the daily challenge
 	async function fetchChallenge() {
@@ -80,6 +101,31 @@
 				alreadyPlayed = true;
 			}
 		}
+	}
+
+	// Check for previous and next days
+	async function checkAdjacentDays() {
+		const { data, error } = await supabase
+			.from('daily_challenge')
+			.select('day')
+			.in('day', [day - 1, day + 1]);
+
+		if (error) {
+			console.error('Error checking adjacent days:', error);
+			return;
+		}
+
+		if (data.some((d) => d.day === day - 1)) {
+			hasPreviousDay = true;
+		}
+		if (data.some((d) => d.day === day + 1)) {
+			hasNextDay = true;
+		}
+	}
+
+	// Navigate to another day
+	function switchDay(newDay) {
+		goto(`/games/daily/day-${newDay}`);
 	}
 
 	// Fetch the saved state if the game was already played
@@ -247,6 +293,15 @@
 			<h1>🎬 Daily Challenge: Day {day}</h1>
 		</div>
 
+		<div class="day-navigation">
+			{#if hasPreviousDay}
+				<button class="nav-button" on:click={() => switchDay(day - 1)}>← Day {day - 1}</button>
+			{/if}
+			{#if hasNextDay}
+				<button class="nav-button" on:click={() => switchDay(day + 1)}>Day {day + 1} →</button>
+			{/if}
+		</div>
+
 		<div class="hint-container fade-in">
 			<div class="poster-wrapper">
 				<img
@@ -332,6 +387,27 @@
 		background: var(--background-color);
 		margin: 0;
 		font-family: 'Arial', sans-serif;
+	}
+
+	.day-navigation {
+		display: flex;
+		justify-content: center;
+		gap: 10px;
+		margin-bottom: 20px;
+	}
+
+	.nav-button {
+		background-color: var(--primary-color);
+		color: var(--text-color);
+		border: none;
+		padding: 10px 15px;
+		border-radius: 8px;
+		cursor: pointer;
+		transition: background-color 0.2s ease;
+	}
+
+	.nav-button:hover {
+		background-color: var(--success-color);
 	}
 
 	.challenge-container {
