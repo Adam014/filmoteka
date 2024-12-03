@@ -62,50 +62,74 @@
 
 	// Check if the user has already played this day
 	async function checkIfPlayed() {
-		const { data, error } = await supabase.storage
-			.from('games')
-			.list(`daily-challenge/${currentUser?.id}/`, { search: `${day}.json` });
+		if (!currentUser) {
+			// Use localStorage for anonymous users
+			const localState = localStorage.getItem(`daily-challenge-day-${day}`);
+			alreadyPlayed = !!localState;
+		} else {
+			const { data, error } = await supabase.storage
+				.from('games')
+				.list(`daily-challenge/${currentUser?.id}/`, { search: `${day}.json` });
 
-		if (error) {
-			console.error('Error checking game state:', error);
-			return;
-		}
+			if (error) {
+				console.error('Error checking game state:', error);
+				return;
+			}
 
-		if (data.length > 0) {
-			alreadyPlayed = true;
+			if (data.length > 0) {
+				alreadyPlayed = true;
+			}
 		}
 	}
 
 	// Fetch the saved state if the game was already played
 	async function fetchSavedState() {
-		const filePath = `daily-challenge/${currentUser.id}/${day}.json`;
+		if (!currentUser) {
+			// Use localStorage for anonymous users
+			const localState = localStorage.getItem(`daily-challenge-day-${day}`);
+			if (localState) {
+				try {
+					savedState = JSON.parse(localState);
+					applySavedState();
+				} catch (error) {
+					console.error('Error parsing local saved state:', error);
+				}
+			}
+		} else {
+			const filePath = `daily-challenge/${currentUser.id}/${day}.json`;
 
-		const { data, error } = await supabase.storage
-			.from('games')
-			.download(filePath);
+			const { data, error } = await supabase.storage
+				.from('games')
+				.download(filePath);
 
-		if (error) {
-			console.error('Error fetching saved state:', error);
-			return;
-		}
+			if (error) {
+				console.error('Error fetching saved state:', error);
+				return;
+			}
 
-		try {
-			const text = await data.text();
-			savedState = JSON.parse(text);
-
-			// Apply the saved state to the variables
-			guessedCorrectly = savedState.guessedCorrectly ?? false;
-			guessesLeft = savedState.guessesLeft ?? 3;
-			currentHint = savedState.currentHint ?? 1;
-
-			// Ensure the challenge data is loaded
-			await fetchChallenge();
-		} catch (parseError) {
-			console.error('Error parsing saved state JSON:', parseError);
+			try {
+				const text = await data.text();
+				savedState = JSON.parse(text);
+				applySavedState();
+			} catch (parseError) {
+				console.error('Error parsing saved state JSON:', parseError);
+			}
 		}
 	}
 
-	// Save game result to Supabase storage
+	// Apply saved state to variables
+	function applySavedState() {
+		guessedCorrectly = savedState.guessedCorrectly ?? false;
+		guessesLeft = savedState.guessesLeft ?? 3;
+		currentHint = savedState.currentHint ?? 1;
+
+		// Ensure the challenge data is loaded
+		if (!challenge) {
+			fetchChallenge();
+		}
+	}
+
+	// Save game result to Supabase or localStorage
 	async function saveGameResult() {
 		const gameResult = {
 			day,
@@ -115,21 +139,25 @@
 			completedAt: new Date().toISOString(),
 		};
 
-		const filePath = `daily-challenge/${currentUser.id}/${day}.json`;
+		if (!currentUser) {
+			// Save to localStorage for anonymous users
+			localStorage.setItem(`daily-challenge-day-${day}`, JSON.stringify(gameResult));
+		} else {
+			const filePath = `daily-challenge/${currentUser.id}/${day}.json`;
 
-		try {
-			const fileContent = new Blob([JSON.stringify(gameResult)], { type: 'application/json' });
+			try {
+				const fileContent = new Blob([JSON.stringify(gameResult)], { type: 'application/json' });
 
-			const { error } = await supabase.storage
-				.from('games')
-				.upload(filePath, fileContent, { upsert: true });
+				const { error } = await supabase.storage
+					.from('games')
+					.upload(filePath, fileContent, { upsert: true });
 
-			if (error) {
-				throw error;
+				if (error) {
+					throw error;
+				}
+			} catch (error) {
+				console.error('Error saving game result to Supabase storage:', error.message);
 			}
-
-		} catch (error) {
-			console.error('Error saving game result to Supabase storage:', error.message);
 		}
 	}
 

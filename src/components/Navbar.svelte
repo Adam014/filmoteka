@@ -158,8 +158,13 @@
 				</button>
 			</div>
 		{:else}
-		<div class="nav-items">			
+		<div class="nav-items">	
 			<div class="left-nav-menu-items">
+				<h2>Games</h2>
+				<a href="/games/daily" on:click={closeMenu}>Daily Challenge</a>
+				<hr />
+			</div>		
+			<div class="center-nav-menu-items">
 					<h2>User Actions</h2>
 					<a href="/login">Login</a>or
 					<a href="/register">Register</a>
