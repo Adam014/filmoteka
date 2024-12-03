@@ -3,15 +3,15 @@
 	import { page } from '$app/stores';
 	import { user } from '../../../../stores/user';
 	import lodash from 'lodash';
-	import { onDestroy } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import Loader from "../../../../components/Loader.svelte";
 	import { goto } from '$app/navigation';
 
 	let challenge = null;
-	let currentHint = 1;
-	let guessedCorrectly = false;
-	let userGuess = '';
-	let suggestions = [];
+	let currentHint = 1; // Tracks the current hint
+	let guessedCorrectly = false; // Tracks if the user guessed correctly
+	let userGuess = ''; // Holds the user's input
+	let suggestions = []; // Autocomplete suggestions
 	let isLoading = false;
 	let incorrectGuess = false; // Show animation for incorrect guess
 	let guessesLeft = 3; // Maximum guesses allowed
@@ -25,12 +25,12 @@
 	// Reactively track the day from the page params
 	$: day = parseInt($page.params.day);
 
-	// Subscribe to the user store
+	// Subscribe to user store
 	const unsubscribe = user.subscribe((value) => {
 		currentUser = value;
 	});
 
-	// Cleanup onDestroy
+	// Cleanup subscription
 	onDestroy(() => {
 		unsubscribe();
 	});
@@ -61,6 +61,7 @@
 		if (!alreadyPlayed) {
 			await fetchChallenge();
 		} else {
+			// Load the saved state if already played
 			await fetchSavedState();
 		}
 	}
@@ -83,6 +84,7 @@
 	// Check if the user has already played this day
 	async function checkIfPlayed() {
 		if (!currentUser) {
+			// Use localStorage for anonymous users
 			const localState = localStorage.getItem(`daily-challenge-day-${day}`);
 			alreadyPlayed = !!localState;
 		} else {
@@ -129,6 +131,7 @@
 	// Fetch the saved state if the game was already played
 	async function fetchSavedState() {
 		if (!currentUser) {
+			// Use localStorage for anonymous users
 			const localState = localStorage.getItem(`daily-challenge-day-${day}`);
 			if (localState) {
 				try {
@@ -166,38 +169,122 @@
 		guessesLeft = savedState.guessesLeft ?? 3;
 		currentHint = savedState.currentHint ?? 1;
 
+		// Ensure the challenge data is loaded
 		if (!challenge) {
 			fetchChallenge();
 		}
 	}
 
-	// Save game result
+	// Save game result to Supabase or localStorage
 	async function saveGameResult() {
-		// Same implementation as above
+		const gameResult = {
+			day,
+			guessedCorrectly,
+			guessesLeft,
+			currentHint,
+			completedAt: new Date().toISOString(),
+		};
+
+		if (!currentUser) {
+			// Save to localStorage for anonymous users
+			localStorage.setItem(`daily-challenge-day-${day}`, JSON.stringify(gameResult));
+		} else {
+			const filePath = `daily-challenge/${currentUser.id}/${day}.json`;
+
+			try {
+				const fileContent = new Blob([JSON.stringify(gameResult)], { type: 'application/json' });
+
+				const { error } = await supabase.storage
+					.from('games')
+					.upload(filePath, fileContent, { upsert: true });
+
+				if (error) {
+					throw error;
+				}
+			} catch (error) {
+				console.error('Error saving game result to Supabase storage:', error.message);
+			}
+		}
 	}
 
-	// Fetch suggestions for search input
+	// Fetch suggestions for the search input
 	async function fetchSuggestions(query) {
-		// Same implementation as above
+		isLoading = true;
+		isSuggestionsOpen = true;
+		try {
+			const { data, error } = await supabase
+				.from('films')
+				.select('id, title, poster_path')
+				.ilike('title', `%${query}%`)
+				.limit(5);
+
+			if (error) {
+				console.error('Error fetching suggestions:', error);
+				suggestions = [];
+			} else {
+				suggestions = data.map((movie) => ({
+					id: movie.id,
+					title: movie.title,
+					poster_path: movie.poster_path,
+				}));
+			}
+		} catch (err) {
+			console.error('Error fetching suggestions:', err);
+			suggestions = [];
+		} finally {
+			isLoading = false;
+		}
 	}
 
 	// Handle guess submission
 	function handleGuess(selectedMovie) {
-		// Same implementation as above
+		userGuess = selectedMovie.title;
+
+		if (userGuess.toLowerCase() === challenge.title.toLowerCase()) {
+			guessedCorrectly = true;
+			saveGameResult();
+			userGuess = '';
+		} else {
+			incorrectGuess = true;
+			setTimeout(() => (incorrectGuess = false), 1000);
+			guessesLeft--;
+			currentHint++;
+		}
+
+		if (guessesLeft === 0 && !guessedCorrectly) {
+			currentHint = 3;
+			saveGameResult();
+		}
+
+		suggestions = [];
+		isSuggestionsOpen = false;
 	}
 
-	// Handle skipping a guess
+	// Handle skipping the guess
 	function handleSkip() {
-		// Same implementation as above
-	}
-
-	// Navigate to the previous or next day
-	function switchDay(offset) {
-		const targetDay = parseInt(day) + offset;
-		if (targetDay > 0) {
-			goto(`/games/daily/day-${targetDay}`);
+		if (!guessedCorrectly && guessesLeft > 0) {
+			guessesLeft--;
+			currentHint++;
+			if (guessesLeft === 0) {
+				currentHint = 3;
+				saveGameResult();
+			}
 		}
 	}
+
+	// Close suggestions on clicking outside
+	function handleClickOutside(event) {
+		if (!event.target.closest('.search-container')) {
+			isSuggestionsOpen = false;
+		}
+	}
+
+	onMount(() => {
+		document.addEventListener('click', handleClickOutside);
+		return () => {
+			document.removeEventListener('click', handleClickOutside);
+		};
+	});
 </script>
 
 {#if challenge}
