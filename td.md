@@ -16,3 +16,6 @@ movie/id
 
 /profile
     TODO: Add personalized movies you might like, based on favorite movies (probably with AI picking the personalized movies)
+
+/profile
+    TODO: Edit profile to be profile/username, on /profile you will see all profiles, and on root / you will see abvoe of the grid top 5 or 10 movies users liked in order from the date of added
