@@ -610,7 +610,7 @@
 			width: 95%;
 		}
 		.challenge-container{
-			padding-top: 60px;
+			padding-top: 20px;
 		}
 		.header h1{
 			padding-bottom: 1rem;
