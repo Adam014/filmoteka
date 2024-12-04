@@ -27,11 +27,6 @@
         loading = true;
         const displayName = params.name;
 
-        if(!currentUser){
-            goto("/?page=1");
-            toast.error("You need to sign in to view profiles. Please sign in.", { duration: 5000 })
-        }
-
         try {
             // Fetch all users
             const { data, error } = await supabase.auth.admin.listUsers();
