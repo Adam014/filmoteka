@@ -279,3 +279,18 @@ export function generatePageNumbers(currentPage, totalPages) {
 	
     return pages;
 }
+
+// Fetch user profile by username
+export async function fetchUserProfile(username) {
+    const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('user_metadata->>display_name', username)
+        .single();
+
+    if (error) {
+        console.error('Error fetching user profile:', error);
+        return null;
+    }
+    return data;
+}

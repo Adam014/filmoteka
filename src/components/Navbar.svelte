@@ -3,13 +3,13 @@
 	import { loadMovies } from '../lib/utils';
 	import { supabase } from '../lib/db/supabaseClient.js';
 	import { onDestroy, onMount } from 'svelte';
-	import { user } from '../stores/user';
+	import { user } from '../stores/user.js';
 	import logo from '../lib/assets/Filmoteka_logo.svg';
 	import Search from "./Search.svelte";
 
 	let currentUser;
 	let menuOpen = false;
-
+	
 	const unsubscribe = user.subscribe((value) => {
 		currentUser = value;
 	});
@@ -92,13 +92,13 @@
 		</a>
 	</div>
 
-	{#if currentUser}
-		<div class="search-container">
-			<Search placeholder="Search for a movie or person..." />
-		</div>
-		<div class="nav-links">
+	<div class="search-container">
+		<Search placeholder="Search for a movie or person..." />
+	</div>
+	<div class="nav-links">
+		{#if currentUser}
 			<div class="profile-container">
-				<a href="/profile">
+				<a href={`/profile/${currentUser.user_metadata.display_name}`}>
 					{#if currentUser.user_metadata && currentUser.user_metadata.avatar_url}
 						<img
 							src={currentUser.user_metadata.avatar_url}
@@ -110,32 +110,34 @@
 					{/if}
 				</a>
 			</div>
-		</div>
-	{:else}
-		<a href="/register" class="signup-link">Register</a>
-		<a href="/login" class="signup-link">Login</a>
-	{/if}
+		{:else}
+			<div class="signup-container">
+				<a href="/register" class="signup-link">Sign up</a>
+			</div>
+		{/if}
+	</div>
 
 	<div class="nav-menu" style="transform: translateX({menuOpen ? '0%' : '-100%'});">
 		{#if currentUser}
 			<div class="nav-items">
 				<div class="left-nav-menu-items">
-					<h2>Games</h2>
-					<a href="/games/daily" on:click={closeMenu}>Daily Challenge</a>
+					<h2>Play</h2>
+					<a href="/games" on:click={closeMenu}>Games</a>
 					<hr />
+					<a href="/games/daily" on:click={closeMenu}>Daily Challenge</a>
 				</div>
 				<div class="center-nav-menu-items">
-					<h2>Filmoteka</h2>
+					<h2>Explore</h2>
 					<a href="/" on:click={closeMenu}>Library</a>
 					<hr />
-					<a href="/profile" on:click={closeMenu}>Profile</a>
-					<hr />
 					<a href="/random" on:click={closeMenu}>Random-Movie</a>
+					<hr />
+					<a href={`/profile/${currentUser.user_metadata.display_name}`} on:click={closeMenu}>Profile</a>
 				</div>
 			</div>
 			<div class="logout-container">
 				<div class="profile-logout-container">
-					<a href="/profile">
+					<a href={`/profile/${currentUser.user_metadata.display_name}`} on:click={closeMenu}>
 						{#if currentUser.user_metadata && currentUser.user_metadata.avatar_url}
 							<img
 								src={currentUser.user_metadata.avatar_url}
@@ -147,7 +149,7 @@
 						{/if}
 					</a>
 				</div>
-				<button class="Btn" on:click={signOut}>
+				<button class="Btn" on:click={signOut} on:click={closeMenu}>
 					<div class="sign">
 						<svg viewBox="0 0 512 512">
 							<path
@@ -160,14 +162,20 @@
 		{:else}
 		<div class="nav-items">	
 			<div class="left-nav-menu-items">
-				<h2>Games</h2>
-				<a href="/games/daily" on:click={closeMenu}>Daily Challenge</a>
+				<h2>Play</h2>
+				<a href="/games" on:click={closeMenu}>Games</a>
 				<hr />
+				<a href="/games/daily" on:click={closeMenu}>Daily Challenge</a>
 			</div>		
 			<div class="center-nav-menu-items">
-					<h2>User Actions</h2>
-					<a href="/login">Login</a>or
-					<a href="/register">Register</a>
+					<h2>Explore</h2>
+					<a href="/" on:click={closeMenu}>Library</a>
+					<hr />
+					<a href="/random" on:click={closeMenu}>Random-Movie</a>
+					<hr />
+					<a href="/login" on:click={closeMenu}>Login</a>
+					<hr />
+					<a href="/register" on:click={closeMenu}>Register</a>
 				</div>	
 			</div>
 		{/if}
@@ -182,6 +190,10 @@
 		width: 100%;
 		position: absolute;
 		top: 20%;
+	}
+
+	.signup-container{
+		padding-left: 30px;
 	}
 
 	.nav-items div{
@@ -206,11 +218,13 @@
 	}
 
 	@media (max-width: 768px) {
+		.signup-container{
+			padding-left: 0px;
+		}
 
 		.nav-links {
 			flex-direction: column;
 			align-items: flex-start;
-			width: 100%;
 		}
 
 		.search-container {

@@ -78,6 +78,10 @@
 	});
 </script>
 
+<div class="title-container">
+	<h1>The Daily Challenges</h1>
+	<p>Each day, guess a movie with hints like blurry posters, genres, and taglines. The faster you solve it, the better! Ready for today’s challenge? 🎬✨</p>
+</div>
 <div class="daily-grid">
 	{#each dailyChallenges as challenge}
 		<a href={`/games/daily/day-${challenge.day}`}>
@@ -94,6 +98,10 @@
 </div>
 
 <style>
+	.title-container{
+		padding: 20px;
+	}
+
 	.daily-grid {
 		display: flex;
 		flex-wrap: wrap;
@@ -130,5 +138,12 @@
 
 	.day-number {
 		text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6);
+	}
+
+	@media (max-width: 768px){
+		.daily-card{
+			width: 5rem;
+			height: 80px;
+		}
 	}
 </style>

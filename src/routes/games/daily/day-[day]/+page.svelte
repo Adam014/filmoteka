@@ -84,9 +84,13 @@
 	// Check if the user has already played this day
 	async function checkIfPlayed() {
 		if (!currentUser) {
-			// Use localStorage for anonymous users
-			const localState = localStorage.getItem(`daily-challenge-day-${day}`);
-			alreadyPlayed = !!localState;
+			// Ensure localStorage is only accessed on the client
+			if (typeof window !== "undefined") {
+				const localState = localStorage.getItem(`daily-challenge-day-${day}`);
+				alreadyPlayed = !!localState;
+			} else {
+				alreadyPlayed = false;
+			}
 		} else {
 			const { data, error } = await supabase.storage
 				.from('games')
@@ -131,14 +135,16 @@
 	// Fetch the saved state if the game was already played
 	async function fetchSavedState() {
 		if (!currentUser) {
-			// Use localStorage for anonymous users
-			const localState = localStorage.getItem(`daily-challenge-day-${day}`);
-			if (localState) {
-				try {
-					savedState = JSON.parse(localState);
-					applySavedState();
-				} catch (error) {
-					console.error('Error parsing local saved state:', error);
+			// Ensure localStorage is only accessed on the client
+			if (typeof window !== "undefined") {
+				const localState = localStorage.getItem(`daily-challenge-day-${day}`);
+				if (localState) {
+					try {
+						savedState = JSON.parse(localState);
+						applySavedState();
+					} catch (error) {
+						console.error('Error parsing local saved state:', error);
+					}
 				}
 			}
 		} else {
@@ -304,12 +310,22 @@
 
 		<div class="hint-container fade-in">
 			<div class="poster-wrapper">
-				<img
-					src={`https://image.tmdb.org/t/p/w400${challenge.poster_path}`}
-					alt="Movie Poster"
-					class="poster {guessedCorrectly || guessesLeft === 0 ? 'unblurred' : ''}"
-					style="filter: blur({guessedCorrectly || guessesLeft === 0 ? '0px' : currentHint === 1 ? '20px' : currentHint === 2 ? '10px' : '5px'});"
-				/>
+				{#if alreadyPlayed || guessedCorrectly || guessesLeft === 0}
+					<a href={`/movie/${challenge.films_id}`}>					
+						<img
+							src={`https://image.tmdb.org/t/p/w400${challenge.poster_path}`}
+							alt="Movie Poster"
+							class="poster {guessedCorrectly || guessesLeft === 0 ? 'unblurred' : ''}"
+						/>
+					</a>
+				{:else}
+					<img
+						src={`https://image.tmdb.org/t/p/w400${challenge.poster_path}`}
+						alt="Movie Poster"
+						class="poster {guessedCorrectly || guessesLeft === 0 ? 'unblurred' : ''}"
+						style="filter: blur({guessedCorrectly || guessesLeft === 0 ? '0px' : currentHint === 1 ? '20px' : currentHint === 2 ? '10px' : '5px'});"
+					/>
+				{/if}
 			</div>
 			<div class="hints">
 				{#if currentHint >= 1}
@@ -594,7 +610,10 @@
 			width: 95%;
 		}
 		.challenge-container{
-			padding-top: 60px;
+			padding-top: 20px;
+		}
+		.header h1{
+			padding-bottom: 1rem;
 		}
 	}
 
