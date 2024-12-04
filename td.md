@@ -16,4 +16,9 @@ movie/id
 
 /profile
     TODO: Add personalized movies you might like, based on favorite movies (probably with AI picking the personalized movies)
-    TODO: Edit profile to be profile/username, on /profile you will see all profiles, and on root / you will see abvoe of the grid top 5 or 10 movies users liked in order from the date of added
+    
+/spotlight
+    TODO: Add users feed, where users can write posts, like posts, or even when they like movie it will appear there
+
+/random
+    TODO: Fix when you get random movies, and then click to get another random, the hrefs to the new movies doesnt edit
