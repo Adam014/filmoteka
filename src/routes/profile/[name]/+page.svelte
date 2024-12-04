@@ -36,7 +36,7 @@
 </script>
 
 <svelte:head>
-	<title>Profile | Filmoteka</title>
+	<title>Profile | {currentUser.user_metadata.display_name}</title>
 </svelte:head>
 
 {#if currentUser}
