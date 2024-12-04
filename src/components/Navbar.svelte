@@ -92,11 +92,11 @@
 		</a>
 	</div>
 
-	{#if currentUser}
-		<div class="search-container">
-			<Search placeholder="Search for a movie or person..." />
-		</div>
-		<div class="nav-links">
+	<div class="search-container">
+		<Search placeholder="Search for a movie or person..." />
+	</div>
+	<div class="nav-links">
+		{#if currentUser}
 			<div class="profile-container">
 				<a href="/profile">
 					{#if currentUser.user_metadata && currentUser.user_metadata.avatar_url}
@@ -110,11 +110,12 @@
 					{/if}
 				</a>
 			</div>
-		</div>
-	{:else}
-		<a href="/register" class="signup-link">Register</a>
-		<a href="/login" class="signup-link">Login</a>
-	{/if}
+		{:else}
+			<div class="signup-container">
+				<a href="/register" class="signup-link">Sign up</a>
+			</div>
+		{/if}
+	</div>
 
 	<div class="nav-menu" style="transform: translateX({menuOpen ? '0%' : '-100%'});">
 		{#if currentUser}
@@ -184,6 +185,10 @@
 		top: 20%;
 	}
 
+	.signup-container{
+		padding-left: 30px;
+	}
+
 	.nav-items div{
 		padding-left: 100px;
 	}
@@ -206,11 +211,13 @@
 	}
 
 	@media (max-width: 768px) {
+		.signup-container{
+			padding-left: 0px;
+		}
 
 		.nav-links {
 			flex-direction: column;
 			align-items: flex-start;
-			width: 100%;
 		}
 
 		.search-container {
