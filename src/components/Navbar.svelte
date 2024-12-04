@@ -130,9 +130,9 @@
 					<h2>Explore</h2>
 					<a href="/" on:click={closeMenu}>Library</a>
 					<hr />
-					<a href={`/profile/${currentUser.user_metadata.display_name}`} on:click={closeMenu}>Profile</a>
-					<hr />
 					<a href="/random" on:click={closeMenu}>Random-Movie</a>
+					<hr />
+					<a href={`/profile/${currentUser.user_metadata.display_name}`} on:click={closeMenu}>Profile</a>
 				</div>
 			</div>
 			<div class="logout-container">
