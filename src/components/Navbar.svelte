@@ -121,12 +121,13 @@
 		{#if currentUser}
 			<div class="nav-items">
 				<div class="left-nav-menu-items">
-					<h2>Games</h2>
-					<a href="/games/daily" on:click={closeMenu}>Daily Challenge</a>
+					<h2>Play</h2>
+					<a href="/games" on:click={closeMenu}>Games</a>
 					<hr />
+					<a href="/games/daily" on:click={closeMenu}>Daily Challenge</a>
 				</div>
 				<div class="center-nav-menu-items">
-					<h2>Filmoteka</h2>
+					<h2>Explore</h2>
 					<a href="/" on:click={closeMenu}>Library</a>
 					<hr />
 					<a href="/profile" on:click={closeMenu}>Profile</a>
@@ -148,7 +149,7 @@
 						{/if}
 					</a>
 				</div>
-				<button class="Btn" on:click={signOut}>
+				<button class="Btn" on:click={signOut} on:click={closeMenu}>
 					<div class="sign">
 						<svg viewBox="0 0 512 512">
 							<path
@@ -161,14 +162,20 @@
 		{:else}
 		<div class="nav-items">	
 			<div class="left-nav-menu-items">
-				<h2>Games</h2>
-				<a href="/games/daily" on:click={closeMenu}>Daily Challenge</a>
+				<h2>Play</h2>
+				<a href="/games" on:click={closeMenu}>Games</a>
 				<hr />
+				<a href="/games/daily" on:click={closeMenu}>Daily Challenge</a>
 			</div>		
 			<div class="center-nav-menu-items">
-					<h2>User Actions</h2>
-					<a href="/login">Login</a>or
-					<a href="/register">Register</a>
+					<h2>Explore</h2>
+					<a href="/" on:click={closeMenu}>Library</a>
+					<hr />
+					<a href="/random" on:click={closeMenu}>Random-Movie</a>
+					<hr />
+					<a href="/login" on:click={closeMenu}>Login</a>
+					<hr />
+					<a href="/register" on:click={closeMenu}>Register</a>
 				</div>	
 			</div>
 		{/if}
