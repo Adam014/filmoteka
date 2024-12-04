@@ -3,13 +3,13 @@
 	import { loadMovies } from '../lib/utils';
 	import { supabase } from '../lib/db/supabaseClient.js';
 	import { onDestroy, onMount } from 'svelte';
-	import { user } from '../stores/user';
+	import { user } from '../stores/user.js';
 	import logo from '../lib/assets/Filmoteka_logo.svg';
 	import Search from "./Search.svelte";
 
 	let currentUser;
 	let menuOpen = false;
-
+	
 	const unsubscribe = user.subscribe((value) => {
 		currentUser = value;
 	});
@@ -98,7 +98,7 @@
 	<div class="nav-links">
 		{#if currentUser}
 			<div class="profile-container">
-				<a href="/profile">
+				<a href={`/profile/${currentUser.user_metadata.display_name}`}>
 					{#if currentUser.user_metadata && currentUser.user_metadata.avatar_url}
 						<img
 							src={currentUser.user_metadata.avatar_url}
@@ -130,14 +130,14 @@
 					<h2>Explore</h2>
 					<a href="/" on:click={closeMenu}>Library</a>
 					<hr />
-					<a href="/profile" on:click={closeMenu}>Profile</a>
+					<a href={`/profile/${currentUser.user_metadata.display_name}`} on:click={closeMenu}>Profile</a>
 					<hr />
 					<a href="/random" on:click={closeMenu}>Random-Movie</a>
 				</div>
 			</div>
 			<div class="logout-container">
 				<div class="profile-logout-container">
-					<a href="/profile">
+					<a href={`/profile/${currentUser.user_metadata.display_name}`} on:click={closeMenu}>
 						{#if currentUser.user_metadata && currentUser.user_metadata.avatar_url}
 							<img
 								src={currentUser.user_metadata.avatar_url}
