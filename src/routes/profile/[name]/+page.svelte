@@ -4,8 +4,10 @@
     import MovieCard from '../../../components/MovieCard.svelte';
     import { onMount, onDestroy } from 'svelte';
     import { page } from '$app/stores';
-    import { user } from '../../../stores/user'; // Import user store
+    import { user } from '../../../stores/user'; 
     import { formatDate } from "../../../lib/utils.js";
+    import { goto } from '$app/navigation';
+    import toast from 'svelte-french-toast';
 
     let profileUser = null;
     let currentUser = null; // To track the logged-in user
@@ -20,9 +22,15 @@
         currentUser = value;
     });
 
+    
     onMount(async () => {
         loading = true;
         const displayName = params.name;
+
+        if(!currentUser){
+            goto("/?page=1");
+            toast.error("You need to sign in to view profiles. Please sign in.", { duration: 5000 })
+        }
 
         try {
             // Fetch all users
