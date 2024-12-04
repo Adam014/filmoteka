@@ -2,16 +2,23 @@
     import { supabase } from '../../../lib/db/supabaseClient';
     import Loader from '../../../components/Loader.svelte';
     import MovieCard from '../../../components/MovieCard.svelte';
-    import { onMount } from 'svelte';
+    import { onMount, onDestroy } from 'svelte';
     import { page } from '$app/stores';
+    import { user } from '../../../stores/user'; // Import user store
     import { formatDate } from "../../../lib/utils.js";
 
     let profileUser = null;
+    let currentUser = null; // To track the logged-in user
     let favoriteMovies = [];
     let loading = true;
 
     let params;
     $: $page, params = $page.params;
+
+    // Subscribe to the user store
+    const unsubscribe = user.subscribe((value) => {
+        currentUser = value;
+    });
 
     onMount(async () => {
         loading = true;
@@ -80,6 +87,10 @@
             loading = false;
         }
     });
+
+    onDestroy(() => {
+        unsubscribe(); // Clean up subscription
+    });
 </script>
 
 <svelte:head>
@@ -103,9 +114,11 @@
                     <span class="placeholder-icon">👤</span>
                 {/if}
                 <div class="profile-details">
-                    <p>Email: <b>{profileUser.email}</b></p>
                     <p>Username: <b>{profileUser.user_metadata.display_name || 'Not set'}</b></p>
-                    <p>Created at: <b>{formatDate(profileUser?.created_at)}</b></p>
+                    {#if profileUser.id === currentUser?.id}
+                        <p>Email: <b>{profileUser.email}</b></p>
+                        <p>Created at: <b>{formatDate(profileUser?.created_at)}</b></p>
+                    {/if}
                     <p>Last sign in: <b>{formatDate(profileUser?.last_sign_in_at)}</b></p>
                 </div>
             </div>
