@@ -4,10 +4,10 @@
     import MovieCard from '../../../components/MovieCard.svelte';
     import { onMount, onDestroy } from 'svelte';
     import { page } from '$app/stores';
-    import { user } from '../../../stores/user'; 
+    import { user } from '../../../stores/user'; // Import user store
+    import toast from 'svelte-french-toast'; // Import toast
+    import { goto } from '$app/navigation'; // Import goto for redirection
     import { formatDate } from "../../../lib/utils.js";
-    import { goto } from '$app/navigation';
-    import toast from 'svelte-french-toast';
 
     let profileUser = null;
     let currentUser = null; // To track the logged-in user
@@ -22,8 +22,18 @@
         currentUser = value;
     });
 
-    
     onMount(async () => {
+        // Check if the user is logged in
+        if (!currentUser) {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.user) {
+                toast.error('You must be logged in to view profile pages.');
+                goto('/?page=1');
+                return;
+            }
+            currentUser = session.user; // Set the user from the session
+        }
+
         loading = true;
         const displayName = params.name;
 
