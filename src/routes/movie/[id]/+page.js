@@ -2,15 +2,14 @@ import { getDetailedMovie } from '../../../lib/utils';
 
 export async function load({ params }) {
 	try {
-		// Attempt to retrieve detailed data from the local database using getDetailedMovie
 		let detailedData = await getDetailedMovie(params.id);
 
-		// If detailed data is found in the database, return it
 		if (detailedData) {
 			return {
 				details: detailedData,
 				videos: detailedData.videos || null,
 				credits: detailedData.credits || null,
+				poster_path: detailedData.poster_path || null, // Include poster_path
 				similar_movies: detailedData.similar_movies || null
 			};
 		}
@@ -20,7 +19,9 @@ export async function load({ params }) {
 			details: null,
 			videos: null,
 			credits: null,
+			poster_path: null,
 			error: true
 		};
 	}
 }
+
