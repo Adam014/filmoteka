@@ -84,7 +84,7 @@
 		checkIfFavorite();
 	});
 
-	let movieId = /^\d+$/.test(movie?.id) ? movie.id : movie?.media?.id;
+	$: movieId = /^\d+$/.test(movie?.id) ? movie.id : movie?.media?.id;
 	let isMovieType = movie?.media_type === 'movie';
 </script>
 
