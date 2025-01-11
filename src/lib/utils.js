@@ -62,25 +62,25 @@ function selectBestMatch(movies, searchQuery) {
 }
 
 async function getVideoDetailsBatch(videoIds) {
-    if (!videoIds || videoIds?.length === 0) return [];
-    const ids = videoIds.join(',');
-    const url = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,status,statistics&id=${ids}&key=${API_KEY}`;
-    try {
-        const response = await fetch(url);
-		if (response.status === 403){
-			toast.error("The API quota for the youtube trailers has been reached, try again later.")
+	if (!videoIds || videoIds?.length === 0) return [];
+	const ids = videoIds.join(',');
+	const url = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,status,statistics&id=${ids}&key=${API_KEY}`;
+	try {
+		const response = await fetch(url);
+		if (response.status === 403) {
+			toast.error('The API quota for the youtube trailers has been reached, try again later.');
 			return [];
 		}
-        if (!response.ok) {
-            console.error(`Error fetching video details: ${response.status} - ${response.statusText}`);
-            return [];
-        } 
-        const data = await response.json();
-        return data.items || [];
-    } catch (error) {
-        console.error('Error fetching video details:', error);
-        return [];
-    }
+		if (!response.ok) {
+			console.error(`Error fetching video details: ${response.status} - ${response.statusText}`);
+			return [];
+		}
+		const data = await response.json();
+		return data.items || [];
+	} catch (error) {
+		console.error('Error fetching video details:', error);
+		return [];
+	}
 }
 
 /**
@@ -89,31 +89,29 @@ async function getVideoDetailsBatch(videoIds) {
  * @returns {Promise<object|null>} - The best available video object.
  */
 export async function getBestAvailableVideoWithCheck(movieId) {
-    const url = `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${TMDB_API_KEY}`;
+	const url = `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${TMDB_API_KEY}`;
 
-    try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            console.error(`Error fetching TMDB videos: ${response.status} - ${response.statusText}`);
-            return null;
-        }
-        const data = await response.json();
-        const videos = data.results || [];
+	try {
+		const response = await fetch(url);
+		if (!response.ok) {
+			console.error(`Error fetching TMDB videos: ${response.status} - ${response.statusText}`);
+			return null;
+		}
+		const data = await response.json();
+		const videos = data.results || [];
 
-        // Prioritize videos with type 'Trailer'
-        const prioritizedTypes = ['Trailer', 'Teaser'];
-        const filteredVideos = videos.filter((video) =>
-            prioritizedTypes.includes(video.type)
-        );
+		// Prioritize videos with type 'Trailer'
+		const prioritizedTypes = ['Trailer', 'Teaser'];
+		const filteredVideos = videos.filter((video) => prioritizedTypes.includes(video.type));
 
-        // Sort by YouTube video views (mock logic, since TMDB doesn't provide view counts)
-        const bestVideo = filteredVideos[0]; // TMDB returns videos sorted by relevance
+		// Sort by YouTube video views (mock logic, since TMDB doesn't provide view counts)
+		const bestVideo = filteredVideos[0]; // TMDB returns videos sorted by relevance
 
-        return bestVideo || null;
-    } catch (error) {
-        console.error('Error fetching TMDB videos:', error);
-        return null;
-    }
+		return bestVideo || null;
+	} catch (error) {
+		console.error('Error fetching TMDB videos:', error);
+		return null;
+	}
 }
 
 /**
@@ -272,26 +270,26 @@ export async function fetchFavoriteMovies(currentUser) {
 
 // Function to generate the list of pages to display
 export function generatePageNumbers(currentPage, totalPages) {
-    const pages = [];
+	const pages = [];
 
-    for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-    }
-	
-    return pages;
+	for (let i = 1; i <= totalPages; i++) {
+		pages.push(i);
+	}
+
+	return pages;
 }
 
 // Fetch user profile by username
 export async function fetchUserProfile(username) {
-    const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('user_metadata->>display_name', username)
-        .single();
+	const { data, error } = await supabase
+		.from('users')
+		.select('*')
+		.eq('user_metadata->>display_name', username)
+		.single();
 
-    if (error) {
-        console.error('Error fetching user profile:', error);
-        return null;
-    }
-    return data;
+	if (error) {
+		console.error('Error fetching user profile:', error);
+		return null;
+	}
+	return data;
 }

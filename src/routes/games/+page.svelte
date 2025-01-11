@@ -2,11 +2,11 @@
 	// Array of available games
 	let games = [
 		{
-			name: "Daily Challenge",
-			description: "Guess the movie with hints and pixelated posters!",
-			link: "/games/daily",
-			icon: "🎬"
-		},
+			name: 'Daily Challenge',
+			description: 'Guess the movie with hints and pixelated posters!',
+			link: '/games/daily',
+			icon: '🎬'
+		}
 	];
 </script>
 

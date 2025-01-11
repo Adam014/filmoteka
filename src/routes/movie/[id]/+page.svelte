@@ -319,12 +319,12 @@
 		margin: 15px 40px 15px 40px;
 	}
 
-	.thumbnail-container{
+	.thumbnail-container {
 		padding: 40px;
 		height: auto;
 	}
 
-	.thumbnail-container img{
+	.thumbnail-container img {
 		height: 30rem;
 		object-fit: contain;
 	}

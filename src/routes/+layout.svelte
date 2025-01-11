@@ -24,10 +24,10 @@
 		if (!isToastShown) {
 			// Show the toast
 			toast(
-				"🎮 A new game is available! Check it out in the menu or at filmoteka.app/games/daily 🚀",
+				'🎮 A new game is available! Check it out in the menu or at filmoteka.app/games/daily 🚀',
 				{
 					duration: 15000,
-					icon: "🎉",
+					icon: '🎉'
 				}
 			);
 
@@ -48,9 +48,8 @@
 
 <style>
 	@media (max-width: 768px) {
-		.main-content{
+		.main-content {
 			padding-top: 60px;
 		}
 	}
-
 </style>

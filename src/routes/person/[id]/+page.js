@@ -11,8 +11,8 @@ export async function load({ params }) {
 			.eq('id', personId)
 			.single();
 
-		if(fetchError){
-			console.log(fetchError)
+		if (fetchError) {
+			console.log(fetchError);
 			return;
 		}
 

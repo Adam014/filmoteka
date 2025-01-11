@@ -118,24 +118,20 @@
 				</div>
 			{/if}
 		</a>
-		<div
-			class="favorite-icon"
-			on:click={toggleFavorite}
-			class:isFavorite={isFavorite}
-		>
+		<div class="favorite-icon" on:click={toggleFavorite} class:isFavorite>
 			{isFavorite ? '★' : '☆'}
 		</div>
 	{/if}
 </div>
 
 <style>
-	span p{
+	span p {
 		font-size: 20px;
 		text-align: center;
 	}
 
-	.movie-card a{
-		text-decoration: none
+	.movie-card a {
+		text-decoration: none;
 	}
 
 	.placeholder-image {

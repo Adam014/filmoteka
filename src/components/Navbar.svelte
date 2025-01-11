@@ -5,11 +5,11 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { user } from '../stores/user.js';
 	import logo from '../lib/assets/Filmoteka_logo.svg';
-	import Search from "./Search.svelte";
+	import Search from './Search.svelte';
 
 	let currentUser;
 	let menuOpen = false;
-	
+
 	const unsubscribe = user.subscribe((value) => {
 		currentUser = value;
 	});
@@ -132,7 +132,9 @@
 					<hr />
 					<a href="/random" on:click={closeMenu}>Random-Movie</a>
 					<hr />
-					<a href={`/profile/${currentUser.user_metadata.display_name}`} on:click={closeMenu}>Profile</a>
+					<a href={`/profile/${currentUser.user_metadata.display_name}`} on:click={closeMenu}
+						>Profile</a
+					>
 				</div>
 			</div>
 			<div class="logout-container">
@@ -160,14 +162,14 @@
 				</button>
 			</div>
 		{:else}
-		<div class="nav-items">	
-			<div class="left-nav-menu-items">
-				<h2>Play</h2>
-				<a href="/games" on:click={closeMenu}>Games</a>
-				<hr />
-				<a href="/games/daily" on:click={closeMenu}>Daily Challenge</a>
-			</div>		
-			<div class="center-nav-menu-items">
+			<div class="nav-items">
+				<div class="left-nav-menu-items">
+					<h2>Play</h2>
+					<a href="/games" on:click={closeMenu}>Games</a>
+					<hr />
+					<a href="/games/daily" on:click={closeMenu}>Daily Challenge</a>
+				</div>
+				<div class="center-nav-menu-items">
 					<h2>Explore</h2>
 					<a href="/" on:click={closeMenu}>Library</a>
 					<hr />
@@ -176,7 +178,7 @@
 					<a href="/login" on:click={closeMenu}>Login</a>
 					<hr />
 					<a href="/register" on:click={closeMenu}>Register</a>
-				</div>	
+				</div>
 			</div>
 		{/if}
 	</div>
@@ -185,18 +187,18 @@
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Shadows+Into+Light&display=swap');
 
-	.nav-items{
+	.nav-items {
 		display: flex;
 		width: 100%;
 		position: absolute;
 		top: 20%;
 	}
 
-	.signup-container{
+	.signup-container {
 		padding-left: 30px;
 	}
 
-	.nav-items div{
+	.nav-items div {
 		padding-left: 100px;
 	}
 
@@ -207,18 +209,18 @@
 	}
 
 	@media (max-width: 965px) {
-		.nav-items{
+		.nav-items {
 			display: grid;
 			justify-content: center;
 		}
-		.nav-items div{
+		.nav-items div {
 			padding-left: 0px;
 			padding-bottom: 50px;
 		}
 	}
 
 	@media (max-width: 768px) {
-		.signup-container{
+		.signup-container {
 			padding-left: 0px;
 		}
 
@@ -412,7 +414,7 @@
 	.placeholder-icon {
 		font-size: 2rem;
 	}
-	
+
 	@media (max-width: 768px) {
 		.logo {
 			width: 150px;

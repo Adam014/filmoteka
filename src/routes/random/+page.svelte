@@ -22,7 +22,6 @@
 		unsubscribe();
 	});
 
-	
 	// Fetch all genres from the database
 	async function fetchGenres() {
 		try {
@@ -169,7 +168,7 @@
 			</select>
 		</div>
 	</div>
-	<div></div>
+	<div />
 	<button on:click={fetchRandomMovies} class="random-button">
 		{isLoading ? 'Loading...' : 'Get Random Movies'}
 	</button>
@@ -195,12 +194,12 @@
 		text-align: center;
 	}
 
-	.control{
+	.control {
 		display: flex;
 		align-items: center;
 	}
 
-	.control label{
+	.control label {
 		padding-right: 20px;
 	}
 
@@ -254,15 +253,15 @@
 	}
 
 	@media (max-width: 768px) {
-		.controls{
+		.controls {
 			display: block;
 		}
-		.control{
+		.control {
 			padding: 10px;
 		}
 
-		.control select{
-			width: 100%
+		.control select {
+			width: 100%;
 		}
 	}
 </style>

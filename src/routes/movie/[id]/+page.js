@@ -8,7 +8,7 @@ export async function load({ params }) {
 			return {
 				details: detailedData,
 				credits: detailedData.credits || null,
-				poster_path: detailedData.poster_path || null, // Include poster_path
+				poster_path: detailedData.poster_path || null // Include poster_path
 			};
 		}
 	} catch (error) {
@@ -21,4 +21,3 @@ export async function load({ params }) {
 		};
 	}
 }
-

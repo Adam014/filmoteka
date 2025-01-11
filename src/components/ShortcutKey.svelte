@@ -22,7 +22,7 @@
 	}
 
 	@media (max-width: 768px) {
-		.shortcut-key{
+		.shortcut-key {
 			display: none;
 		}
 	}

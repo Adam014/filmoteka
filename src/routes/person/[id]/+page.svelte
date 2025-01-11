@@ -17,8 +17,7 @@
 	$: uniqueMovies = person?.movies?.results
 		? person.movies.results.filter(
 				(movie, index, self) =>
-					index === self.findIndex((m) => m.media?.id === movie.media?.id) &&
-					movie.media?.title // Ensure the movie has a valid title
+					index === self.findIndex((m) => m.media?.id === movie.media?.id) && movie.media?.title // Ensure the movie has a valid title
 		  )
 		: [];
 </script>

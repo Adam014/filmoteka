@@ -10,22 +10,22 @@ export async function load({ url }) {
 			.from('films')
 			.select('*', { count: 'exact', head: true });
 
-			if (countError || count === 0) {
-				console.warn('Count query failed or returned zero. Falling back to estimate.');
-				return {
-					data: { results: films },
-					count: 0,
-					currentPage: page,
-				};
-			}
+		if (countError || count === 0) {
+			console.warn('Count query failed or returned zero. Falling back to estimate.');
+			return {
+				data: { results: films },
+				count: 0,
+				currentPage: page
+			};
+		}
 
 		let films = await getAllMovies(page);
 
 		if (films && films?.length > 0) {
 			return {
 				data: { results: films },
-				count, 
-				currentPage: page 
+				count,
+				currentPage: page
 			};
 		}
 	} catch (error) {

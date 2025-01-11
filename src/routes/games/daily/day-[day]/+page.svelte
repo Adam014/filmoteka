@@ -4,7 +4,7 @@
 	import { user } from '../../../../stores/user';
 	import lodash from 'lodash';
 	import { onMount, onDestroy } from 'svelte';
-	import Loader from "../../../../components/Loader.svelte";
+	import Loader from '../../../../components/Loader.svelte';
 	import { goto } from '$app/navigation';
 
 	let challenge = null;
@@ -85,7 +85,7 @@
 	async function checkIfPlayed() {
 		if (!currentUser) {
 			// Ensure localStorage is only accessed on the client
-			if (typeof window !== "undefined") {
+			if (typeof window !== 'undefined') {
 				const localState = localStorage.getItem(`daily-challenge-day-${day}`);
 				alreadyPlayed = !!localState;
 			} else {
@@ -136,7 +136,7 @@
 	async function fetchSavedState() {
 		if (!currentUser) {
 			// Ensure localStorage is only accessed on the client
-			if (typeof window !== "undefined") {
+			if (typeof window !== 'undefined') {
 				const localState = localStorage.getItem(`daily-challenge-day-${day}`);
 				if (localState) {
 					try {
@@ -150,9 +150,7 @@
 		} else {
 			const filePath = `daily-challenge/${currentUser.id}/${day}.json`;
 
-			const { data, error } = await supabase.storage
-				.from('games')
-				.download(filePath);
+			const { data, error } = await supabase.storage.from('games').download(filePath);
 
 			if (error) {
 				console.error('Error fetching saved state:', error);
@@ -188,7 +186,7 @@
 			guessedCorrectly,
 			guessesLeft,
 			currentHint,
-			completedAt: new Date().toISOString(),
+			completedAt: new Date().toISOString()
 		};
 
 		if (!currentUser) {
@@ -231,7 +229,7 @@
 				suggestions = data.map((movie) => ({
 					id: movie.id,
 					title: movie.title,
-					poster_path: movie.poster_path,
+					poster_path: movie.poster_path
 				}));
 			}
 		} catch (err) {
@@ -312,7 +310,7 @@
 		<div class="hint-container fade-in">
 			<div class="poster-wrapper">
 				{#if alreadyPlayed || guessedCorrectly || guessesLeft === 0}
-					<a href={`/movie/${challenge.films_id}`}>					
+					<a href={`/movie/${challenge.films_id}`}>
 						<img
 							src={`https://image.tmdb.org/t/p/w400${challenge.poster_path}`}
 							alt="Movie Poster"
@@ -324,7 +322,13 @@
 						src={`https://image.tmdb.org/t/p/w400${challenge.poster_path}`}
 						alt="Movie Poster"
 						class="poster {guessedCorrectly || guessesLeft === 0 ? 'unblurred' : ''}"
-						style="filter: blur({guessedCorrectly || guessesLeft === 0 ? '0px' : currentHint === 1 ? '20px' : currentHint === 2 ? '10px' : '5px'});"
+						style="filter: blur({guessedCorrectly || guessesLeft === 0
+							? '0px'
+							: currentHint === 1
+							? '20px'
+							: currentHint === 2
+							? '10px'
+							: '5px'});"
 					/>
 				{/if}
 			</div>
@@ -333,7 +337,9 @@
 					<p class="hint slide-in">🗓 Release Date: {challenge.release_date}</p>
 				{/if}
 				{#if currentHint >= 2}
-					<p class="hint slide-in">🌍 Countries: {challenge.original_country.map((c) => c.name).join(', ')}</p>
+					<p class="hint slide-in">
+						🌍 Countries: {challenge.original_country.map((c) => c.name).join(', ')}
+					</p>
 					<p class="hint slide-in">🎭 Genres: {challenge.genres.map((g) => g.name).join(', ')}</p>
 				{/if}
 				{#if currentHint >= 3}
@@ -344,7 +350,7 @@
 
 		<!-- Final Message -->
 		{#if alreadyPlayed || guessedCorrectly || guessesLeft === 0}
-			<p class="{guessedCorrectly ? 'success-message fade-in' : 'game-over-message fade-in'}">
+			<p class={guessedCorrectly ? 'success-message fade-in' : 'game-over-message fade-in'}>
 				{guessedCorrectly
 					? `🎉 Correct! The movie is ${challenge.title}!`
 					: `❌ You didn’t guess it! The movie was "${challenge.title}".`}
@@ -382,7 +388,7 @@
 			</div>
 			<div class="controls">
 				<button class="skip-button fade-in" on:click={handleSkip}>Skip Guess</button>
-				<p class="guesses-left fade-in ">Guesses Left: {guessesLeft}</p>
+				<p class="guesses-left fade-in">Guesses Left: {guessesLeft}</p>
 			</div>
 		{/if}
 	</div>
@@ -584,38 +590,64 @@
 		font-size: 1.2rem;
 	}
 
-  @keyframes fadeIn {
-		0% { opacity: 0; transform: translateY(20px); }
-		100% { opacity: 1; transform: translateY(0); }
+	@keyframes fadeIn {
+		0% {
+			opacity: 0;
+			transform: translateY(20px);
+		}
+		100% {
+			opacity: 1;
+			transform: translateY(0);
+		}
 	}
 	@keyframes slideIn {
-		0% { opacity: 0; transform: translateX(-20px); }
-		100% { opacity: 1; transform: translateX(0); }
+		0% {
+			opacity: 0;
+			transform: translateX(-20px);
+		}
+		100% {
+			opacity: 1;
+			transform: translateX(0);
+		}
 	}
 	@keyframes shake {
-		0%, 100% { transform: translateX(0); }
-		25% { transform: translateX(-5px); }
-		50% { transform: translateX(5px); }
-		75% { transform: translateX(-5px); }
+		0%,
+		100% {
+			transform: translateX(0);
+		}
+		25% {
+			transform: translateX(-5px);
+		}
+		50% {
+			transform: translateX(5px);
+		}
+		75% {
+			transform: translateX(-5px);
+		}
 	}
 
-	.fade-in { animation: fadeIn 0.8s ease-in-out; }
-	.slide-in { animation: slideIn 0.8s ease-in-out; }
-	.shake { animation: shake 0.5s ease-in-out; }
+	.fade-in {
+		animation: fadeIn 0.8s ease-in-out;
+	}
+	.slide-in {
+		animation: slideIn 0.8s ease-in-out;
+	}
+	.shake {
+		animation: shake 0.5s ease-in-out;
+	}
 
-	@media (max-width: 768px){
-		.search-input{
+	@media (max-width: 768px) {
+		.search-input {
 			width: 90%;
 		}
-		.controls{
+		.controls {
 			width: 95%;
 		}
-		.challenge-container{
+		.challenge-container {
 			padding-top: 20px;
 		}
-		.header h1{
+		.header h1 {
 			padding-bottom: 1rem;
 		}
 	}
-
 </style>

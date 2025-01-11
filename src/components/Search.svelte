@@ -5,7 +5,7 @@
 	import { onMount } from 'svelte';
 	import lodash from 'lodash';
 	import { handleSearch } from '../lib/utils'; // Import the handleSearch function
-	
+
 	const { debounce } = lodash;
 
 	let searchQuery = '';
@@ -16,59 +16,60 @@
 
 	// Fetch movies and people based on user input or show random results
 	async function fetchSuggestions(query = '') {
-	isLoading = true;
+		isLoading = true;
 
-	try {
-		let movieQuery = supabase.from('films').select('id, title, poster_path, popularity');
-		let peopleQuery = supabase.from('person_detailed').select('id, name, profile_path, popularity');
+		try {
+			let movieQuery = supabase.from('films').select('id, title, poster_path, popularity');
+			let peopleQuery = supabase
+				.from('person_detailed')
+				.select('id, name, profile_path, popularity');
 
-		if (query) {
-			// Apply search filter when the user types
-			movieQuery = movieQuery.ilike('title', `%${query}%`);
-			peopleQuery = peopleQuery.ilike('name', `%${query}%`);
+			if (query) {
+				// Apply search filter when the user types
+				movieQuery = movieQuery.ilike('title', `%${query}%`);
+				peopleQuery = peopleQuery.ilike('name', `%${query}%`);
+			}
+
+			const [movies, people] = await Promise.all([movieQuery, peopleQuery]);
+
+			if (movies.error || people.error) {
+				console.error(
+					'Error fetching data:',
+					movies.error?.message || '',
+					people.error?.message || ''
+				);
+				return;
+			}
+
+			const moviesData = movies.data || [];
+			const peopleData = people.data || [];
+
+			// Combine all results
+			const combinedResults = [
+				...moviesData.map((movie) => ({
+					type: 'movie',
+					id: movie.id,
+					name: movie.title,
+					poster_path: movie.poster_path,
+					popularity: movie.popularity
+				})),
+				...peopleData.map((person) => ({
+					type: 'person',
+					id: person.id,
+					name: person.name,
+					poster_path: person.profile_path,
+					popularity: person.popularity
+				}))
+			];
+
+			// Shuffle the combined results and select 5 random items
+			suggestions = lodash.shuffle(combinedResults).slice(0, 5);
+		} catch (error) {
+			console.error('Error fetching suggestions:', error.message);
+		} finally {
+			isLoading = false;
 		}
-
-		const [movies, people] = await Promise.all([movieQuery, peopleQuery]);
-
-		if (movies.error || people.error) {
-			console.error(
-				'Error fetching data:',
-				movies.error?.message || '',
-				people.error?.message || ''
-			);
-			return;
-		}
-
-		const moviesData = movies.data || [];
-		const peopleData = people.data || [];
-
-		// Combine all results
-		const combinedResults = [
-			...moviesData.map((movie) => ({
-				type: 'movie',
-				id: movie.id,
-				name: movie.title,
-				poster_path: movie.poster_path,
-				popularity: movie.popularity,
-			})),
-			...peopleData.map((person) => ({
-				type: 'person',
-				id: person.id,
-				name: person.name,
-				poster_path: person.profile_path,
-				popularity: person.popularity,
-			})),
-		];
-
-		// Shuffle the combined results and select 5 random items
-		suggestions = lodash.shuffle(combinedResults).slice(0, 5);
-	} catch (error) {
-		console.error('Error fetching suggestions:', error.message);
-	} finally {
-		isLoading = false;
 	}
-}
-
 
 	// Debounced search
 	const debouncedFetch = debounce((query) => fetchSuggestions(query), 300);
@@ -169,7 +170,9 @@
 											<span>{suggestion.name ? suggestion.name.charAt(0) : '?'}</span>
 										</div>
 									{/if}
-									{suggestion.name || 'No Name'} ({suggestion.type === 'movie' ? 'Movie' : 'Person'})
+									{suggestion.name || 'No Name'} ({suggestion.type === 'movie'
+										? 'Movie'
+										: 'Person'})
 								</li>
 							</a>
 						{/each}
@@ -196,17 +199,16 @@
 		color: #fff;
 	}
 
-	
 	.placeholder-image {
 		width: 60px;
 		height: 90px;
-		background-color: #333; 
-		color: #fff; 
+		background-color: #333;
+		color: #fff;
 		display: flex;
 		justify-content: center;
 		align-items: center;
 		border-radius: 4px;
-		font-size: 24px; 
+		font-size: 24px;
 		font-weight: bold;
 	}
 
