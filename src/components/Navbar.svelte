@@ -124,17 +124,19 @@
 					<h2>Play</h2>
 					<a href="/games" on:click={closeMenu}>Games</a>
 					<hr />
+					<a href="/random" on:click={closeMenu}>Random-Movie</a>
+					<hr />
 					<a href="/games/daily" on:click={closeMenu}>Daily Challenge</a>
 				</div>
 				<div class="center-nav-menu-items">
 					<h2>Explore</h2>
-					<a href="/" on:click={closeMenu}>Library</a>
-					<hr />
-					<a href="/random" on:click={closeMenu}>Random-Movie</a>
+					<a href="/library" on:click={closeMenu}>Library</a>
 					<hr />
 					<a href={`/profile/${currentUser.user_metadata.display_name}`} on:click={closeMenu}
 						>Profile</a
 					>
+					<hr />
+					<a href="/contact" on:click={closeMenu}>Contact</a>
 				</div>
 			</div>
 			<div class="logout-container">
@@ -168,12 +170,12 @@
 					<a href="/games" on:click={closeMenu}>Games</a>
 					<hr />
 					<a href="/games/daily" on:click={closeMenu}>Daily Challenge</a>
+					<hr />
+					<a href="/random" on:click={closeMenu}>Random-Movie</a>
 				</div>
 				<div class="center-nav-menu-items">
 					<h2>Explore</h2>
 					<a href="/" on:click={closeMenu}>Library</a>
-					<hr />
-					<a href="/random" on:click={closeMenu}>Random-Movie</a>
 					<hr />
 					<a href="/login" on:click={closeMenu}>Login</a>
 					<hr />
