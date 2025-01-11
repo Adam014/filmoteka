@@ -196,17 +196,25 @@ export async function getAllMovies(page) {
 }
 
 export async function getDetailedMovie(id) {
-	// If film exists, fetch the detailed information from the detailed_film table
 	try {
+		// Fetch detailed data with poster_path from films table
 		const { data: detailedData, error } = await supabase
 			.from('film_detailed')
-			.select('*')
+			.select('*, films(poster_path)')
 			.eq('id', id)
 			.single();
 
-		return detailedData;
+		if (error) {
+			throw new Error(`Error fetching detailed movie: ${error.message}`);
+		}
+
+		// Return detailed data including poster_path
+		return {
+			...detailedData,
+			poster_path: detailedData.films?.poster_path || null // Include poster_path in the result
+		};
 	} catch (error) {
-		console.log(error);
+		console.error('Error in getDetailedMovie:', error.message);
 		return null;
 	}
 }

@@ -2,40 +2,26 @@
     import { supabase } from '../../../lib/db/supabaseClient';
     import Loader from '../../../components/Loader.svelte';
     import MovieCard from '../../../components/MovieCard.svelte';
-    import { onMount, onDestroy } from 'svelte';
     import { page } from '$app/stores';
-    import { user } from '../../../stores/user'; // Import user store
-    import toast from 'svelte-french-toast'; // Import toast
-    import { goto } from '$app/navigation'; // Import goto for redirection
+    import { user } from '../../../stores/user'; 
+    import toast from 'svelte-french-toast'; 
+    import { goto } from '$app/navigation'; 
     import { formatDate } from "../../../lib/utils.js";
+    import { onMount, onDestroy } from 'svelte';
 
     let profileUser = null;
     let currentUser = null; // To track the logged-in user
     let favoriteMovies = [];
     let loading = true;
 
-    let params;
-    $: $page, params = $page.params;
-
     // Subscribe to the user store
     const unsubscribe = user.subscribe((value) => {
         currentUser = value;
     });
 
-    onMount(async () => {
-        // Check if the user is logged in
-        if (!currentUser) {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session?.user) {
-                toast.error('You must be logged in to view profile pages.');
-                goto('/?page=1');
-                return;
-            }
-            currentUser = session.user; // Set the user from the session
-        }
-
+    // Function to fetch profile data
+    async function fetchProfileData(name) {
         loading = true;
-        const displayName = params.name;
 
         try {
             // Fetch all users
@@ -48,7 +34,7 @@
 
             // Access the 'users' array and find the user by display name
             const users = data?.users || [];
-            profileUser = users.find(user => user.user_metadata?.display_name === displayName);
+            profileUser = users.find(user => user.user_metadata?.display_name === name);
 
             if (!profileUser) {
                 console.error('User not found');
@@ -95,9 +81,28 @@
                 console.log('No favorite movies found.');
             }
         } catch (err) {
-            console.error('Error in onMount:', err);
+            console.error('Error in fetchProfileData:', err);
         } finally {
             loading = false;
+        }
+    }
+
+    // Watch for changes in the route params and fetch data
+    $: params = $page.params;
+    $: if (params.name) {
+        fetchProfileData(params.name);
+    }
+
+    // Handle user authentication
+    onMount(async () => {
+        if (!currentUser) {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.user) {
+                toast.error('You must be logged in to view profile pages.');
+                goto('/?page=1');
+                return;
+            }
+            currentUser = session.user;
         }
     });
 

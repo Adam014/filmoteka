@@ -19,6 +19,3 @@ movie/id
     
 /spotlight
     TODO: Add users feed, where users can write posts, like posts, or even when they like movie it will appear there
-
-/random
-    TODO: Fix when you get random movies, and then click to get another random, the hrefs to the new movies doesnt edit

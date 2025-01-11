@@ -182,20 +182,30 @@
 	</div>
 
 	<!-- Show Loading... when trailer is being fetched -->
+	<!-- Show Loading... when trailer is being fetched -->
 	{#if isLoading}
-		<Loader />
+	<Loader />
 	{:else if finalTrailer}
-		<div class="video-container">
-			<iframe
-				title="youtube-video"
-				src={`https://www.youtube.com/embed/${finalTrailer.key}`}
-				frameborder="0"
-				allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-				allowfullscreen
-			/>
-		</div>
+	<div class="video-container">
+		<iframe
+			title="youtube-video"
+			src={`https://www.youtube.com/embed/${finalTrailer.key}`}
+			frameborder="0"
+			allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+			allowfullscreen
+		/>
+	</div>
+	{:else if poster_path}
+	<!-- Display a thumbnail when no trailer is available -->
+	<div class="thumbnail-container">
+		<img
+			src={`https://image.tmdb.org/t/p/w500${poster_path}`}
+			alt="{original_title} Thumbnail"
+			class="thumbnail-image"
+		/>
+	</div>
 	{:else}
-		<p class="no-trailer">No trailer available.</p>
+	<p class="no-trailer">No trailer or thumbnail available.</p>
 	{/if}
 
 	<!-- Add images right under the trailer, lets say 5-6 images -->
@@ -284,6 +294,16 @@
 
 	hr {
 		margin: 15px 40px 15px 40px;
+	}
+
+	.thumbnail-container{
+		padding: 40px;
+		height: auto;
+	}
+
+	.thumbnail-container img{
+		height: 30rem;
+		object-fit: contain;
 	}
 
 	.favorite-icon {
