@@ -5,14 +5,13 @@
 	import { supabase } from '../../../lib/db/supabaseClient';
 	import toast from 'svelte-french-toast';
 	import { user } from '../../../stores/user';
-	import MovieCard from "../../../components/MovieCard.svelte"
 	import PersonCard from '../../../components/PersonCard.svelte';
 
 	export let data;
 
 	let currentUser;
 	let movieDetails = {};
-	let movieVideos = [];
+	let movieTrailer = null;
 	let cast = [];
 	let crew = [];
 	let topActors = [];
@@ -47,7 +46,7 @@
 	// Reactively update variables when `data` changes
 	$: if (data) {
 		movieDetails = data.details || {};
-		movieVideos = data.videos?.results || [];
+		movieTrailer = data.trailer || [];
 		cast = data.credits?.cast || [];
 		crew = data.credits?.crew || [];
 
@@ -85,8 +84,34 @@
 
 	async function fetchBestAvailableVideo() {
 		isLoading = true;
-		finalTrailer = await getBestAvailableVideoWithCheck(movieVideos);
-		isLoading = false;
+
+		try {
+			// Fetch the best trailer using the utility function
+			const bestVideo = await getBestAvailableVideoWithCheck(movieDetails.id);
+
+			if (bestVideo) {
+				// Save the trailer key to Supabase
+				const { data, error } = await supabase
+					.from('film_detailed')
+					.update({ trailer: bestVideo.key })
+					.eq('id', movieDetails.id);
+
+				if (error) {
+					console.error('Error saving trailer to Supabase:', error.message);
+					toast.error('Failed to save trailer.');
+				} else {
+					finalTrailer = bestVideo;
+				}
+			} else {
+				console.warn('No suitable trailer found.');
+				toast.error('No suitable trailer found.');
+			}
+		} catch (error) {
+			console.error('Error fetching the best trailer:', error);
+			toast.error('Failed to fetch trailer.');
+		} finally {
+			isLoading = false;
+		}
 	}
 
 	async function checkIfFavorite() {
@@ -181,31 +206,29 @@
 		</div>
 	</div>
 
-	<!-- Show Loading... when trailer is being fetched -->
-	<!-- Show Loading... when trailer is being fetched -->
 	{#if isLoading}
-	<Loader />
+		<Loader />
 	{:else if finalTrailer}
-	<div class="video-container">
-		<iframe
-			title="youtube-video"
-			src={`https://www.youtube.com/embed/${finalTrailer.key}`}
-			frameborder="0"
-			allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-			allowfullscreen
-		/>
-	</div>
+		<div class="video-container">
+			<iframe
+				title="youtube-video"
+				src={`https://www.youtube.com/embed/${finalTrailer.key}`}
+				frameborder="0"
+				allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+				allowfullscreen
+			/>
+		</div>
 	{:else if poster_path}
-	<!-- Display a thumbnail when no trailer is available -->
-	<div class="thumbnail-container">
-		<img
-			src={`https://image.tmdb.org/t/p/w500${poster_path}`}
-			alt="{original_title} Thumbnail"
-			class="thumbnail-image"
-		/>
-	</div>
+		<!-- Display a thumbnail when no trailer is available -->
+		<div class="thumbnail-container">
+			<img
+				src={`https://image.tmdb.org/t/p/w500${poster_path}`}
+				alt="{original_title} Thumbnail"
+				class="thumbnail-image"
+			/>
+		</div>
 	{:else}
-	<p class="no-trailer">No trailer or thumbnail available.</p>
+		<p class="no-trailer">No trailer or thumbnail available.</p>
 	{/if}
 
 	<!-- Add images right under the trailer, lets say 5-6 images -->

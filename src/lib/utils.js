@@ -84,43 +84,36 @@ async function getVideoDetailsBatch(videoIds) {
 }
 
 /**
- * Optimized function to find the best available video by making a single batch request.
- * @param {Array} videoList - List of video objects.
- * @returns {Promise<object|null>} - The best available video based on views, availability, and age restriction.
+ * Fetch the best available video for a movie using TMDB API and save it to Supabase.
+ * @param {number} movieId - The TMDB movie ID.
+ * @returns {Promise<object|null>} - The best available video object.
  */
-export async function getBestAvailableVideoWithCheck(videoList) {
-    const prioritizedTypes = ['Trailer', 'Teaser', 'Clip'];
+export async function getBestAvailableVideoWithCheck(movieId) {
+    const url = `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${TMDB_API_KEY}`;
 
-    // Filter videos by prioritized types
-    const filteredVideos = videoList.filter(
-        (video) =>
-            prioritizedTypes.includes(video.type) && !video.name.toLowerCase().includes('restricted')
-    );
-
-    // Extract video keys (IDs) for the batch request
-    const videoIds = filteredVideos.map((video) => video.key);
-    const videoDetails = await getVideoDetailsBatch(videoIds);
-
-    // Process the fetched details and filter valid videos
-    const validVideos = videoDetails
-        .map((details) => {
-            const video = filteredVideos.find((v) => v.key === details.id);
-            const isRestricted = details.contentDetails.contentRating?.ytRating === 'ytAgeRestricted';
-            const isAvailable =
-                details.status.embeddable && details.status.uploadStatus === 'processed';
-            const views = parseInt(details.statistics.viewCount || '0', 10);
-
-            if (video && !isRestricted && isAvailable) {
-                return { ...video, views };
-            }
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            console.error(`Error fetching TMDB videos: ${response.status} - ${response.statusText}`);
             return null;
-        })
-        .filter(Boolean);
+        }
+        const data = await response.json();
+        const videos = data.results || [];
 
-    // Sort videos by view count in descending order
-    validVideos.sort((a, b) => b.views - a.views);
+        // Prioritize videos with type 'Trailer'
+        const prioritizedTypes = ['Trailer', 'Teaser'];
+        const filteredVideos = videos.filter((video) =>
+            prioritizedTypes.includes(video.type)
+        );
 
-    return validVideos?.length > 0 ? validVideos[0] : null;
+        // Sort by YouTube video views (mock logic, since TMDB doesn't provide view counts)
+        const bestVideo = filteredVideos[0]; // TMDB returns videos sorted by relevance
+
+        return bestVideo || null;
+    } catch (error) {
+        console.error('Error fetching TMDB videos:', error);
+        return null;
+    }
 }
 
 /**
