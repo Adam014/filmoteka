@@ -262,6 +262,7 @@
 			saveGameResult();
 		}
 
+		userGuess = '';
 		suggestions = [];
 		isSuggestionsOpen = false;
 	}
