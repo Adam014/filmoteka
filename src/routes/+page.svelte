@@ -121,19 +121,11 @@
         font-size: 4rem;
     }
 
-    /* Base grid: 2 columns on larger screens */
     .cards-container {
         width: 100%;
         display: grid;
         grid-template-columns: repeat(2, 1fr);
         gap: 1rem;
-    }
-
-    /* Media query: switch to single column on small screens */
-    @media (max-width: 600px) {
-        .cards-container {
-            grid-template-columns: 1fr;
-        }
     }
 
     .card {
@@ -163,5 +155,18 @@
         color: white;
         font-size: 2rem;
         cursor: pointer;
+    }
+
+        
+    @media (max-width: 600px) {
+        .cards-container {
+            grid-template-columns: 1fr;
+        }
+        button{
+            font-size: 1.3rem;
+        }
+        h1{
+            font-size: 2rem;
+        }
     }
 </style>
