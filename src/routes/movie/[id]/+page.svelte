@@ -89,6 +89,12 @@
 			// Fetch the best trailer using the utility function
 			const bestVideo = await getBestAvailableVideoWithCheck(movieDetails.id);
 
+			if (!bestVideo) {
+			// Only show toast here
+			toast.error('No suitable trailer found.');
+			return;
+			}
+
 			if (bestVideo) {
 				// Save the trailer key to Supabase
 				const { data, error } = await supabase
