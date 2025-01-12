@@ -383,11 +383,16 @@
 		.cards-container {
 			grid-template-columns: 1fr;
 		}
-		button {
-			font-size: 1.3rem;
-		}
 		h1 {
 			font-size: 2rem;
 		}
+        .button2{
+            width: 80px;
+            height: 80px;
+        }
+
+        .button__text{
+            font-size: 0.6rem;
+        }
 	}
 </style>
