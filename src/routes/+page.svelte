@@ -390,7 +390,7 @@
 		}
 		h1 {
 			font-size: 2rem;
-            padding: 30px 0px 30px 0px;
+            padding: 0px 0px 30px 0px;
 		}
         .button2{
             width: 80px;
