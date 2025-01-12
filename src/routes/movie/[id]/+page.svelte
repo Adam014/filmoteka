@@ -102,9 +102,6 @@
 				} else {
 					finalTrailer = bestVideo;
 				}
-			} else {
-				console.warn('No suitable trailer found.');
-				toast.error('No suitable trailer found.');
 			}
 		} catch (error) {
 			console.error('Error fetching the best trailer:', error);
