@@ -43,7 +43,7 @@
 		currentPage = page;
 		localStorage.setItem('currentPage', page);
 		await loadMovies(page, setMovieResults);
-		goto(`/?page=${page}`, { replaceState: true });
+		goto(`/library/?page=${page}`, { replaceState: true });
 	}
 
 	function handleMoviesLoaded(event) {

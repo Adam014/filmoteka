@@ -37,18 +37,6 @@
 		}
 	}
 
-	async function goToFirstPage(event) {
-		event.preventDefault();
-		const movies = JSON.parse(localStorage.getItem('movies_page_1'));
-		if (movies) {
-			window.dispatchEvent(new CustomEvent('movies-loaded', { detail: { movies, page: 1 } }));
-			goto('/?page=1', { replaceState: true });
-		} else {
-			await loadMovies(1);
-			goto('/?page=1', { replaceState: true });
-		}
-	}
-
 	async function signOut() {
 		const { error } = await supabase.auth.signOut();
 		if (error) {
@@ -87,7 +75,7 @@
 	</label>
 
 	<div class="header-container">
-		<a href="/?page=1" on:click={goToFirstPage}>
+		<a href="/">
 			<img src={logo} alt="logo" class="logo" />
 		</a>
 	</div>
@@ -175,7 +163,7 @@
 				</div>
 				<div class="center-nav-menu-items">
 					<h2>Explore</h2>
-					<a href="/" on:click={closeMenu}>Library</a>
+					<a href="/library" on:click={closeMenu}>Library</a>
 					<hr />
 					<a href="/login" on:click={closeMenu}>Login</a>
 					<hr />
