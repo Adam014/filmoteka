@@ -218,6 +218,7 @@
 	h1 {
 		padding: 50px 0;
 		font-size: 4rem;
+        text-decoration: underline dotted;
 	}
 
 	.cards-container {
@@ -380,11 +381,16 @@
 	}
 
 	@media (max-width: 600px) {
+        .root-container{
+            padding: 20px;
+        }
+
 		.cards-container {
 			grid-template-columns: 1fr;
 		}
 		h1 {
 			font-size: 2rem;
+            padding: 30px 0px 30px 0px;
 		}
         .button2{
             width: 80px;
@@ -393,6 +399,9 @@
 
         .button__text{
             font-size: 0.6rem;
+        }
+        .button-library{
+            padding-top: 20px;
         }
 	}
 </style>
