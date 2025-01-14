@@ -14,6 +14,9 @@ TODO: Add users feed, where users can write posts, like posts, or even when they
 /contact
 TODO: Create a contact page
 
+/daily
+TODO: Fix: On google when you hold the image and move the mouse you can see the non pixelated image
+
 ////////////////
 
 TODO: Add everything about games to filmoteka -> rename it to something like Mediarena or Enterverse
