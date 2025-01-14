@@ -337,9 +337,6 @@
 					<p class="hint slide-in">🗓 Release Date: {challenge.release_date}</p>
 				{/if}
 				{#if currentHint >= 2}
-					<p class="hint slide-in">
-						🌍 Countries: {challenge.original_country.map((c) => c.name).join(', ')}
-					</p>
 					<p class="hint slide-in">🎭 Genres: {challenge.genres.map((g) => g.name).join(', ')}</p>
 				{/if}
 				{#if currentHint >= 3}
