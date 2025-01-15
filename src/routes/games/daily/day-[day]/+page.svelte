@@ -385,13 +385,15 @@
 		<div class="hint-container fade-in">
 			<div class="poster-wrapper">
 				{#if alreadyPlayed || guessedCorrectly || guessesLeft === 0}
-					<a href={`/movie/${challenge.films_id}`}>
-						<img
-							src={`https://image.tmdb.org/t/p/w400${challenge.poster_path}`}
-							alt="Movie Poster"
-							class="poster {guessedCorrectly || guessesLeft === 0 ? 'unblurred' : ''}"
-						/>
-					</a>
+					<div>
+						<a href={`/movie/${challenge.films_id}`}>
+							<img
+								src={`https://image.tmdb.org/t/p/w400${challenge.poster_path}`}
+								alt="Movie Poster"
+								class="poster {guessedCorrectly || guessesLeft === 0 ? 'unblurred' : ''}"
+							/>
+						</a>
+					</div>
 				{:else}
 					<img
 						src={`https://image.tmdb.org/t/p/w400${challenge.poster_path}`}
@@ -497,7 +499,7 @@
 		display: flex;
 		justify-content: center;
 		gap: 10px;
-		margin-bottom: 20px;
+		margin-bottom: 40px;
 	}
 
 	.nav-button {
@@ -527,7 +529,7 @@
 	}
 
 	.header h1 {
-		padding-bottom: 4rem;
+		padding-bottom: 2rem;
 		color: var(--primary-color);
 		font-size: 2rem;
 	}
@@ -539,37 +541,15 @@
 		gap: 15px;
 	}
 
-	.day-switch-buttons {
-		display: flex;
-		justify-content: center;
-		gap: 20px;
-		padding: 20px;
-	}
-
-	.switch-button {
-		background-color: var(--primary-color);
-		color: var(--text-color);
-		border: none;
-		padding: 10px 20px;
-		border-radius: 8px;
-		cursor: pointer;
-		transition: background-color 0.2s ease;
-		font-size: 1rem;
-	}
-
-	.switch-button:hover {
-		background-color: var(--success-color);
-	}
-
-	.switch-button:disabled {
-		background-color: grey;
-		cursor: not-allowed;
-	}
-
 	.poster-wrapper {
 		position: relative;
 		width: 250px;
 		height: 350px;
+		padding-bottom: 30px;
+	}
+
+	.poster-wrapper a{
+		display: flex;
 	}
 
 	.poster {
