@@ -14,7 +14,7 @@ TODO: Add users feed, where users can write posts, like posts, or even when they
 /contact
 TODO: Create a contact page
 
-/daily
+/games/daily
 TODO: Fix: On google when you hold the image and move the mouse you can see the non pixelated image
 
 ////////////////
