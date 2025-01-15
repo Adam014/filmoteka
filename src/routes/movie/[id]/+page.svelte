@@ -90,9 +90,9 @@
 			const bestVideo = await getBestAvailableVideoWithCheck(movieDetails.id);
 
 			if (!bestVideo) {
-			// Only show toast here
-			toast.error('No suitable trailer found.');
-			return;
+				// Only show toast here
+				toast.error('No suitable trailer found.');
+				return;
 			}
 
 			if (bestVideo) {

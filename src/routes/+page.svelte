@@ -123,90 +123,90 @@
 	</div>
 
 	<div class="button-library">
-        <div class="first-button">
-            <a href="/games/daily">
-                <button class="button2">
-                    <p class="button__text">
-                        <span style="--index: 0;">D</span>
-                        <span style="--index: 1;">A</span>
-                        <span style="--index: 2;">I</span>
-                        <span style="--index: 3;">L</span>
-                        <span style="--index: 4;">Y</span>
-                        <span style="--index: 6;">C</span>
-                        <span style="--index: 7;">H</span>
-                        <span style="--index: 8;">A</span>
-                        <span style="--index: 9;">L</span>
-                        <span style="--index: 10;">L</span>
-                        <span style="--index: 11;">E</span>
-                        <span style="--index: 12;">N</span>
-                        <span style="--index: 13;">G</span>
-                        <span style="--index: 14;">E</span>
-                    </p>
-        
-                    <div class="button__circle">
-                        <svg
-                            viewBox="0 0 14 15"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="button__icon"
-                            width="14"
-                        >
-                            <path
-                                d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z"
-                                fill="currentColor"
-                            />
-                        </svg>
-        
-                        <svg
-                            viewBox="0 0 14 15"
-                            fill="none"
-                            width="14"
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="button__icon button__icon--copy"
-                        >
-                            <path
-                                d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z"
-                                fill="currentColor"
-                            />
-                        </svg>
-                    </div>
-                </button>
-            </a>
-        </div>
-        <div class="second-button">
-            <a href="/library">
-                <button href="#" class="button" style="--clr: #7808d0">
-                    <span class="button__icon-wrapper">
-                        <svg
-                            viewBox="0 0 14 15"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="button__icon-svg"
-                            width="10"
-                        >
-                            <path
-                                d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z"
-                                fill="currentColor"
-                            />
-                        </svg>
-    
-                        <svg
-                            viewBox="0 0 14 15"
-                            fill="none"
-                            width="10"
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="button__icon-svg button__icon-svg--copy"
-                        >
-                            <path
-                                d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z"
-                                fill="currentColor"
-                            />
-                        </svg>
-                    </span>
-                    Go To Library
-                </button>
-            </a>
-        </div>
+		<div class="first-button">
+			<a href="/games/daily">
+				<button class="button2">
+					<p class="button__text">
+						<span style="--index: 0;">D</span>
+						<span style="--index: 1;">A</span>
+						<span style="--index: 2;">I</span>
+						<span style="--index: 3;">L</span>
+						<span style="--index: 4;">Y</span>
+						<span style="--index: 6;">C</span>
+						<span style="--index: 7;">H</span>
+						<span style="--index: 8;">A</span>
+						<span style="--index: 9;">L</span>
+						<span style="--index: 10;">L</span>
+						<span style="--index: 11;">E</span>
+						<span style="--index: 12;">N</span>
+						<span style="--index: 13;">G</span>
+						<span style="--index: 14;">E</span>
+					</p>
+
+					<div class="button__circle">
+						<svg
+							viewBox="0 0 14 15"
+							fill="none"
+							xmlns="http://www.w3.org/2000/svg"
+							class="button__icon"
+							width="14"
+						>
+							<path
+								d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z"
+								fill="currentColor"
+							/>
+						</svg>
+
+						<svg
+							viewBox="0 0 14 15"
+							fill="none"
+							width="14"
+							xmlns="http://www.w3.org/2000/svg"
+							class="button__icon button__icon--copy"
+						>
+							<path
+								d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z"
+								fill="currentColor"
+							/>
+						</svg>
+					</div>
+				</button>
+			</a>
+		</div>
+		<div class="second-button">
+			<a href="/library">
+				<button href="#" class="button" style="--clr: #7808d0">
+					<span class="button__icon-wrapper">
+						<svg
+							viewBox="0 0 14 15"
+							fill="none"
+							xmlns="http://www.w3.org/2000/svg"
+							class="button__icon-svg"
+							width="10"
+						>
+							<path
+								d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z"
+								fill="currentColor"
+							/>
+						</svg>
+
+						<svg
+							viewBox="0 0 14 15"
+							fill="none"
+							width="10"
+							xmlns="http://www.w3.org/2000/svg"
+							class="button__icon-svg button__icon-svg--copy"
+						>
+							<path
+								d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z"
+								fill="currentColor"
+							/>
+						</svg>
+					</span>
+					Go To Library
+				</button>
+			</a>
+		</div>
 	</div>
 </div>
 
@@ -218,7 +218,7 @@
 	h1 {
 		padding: 50px 0;
 		font-size: 4rem;
-        text-decoration: underline dotted;
+		text-decoration: underline dotted;
 	}
 
 	.cards-container {
@@ -245,13 +245,13 @@
 
 	.button-library {
 		padding-top: 65px;
-        display: flex;
-        align-items: center;
+		display: flex;
+		align-items: center;
 	}
 
-    .second-button{
-        padding-left: 20px
-    }
+	.second-button {
+		padding-left: 20px;
+	}
 
 	.button2 {
 		cursor: pointer;
@@ -381,27 +381,27 @@
 	}
 
 	@media (max-width: 600px) {
-        .root-container{
-            padding: 20px;
-        }
+		.root-container {
+			padding: 20px;
+		}
 
 		.cards-container {
 			grid-template-columns: 1fr;
 		}
 		h1 {
 			font-size: 2rem;
-            padding: 0px 0px 30px 0px;
+			padding: 0px 0px 30px 0px;
 		}
-        .button2{
-            width: 80px;
-            height: 80px;
-        }
+		.button2 {
+			width: 80px;
+			height: 80px;
+		}
 
-        .button__text{
-            font-size: 0.6rem;
-        }
-        .button-library{
-            padding-top: 20px;
-        }
+		.button__text {
+			font-size: 0.6rem;
+		}
+		.button-library {
+			padding-top: 20px;
+		}
 	}
 </style>
