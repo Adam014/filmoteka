@@ -15,7 +15,7 @@ TODO: Add users feed, where users can write posts, like posts, or even when they
 TODO: Create a contact page
 
 /games/daily
-TODO: Add option to mark the movie as favorite
+TODO: Save guesses so on refresh they doesnt reset
 
 ////////////////
 

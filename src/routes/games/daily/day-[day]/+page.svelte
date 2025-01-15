@@ -6,6 +6,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import Loader from '../../../../components/Loader.svelte';
 	import { goto } from '$app/navigation';
+	import toast from 'svelte-french-toast';
 
 	let challenge = null;
 	let currentHint = 1; // Tracks the current hint
@@ -21,6 +22,7 @@
 	let currentUser = null; // Holds the current user
 	let hasPreviousDay = false; // Tracks if there is a previous day
 	let hasNextDay = false; // Tracks if there is a next day
+	let isFavorite = false; // Track if the guessed movie is a favorite
 
 	// Reactively track the day from the page params
 	$: day = parseInt($page.params.day);
@@ -78,6 +80,7 @@
 			console.error('Error fetching challenge:', error);
 		} else {
 			challenge = data;
+			await checkIfFavorite(); // Check favorite status immediately after loading challenge
 		}
 	}
 
@@ -247,19 +250,20 @@
 		if (userGuess.toLowerCase() === challenge.title.toLowerCase()) {
 			guessedCorrectly = true;
 			saveGameResult();
-			userGuess = '';
+			guessesLeft = 0; // Set guessesLeft to 0 when guessed correctly
+			checkIfFavorite(); // Check and update favorite status
 		} else {
 			incorrectGuess = true;
 			setTimeout(() => (incorrectGuess = false), 1000);
 			guessesLeft--;
-			currentHint++;
+			if (guessesLeft === 0) {
+				// Trigger when out of guesses
+				saveGameResult();
+				checkIfFavorite();
+			}
 		}
 
-		if (guessesLeft === 0 && !guessedCorrectly) {
-			currentHint = 3;
-			saveGameResult();
-		}
-
+		currentHint = Math.max(currentHint + 1, 3); // Increment hint level
 		userGuess = '';
 		suggestions = [];
 		isSuggestionsOpen = false;
@@ -284,7 +288,78 @@
 		}
 	}
 
+	// Function to check if the movie is already marked as favorite
+	async function checkIfFavorite() {
+		if (!currentUser || !challenge) {
+			isFavorite = false;
+			return;
+		}
+
+		try {
+			const { data, error } = await supabase.storage.from('favorites').list(currentUser.email);
+
+			if (error) {
+				console.error('Error fetching favorites:', error.message);
+				isFavorite = false;
+				return;
+			}
+
+			// Match movie ID in favorites
+			isFavorite = data.some((file) => file.name === `${challenge.id}.json`);
+		} catch (err) {
+			console.error('Error checking favorite status:', err.message);
+			isFavorite = false;
+		}
+	}
+
+	// Function to toggle favorite status
+	async function toggleFavorite() {
+		if (!currentUser) {
+			goto('/login');
+			return;
+		}
+
+		const path = `${currentUser.email}/${challenge?.id}.json`;
+
+		if (isFavorite) {
+			try {
+				const { error } = await supabase.storage.from('favorites').remove([path]);
+				if (error) {
+					console.error('Error removing favorite:', error.message);
+					toast.error('Failed to remove from favorites.');
+					return;
+				}
+
+				toast.success(`${challenge.title} removed from favorites.`);
+			} catch (err) {
+				console.error('Error removing favorite:', err.message);
+				toast.error('Failed to remove from favorites.');
+			}
+		} else {
+			try {
+				const { error } = await supabase.storage
+					.from('favorites')
+					.upload(path, JSON.stringify({ id: challenge?.id, data: challenge }), {
+						contentType: 'application/json'
+					});
+				if (error) {
+					console.error('Error adding favorite:', error.message);
+					toast.error('Failed to add to favorites.');
+					return;
+				}
+
+				toast.success(`${challenge.title} added to favorites.`);
+			} catch (err) {
+				console.error('Error adding favorite:', err.message);
+				toast.error('Failed to add to favorites.');
+			}
+		}
+
+		isFavorite = !isFavorite;
+	}
+
 	onMount(() => {
+		checkIfFavorite();
 		document.addEventListener('click', handleClickOutside);
 		return () => {
 			document.removeEventListener('click', handleClickOutside);
@@ -330,6 +405,15 @@
 							? '10px'
 							: '5px'});"
 					/>
+				{/if}
+
+				{#if guessesLeft === 0 || alreadyPlayed}
+					<div
+						class="favorite-icon {isFavorite ? 'filled' : ''}"
+						on:click={toggleFavorite}
+					>
+						{isFavorite ? '★' : '☆'}
+					</div>
 				{/if}
 			</div>
 			<div class="hints">
@@ -483,22 +567,43 @@
 	}
 
 	.poster-wrapper {
-		display: flex;
-		justify-content: center;
+		position: relative;
+		width: 250px;
+		height: 350px;
 	}
 
 	.poster {
-		width: 250px;
-		height: 350px;
+		width: 100%;
+		height: 100%;
 		border-radius: 12px;
 		box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
 		transition: filter 0.5s ease;
-		-webkit-user-drag: none; 
-		pointer-events: none; 
-		user-select: none; 
+		-webkit-user-drag: none;
+		pointer-events: none;
+		user-select: none;
 	}
 
-	.poster.unblurred {
+	.favorite-icon {
+		position: absolute;
+		top: 10px;
+		right: 10px;
+		font-size: 2rem;
+		cursor: pointer;
+		color: rgba(255, 215, 0, 0.8);
+		text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.6);
+		transition: color 0.3s ease, transform 0.3s ease;
+	}
+
+	.favorite-icon:hover {
+		transform: scale(1.1);
+		color: gold;
+	}
+
+	.favorite-icon.isFavorite {
+		color: gold;
+	}
+
+	.unblurred {
 		filter: none !important;
 	}
 
