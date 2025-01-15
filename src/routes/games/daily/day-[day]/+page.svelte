@@ -493,6 +493,9 @@
 		border-radius: 12px;
 		box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
 		transition: filter 0.5s ease;
+		-webkit-user-drag: none; 
+		pointer-events: none; 
+		user-select: none; 
 	}
 
 	.poster.unblurred {

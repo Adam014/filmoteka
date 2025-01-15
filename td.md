@@ -15,7 +15,6 @@ TODO: Add users feed, where users can write posts, like posts, or even when they
 TODO: Create a contact page
 
 /games/daily
-TODO: Fix: On google when you hold the image and move the mouse you can see the non pixelated image
 TODO: Add option to mark the movie as favorite
 
 ////////////////
