@@ -109,10 +109,8 @@
 		{#if currentUser}
 			<div class="nav-items">
 				<div class="left-nav-menu-items">
-					<h2>Play</h2>
+					<h2>Movieground</h2>
 					<a href="/games" on:click={closeMenu}>Games</a>
-					<hr />
-					<a href="/random" on:click={closeMenu}>Random-Movie</a>
 					<hr />
 					<a href="/games/daily" on:click={closeMenu}>Daily Challenge</a>
 				</div>
@@ -123,6 +121,8 @@
 					<a href={`/profile/${currentUser.user_metadata.display_name}`} on:click={closeMenu}
 						>Profile</a
 					>
+					<hr />
+					<a href="/random" on:click={closeMenu}>Random-Movie</a>
 					<hr />
 					<a href="/contact" on:click={closeMenu}>Contact</a>
 				</div>
@@ -154,16 +154,16 @@
 		{:else}
 			<div class="nav-items">
 				<div class="left-nav-menu-items">
-					<h2>Play</h2>
+					<h2>Movieground</h2>
 					<a href="/games" on:click={closeMenu}>Games</a>
 					<hr />
 					<a href="/games/daily" on:click={closeMenu}>Daily Challenge</a>
-					<hr />
-					<a href="/random" on:click={closeMenu}>Random-Movie</a>
 				</div>
 				<div class="center-nav-menu-items">
 					<h2>Explore</h2>
 					<a href="/library" on:click={closeMenu}>Library</a>
+					<hr />
+					<a href="/random" on:click={closeMenu}>Random-Movie</a>
 					<hr />
 					<a href="/login" on:click={closeMenu}>Login</a>
 					<hr />
