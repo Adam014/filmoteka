@@ -223,7 +223,7 @@
 				.from('films')
 				.select('id, title, poster_path')
 				.ilike('title', `%${query}%`)
-				.limit(5);
+				.limit(100);
 
 			if (error) {
 				console.error('Error fetching suggestions:', error);
