@@ -23,7 +23,7 @@ export async function load() {
         .from('films')
         .select('*')
         .order('popularity', { ascending: false })
-        .limit(10);
+        .limit(11);
 
     if (error) {
         console.error('Error fetching top movies:', error);
