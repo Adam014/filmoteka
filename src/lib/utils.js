@@ -61,28 +61,6 @@ function selectBestMatch(movies, searchQuery) {
 	}
 }
 
-async function getVideoDetailsBatch(videoIds) {
-	if (!videoIds || videoIds?.length === 0) return [];
-	const ids = videoIds.join(',');
-	const url = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,status,statistics&id=${ids}&key=${API_KEY}`;
-	try {
-		const response = await fetch(url);
-		if (response.status === 403) {
-			toast.error('The API quota for the youtube trailers has been reached, try again later.');
-			return [];
-		}
-		if (!response.ok) {
-			console.error(`Error fetching video details: ${response.status} - ${response.statusText}`);
-			return [];
-		}
-		const data = await response.json();
-		return data.items || [];
-	} catch (error) {
-		console.error('Error fetching video details:', error);
-		return [];
-	}
-}
-
 /**
  * Fetch the best available video for a movie using TMDB API and save it to Supabase.
  * @param {number} movieId - The TMDB movie ID.

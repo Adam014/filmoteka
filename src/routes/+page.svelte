@@ -2,6 +2,11 @@
 	import { user } from '../stores/user';
 	import { onDestroy, onMount } from 'svelte';
 	import { supabase } from '../lib/db/supabaseClient';
+	import RootMovies from '../components/Root.svelte';
+
+	export let data;
+
+	const movies = data?.movies
 
 	let currentUser = null;
 	let username;
@@ -93,7 +98,12 @@
 </script>
 
 <div class="root-container">
-	<h1>Welcome {username ? username : 'user'}!</h1>
+	
+	<!-- <div class="welcome-container">
+		<h1>Welcome {username ? username : 'user'}!</h1>
+	</div> -->
+	
+	<RootMovies movies={movies} />
 
 	<div class="cards-container">
 		<div class="card">
@@ -122,7 +132,7 @@
 		</div>
 	</div>
 
-	<div class="button-library">
+	<!-- <div class="button-library">
 		<div class="first-button">
 			<a href="/games/daily">
 				<button class="button2">
@@ -173,41 +183,7 @@
 				</button>
 			</a>
 		</div>
-		<div class="second-button">
-			<a href="/library">
-				<button href="#" class="button" style="--clr: #7808d0">
-					<span class="button__icon-wrapper">
-						<svg
-							viewBox="0 0 14 15"
-							fill="none"
-							xmlns="http://www.w3.org/2000/svg"
-							class="button__icon-svg"
-							width="10"
-						>
-							<path
-								d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z"
-								fill="currentColor"
-							/>
-						</svg>
-
-						<svg
-							viewBox="0 0 14 15"
-							fill="none"
-							width="10"
-							xmlns="http://www.w3.org/2000/svg"
-							class="button__icon-svg button__icon-svg--copy"
-						>
-							<path
-								d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z"
-								fill="currentColor"
-							/>
-						</svg>
-					</span>
-					Go To Library
-				</button>
-			</a>
-		</div>
-	</div>
+	</div> -->
 </div>
 
 <style>
@@ -216,7 +192,7 @@
 	}
 
 	h1 {
-		padding: 50px 0;
+		padding: 10px 0;
 		font-size: 4rem;
 		text-decoration: underline dotted;
 	}

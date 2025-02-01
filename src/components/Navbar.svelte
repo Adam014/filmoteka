@@ -249,6 +249,7 @@
 		height: 50px !important;
 		width: 50px !important;
 		z-index: 999;
+		padding-left: 20px;
 	}
 
 	.hamburger input {
