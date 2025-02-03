@@ -424,10 +424,16 @@
 		border-radius: 30px;
 	}
 
-	@media screen and (max-width: 676px) {
+	@media screen and (max-width: 768px) {
+
 		.movie-title-container {
 			display: grid;
 			grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 		}
+
+		.movie-details{
+			padding: 30px 20px;
+		}
+
 	}
 </style>

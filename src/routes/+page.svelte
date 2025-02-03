@@ -7,6 +7,7 @@
 	export let data;
 
 	const movies = data?.movies
+	const detailed_movies = data?.detailed_movies
 
 	let currentUser = null;
 	let username;
@@ -102,37 +103,7 @@
 	<!-- <div class="welcome-container">
 		<h1>Welcome {username ? username : 'user'}!</h1>
 	</div> -->
-	
-	<RootMovies movies={movies} />
-
-	<div class="cards-container">
-		<div class="card">
-			<div class="card-title">Total Films</div>
-			<div class="card-number">{formatNumberWithSpaces(totalFilmsCount)}</div>
-		</div>
-		<div class="card">
-			<div class="card-title">Total Actors/Directors</div>
-			<div class="card-number">{formatNumberWithSpaces(totalPersonsCount)}</div>
-		</div>
-		<div class="card">
-			<div class="card-title">Total Categories</div>
-			<div class="card-number">{formatNumberWithSpaces(totalCategoriesCount)}</div>
-		</div>
-		<div class="card">
-			<div class="card-title">Earliest-Latest Release</div>
-			<div class="card-number">
-				{#if earliestYear && earliestId && latestYear && latestId}
-					<a href="/movie/{earliestId}">{earliestYear}</a>
-					-
-					<a href="/movie/{latestId}">{latestYear}</a>
-				{:else}
-					No data
-				{/if}
-			</div>
-		</div>
-	</div>
-
-	<!-- <div class="button-library">
+	<div class="button-library">
 		<div class="first-button">
 			<a href="/games/daily">
 				<button class="button2">
@@ -183,13 +154,45 @@
 				</button>
 			</a>
 		</div>
-	</div> -->
+	</div>
+	
+	<RootMovies movies={movies} detailed_movies={detailed_movies} />
+
+	<div class="cards-layout">
+		<div class="cards-container">
+			<div class="card">
+				<div class="card-title">Total Films</div>
+				<div class="card-number">{formatNumberWithSpaces(totalFilmsCount)}</div>
+			</div>
+			<div class="card">
+				<div class="card-title">Total Actors/Directors</div>
+				<div class="card-number">{formatNumberWithSpaces(totalPersonsCount)}</div>
+			</div>
+			<div class="card">
+				<div class="card-title">Total Categories</div>
+				<div class="card-number">{formatNumberWithSpaces(totalCategoriesCount)}</div>
+			</div>
+			<div class="card">
+				<div class="card-title">Earliest-Latest Release</div>
+				<div class="card-number">
+					{#if earliestYear && earliestId && latestYear && latestId}
+						<a href="/movie/{earliestId}">{earliestYear}</a>
+						-
+						<a href="/movie/{latestId}">{latestYear}</a>
+					{:else}
+						No data
+					{/if}
+				</div>
+			</div>
+		</div>
+	</div>
+
 </div>
 
 <style>
-	.root-container {
+	/* .root-container {
 		padding: 80px;
-	}
+	} */
 
 	h1 {
 		padding: 10px 0;
@@ -197,11 +200,16 @@
 		text-decoration: underline dotted;
 	}
 
+	.cards-layout{
+		display: flex;
+		justify-content: left;
+		padding: 0px 30px 50px 30px;
+	}
+
 	.cards-container {
 		width: 100%;
 		display: grid;
 		grid-template-columns: repeat(2, 1fr);
-		gap: 1rem;
 	}
 
 	.card {
@@ -220,13 +228,11 @@
 	}
 
 	.button-library {
-		padding-top: 65px;
-		display: flex;
-		align-items: center;
-	}
-
-	.second-button {
-		padding-left: 20px;
+		position: fixed;
+		z-index: 999;
+		bottom: 0;
+		right: 0;
+		padding: 30px;
 	}
 
 	.button2 {
@@ -299,63 +305,6 @@
 			rotate: 360deg;
 		}
 	}
-
-	.button {
-		line-height: 1;
-		text-decoration: none;
-		display: inline-flex;
-		border: none;
-		cursor: pointer;
-		align-items: center;
-		gap: 1rem;
-		background-color: var(--clr);
-		color: #fff;
-		border-radius: 10rem;
-		font-weight: 600;
-		padding: 0.75rem 1.5rem;
-		padding-left: 20px;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		transition: background-color 0.3s;
-	}
-
-	.button__icon-wrapper {
-		flex-shrink: 0;
-		width: 25px;
-		height: 25px;
-		position: relative;
-		color: var(--clr);
-		background-color: #fff;
-		border-radius: 50%;
-		display: grid;
-		place-items: center;
-		overflow: hidden;
-	}
-
-	.button:hover {
-		background-color: #000;
-	}
-
-	.button:hover .button__icon-wrapper {
-		color: #000;
-	}
-
-	.button__icon-svg--copy {
-		position: absolute;
-		transform: translate(-150%, 150%);
-	}
-
-	.button:hover .button__icon-svg:first-child {
-		transition: transform 0.3s ease-in-out;
-		transform: translate(150%, -150%);
-	}
-
-	.button:hover .button__icon-svg--copy {
-		transition: transform 0.3s ease-in-out 0.1s;
-		transform: translate(0);
-	}
-
 	@media (max-width: 600px) {
 		.root-container {
 			padding: 20px;
@@ -364,10 +313,7 @@
 		.cards-container {
 			grid-template-columns: 1fr;
 		}
-		h1 {
-			font-size: 2rem;
-			padding: 0px 0px 30px 0px;
-		}
+		
 		.button2 {
 			width: 80px;
 			height: 80px;

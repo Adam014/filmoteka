@@ -19,15 +19,27 @@ async function fetchMovieImage(movieId) {
 
 export async function load() {
     // Fetch top 10 movies
-    const { data: movies, error } = await supabase
+    const { data: movies, error: moviesError } = await supabase
         .from('films')
         .select('*')
         .order('popularity', { ascending: false })
-        .limit(11);
+        .limit(9);
 
-    if (error) {
-        console.error('Error fetching top movies:', error);
-        return { movies: [] };
+    if (moviesError) {
+        console.error('Error fetching top movies:', moviesError);
+        return { movies: [], detailed_movies: [] };
+    }
+
+    // Fetch detailed info from film_detailed table
+    const movieIds = movies.map(movie => movie.id);
+    const { data: detailedMovies, error: detailsError } = await supabase
+        .from('film_detailed')
+        .select('*')
+        .in('id', movieIds);
+
+    if (detailsError) {
+        console.error('Error fetching movie details:', detailsError);
+        return { movies, detailed_movies: [] };
     }
 
     // Fetch images for each movie
@@ -38,5 +50,5 @@ export async function load() {
         })
     );
 
-    return { movies: moviesWithImages };
+    return { movies: moviesWithImages, detailed_movies: detailedMovies };
 }

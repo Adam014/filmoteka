@@ -222,7 +222,7 @@
 		.search-container {
 			position: absolute;
 			top: 15%;
-			width: 95%;
+			width: 100%;
 		}
 	}
 

@@ -1,66 +1,107 @@
 <script>
+    import { formatDate } from "../lib/utils";
+
     export let movies;
+    export let detailed_movies;
 
-    console.log(movies);
+    // Store top movie and ensure its details are included
+    let topMovie = { 
+        ...movies[0], 
+        details: detailed_movies.find(detail => detail.id === movies[0].id) || null 
+    };
 
-    // Get the top movie (highest popularity)
-    const topMovie = movies.length > 0 ? movies[0] : null;
-    const otherMovies = movies.slice(1); // Remaining movies
+    // Store other movies with their details
+    let otherMovies = movies.slice(1).map(movie => ({
+        ...movie,
+        details: detailed_movies.find(detail => detail.id === movie.id) || null
+    }));
+
+    // Function to swap instantly without reloading images
+    function swapMovies(clickedMovie) {
+        if (!clickedMovie || clickedMovie.id === topMovie.id) return;
+
+        // Swap directly without delay
+        const previousTop = { ...topMovie };
+        topMovie = { ...clickedMovie };
+
+        // Replace clicked movie in otherMovies with previous topMovie
+        otherMovies = otherMovies.map(movie =>
+            movie.id === clickedMovie.id ? previousTop : movie
+        );
+    }
 </script>
 
 <div class="movies-layout">
-    <!-- Top Movie Section -->
     {#if topMovie}
         <div class="top-movie-container">
-            <a href={`movie/${topMovie.id}`} class="top-movie">
-                <img
-                    src={`https://image.tmdb.org/t/p/w780${topMovie.image}`}
-                    alt="{topMovie.original_title} Thumbnail"
-                    class="thumbnail"
-                />
-                <div class="controls">
-                    <h2>{topMovie.title}</h2>
-                    <button class="watch">Watch</button>
+            <a href={`movie/${topMovie.id}`}>            
+                <div class="top-movie">
+                    <img
+                        src={topMovie.image}
+                        alt="{topMovie.original_title} Thumbnail"
+                        class="thumbnail"
+                        loading="eager"
+                    />
+                    <div class="controls">
+                        <h2>{topMovie.title}</h2>
+                        <button class="watch">Watch</button>
+                    </div>
+                </div>
+                <div class="extra-content">
+                    <div class="info">
+                        <h3>🚀 {formatDate(topMovie.release_date)}</h3>
+                        <h3>🗣️ {topMovie.original_language}</h3>
+                    </div>
+                    <p>{topMovie.details?.overview}</p>
+                    <hr />
+                    <a href="/library">
+                        <button class="library">Library</button>
+                    </a>
+                    <hr />
                 </div>
             </a>
-            <!-- Additional content below the top movie -->
-            <div class="extra-content">
-                <!-- TODO: Add here description of the top movie, release date, original_language -->
-                <hr />
-                <a href="/library">
-                    <button class="library">Library</button>
-                </a>
-                <hr />
-            </div>
         </div>
     {/if}
-
-    <!-- Other Movies Grid -->
     <div class="other-movies">
         {#each otherMovies as movie}
-            <a href={`movie/${movie.id}`} class="movie-card">
+            <div class="movie-card" on:click={() => swapMovies(movie)}>
                 <img
-                    src={`https://image.tmdb.org/t/p/w500${movie.image}`}
+                    src={movie.image}
                     alt="{movie.original_title} Thumbnail"
                     class="thumbnail"
+                    loading="eager"
                 />
                 <div class="controls">
                     <h3>{movie.title}</h3>
-                    <button class="watch other">Watch</button>
+                    <a href={`movie/${movie.id}`}>
+                        <button class="watch">Watch</button>
+                    </a>
                 </div>
-            </a>
+            </div>
         {/each}
     </div>
 </div>
 
 <style>
+    .info{
+        display: flex;
+        font-size: 2rem;
+        justify-content: space-between;
+    }
+
+    .extra-content p{
+        text-align: left;
+        padding: 10px;
+        font-size: 1.5rem;
+    }
 
     hr{
         margin: 15px 0px 15px 0px;
     }
 
-    a{
+    .movies-layout a{
         text-decoration: none;
+        color: white
     }
 
     .movies-layout {
@@ -101,10 +142,10 @@
 
     .library{
         width: 100%;   
-        height: 5rem;
+        height: 3rem;
         background-color: #7a1cac;
         color: white;
-        font-size: 3rem;
+        font-size: 2rem;
         border: 0;
         cursor: pointer;
     }
@@ -127,6 +168,8 @@
         border-radius: 12px;
         overflow: hidden;
         transition: transform 0.3s ease;
+        height: auto;
+        cursor: pointer;
     }
 
     .movie-card img {
@@ -155,6 +198,7 @@
         border: none;
         border-radius: 8px;
         cursor: pointer;
+        margin: 20px 0px 10px 0px;
     }
 
     /* Responsive Styles */
@@ -185,6 +229,19 @@
         .library{
             font-size: 2rem;
             height: 3rem;
+        }
+
+        .info{
+            display: block;
+            text-align: left;   
+        }
+
+        .info h3{
+            font-size: 1.7rem;
+        }
+
+        .extra-content p{
+            font-size: 1.3rem;
         }
     }
 </style>

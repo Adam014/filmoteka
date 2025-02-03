@@ -104,7 +104,8 @@
 
 <style>
 	.title-container {
-		padding: 20px;
+		text-align: left;
+		padding: 40px 0px 10px 50px;
 	}
 
 	.daily-grid {
@@ -113,7 +114,8 @@
 		gap: 10px;
 		padding: 20px;
 		background-color: #1a1a1a;
-		justify-content: flex-start;
+		justify-content: center;
+		width: 100%;
 	}
 
 	.daily-grid a {
