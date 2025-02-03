@@ -109,7 +109,7 @@
         gap: 1.5rem;
         grid-template-columns: 2fr 1fr;
         grid-template-rows: auto auto;
-        padding: 2rem;
+        padding: 0rem 4rem 1rem 4rem;
     }
 
     .top-movie-container {
