@@ -46,11 +46,11 @@
 					</div>
 				</div>
 				<div class="extra-content">
+					<p>{topMovie.details?.overview}</p>
 					<div class="info">
 						<h3>🚀 {formatDate(topMovie.release_date)}</h3>
 						<h3>🗣️ {topMovie.original_language}</h3>
 					</div>
-					<p>{topMovie.details?.overview}</p>
 					<hr />
 					<a href="/library">
 						<button class="library">Library</button>
@@ -84,7 +84,10 @@
 	.info {
 		display: flex;
 		font-size: 2rem;
-		justify-content: space-between;
+	}
+
+	.info h3{
+		padding: 10px;
 	}
 
 	.extra-content p {
