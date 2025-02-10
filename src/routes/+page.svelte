@@ -98,6 +98,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Filmoteka</title>
+</svelte:head>
+
 <div class="root-container">
 	<!-- <div class="welcome-container">
 		<h1>Welcome {username ? username : 'user'}!</h1>
