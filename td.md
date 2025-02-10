@@ -1,7 +1,6 @@
 /root  
-TODO: Create whole new page, the library of movies is moved to /library
-TODO: Add statistics to root page, some info about the page (movie count, actors count, directors count etc)
-TODO: Some button or a tag to instantly jump to /library
+TODO: Add top 10 actors
+TODO: Add all users profiles with their icons
 
 /profile
 TODO: Add personalized movies you might like, based on favorite movies (probably with AI picking the personalized movies)
