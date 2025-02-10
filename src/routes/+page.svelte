@@ -357,6 +357,12 @@
 	@media (max-width: 700px) {
 		.title-container{
 			display: block;
+			padding: 0;
+			padding-bottom: 20px;
+		}
+
+		.root-container{
+			padding: 0px 10px 0px 30px;
 		}
 	}
 </style>

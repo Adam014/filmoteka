@@ -245,5 +245,11 @@
 		.extra-content p {
 			font-size: 1.3rem;
 		}
+
+		.movies-layout{
+			padding: 0;
+			justify-content: center;
+			display: grid;
+		}
 	}
 </style>
