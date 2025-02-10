@@ -21,6 +21,9 @@
 	let latestYear = '';
 	let latestId = '';
 
+	// Variable for GitHub repository last updated date
+	let repoUpdatedDate = 'Loading...';
+
 	// If the number is 0 or null, just return "0"
 	function formatNumberWithSpaces(num) {
 		if (!num) return '0';
@@ -68,7 +71,7 @@
 			});
 			totalCategoriesCount = genresSet.size;
 
-			//    Earliest:
+			// Earliest film:
 			const { data: earliest, error: earliestError } = await supabase
 				.from('films')
 				.select('id, release_date')
@@ -76,7 +79,7 @@
 				.limit(1);
 			if (earliestError) throw earliestError;
 
-			//    Latest:
+			// Latest film:
 			const { data: latest, error: latestError } = await supabase
 				.from('films')
 				.select('id, release_date')
@@ -95,6 +98,19 @@
 		} catch (err) {
 			console.error('Error fetching stats:', err);
 		}
+
+		// Fetch the GitHub repository last updated date
+		try {
+			const res = await fetch('https://api.github.com/repos/Adam014/filmoteka');
+			const repoData = await res.json();
+			// Use the updated_at field; new Date(...).toLocaleString() converts to the browser's local timezone.
+			repoUpdatedDate = repoData.updated_at
+				? new Date(repoData.updated_at).toLocaleString()
+				: 'N/A';
+		} catch (err) {
+			console.error('Error fetching GitHub repo data:', err);
+			repoUpdatedDate = 'Error fetching date';
+		}
 	});
 </script>
 
@@ -103,9 +119,10 @@
 </svelte:head>
 
 <div class="root-container">
-	<!-- <div class="welcome-container">
+	<div class="title-container">
 		<h1>Welcome {username ? username : 'user'}!</h1>
-	</div> -->
+		<h4>Last Updated: {repoUpdatedDate}</h4>
+	</div>
 	<div class="button-library">
 		<div class="first-button">
 			<a href="/games/daily">
@@ -196,9 +213,16 @@
 		padding: 80px;
 	} */
 
+	.title-container {
+		padding: 20px 65px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+
 	h1 {
 		padding: 10px 0;
-		font-size: 4rem;
+		font-size: 2rem;
 		text-decoration: underline dotted;
 	}
 
@@ -307,6 +331,7 @@
 			rotate: 360deg;
 		}
 	}
+
 	@media (max-width: 600px) {
 		.root-container {
 			padding: 20px;
@@ -326,6 +351,12 @@
 		}
 		.button-library {
 			padding-top: 20px;
+		}
+	}
+
+	@media (max-width: 700px) {
+		.title-container{
+			display: block;
 		}
 	}
 </style>

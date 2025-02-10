@@ -1,6 +1,7 @@
 /root  
 TODO: Add top 10 actors
 TODO: Add all users profiles with their icons
+TODO: Add versioning changelog
 
 /profile
 TODO: Add personalized movies you might like, based on favorite movies (probably with AI picking the personalized movies)
@@ -12,9 +13,6 @@ TODO: Add users feed, where users can write posts, like posts, or even when they
 
 /contact
 TODO: Create a contact page
-
-/games/daily
-TODO: Save guesses so on refresh they doesnt reset
 
 ////////////////
 
