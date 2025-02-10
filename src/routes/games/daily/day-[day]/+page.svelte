@@ -7,6 +7,7 @@
 	import Loader from '../../../../components/Loader.svelte';
 	import { goto } from '$app/navigation';
 	import toast from 'svelte-french-toast';
+	import { browser } from '$app/environment';
 
 	let challenge = null;
 	let currentHint = 1; // Tracks the current hint
@@ -47,7 +48,9 @@
 	}
 
 	// Initialize challenge data
+	// Always fetch the challenge data and then, if a saved state exists, apply it.
 	async function initChallenge() {
+		// Reset state
 		challenge = null;
 		alreadyPlayed = false;
 		savedState = null;
@@ -57,14 +60,30 @@
 		hasPreviousDay = false;
 		hasNextDay = false;
 
-		await checkIfPlayed();
 		await checkAdjacentDays();
+		await checkIfPlayed();
 
-		if (!alreadyPlayed) {
-			await fetchChallenge();
-		} else {
-			// Load the saved state if already played
-			await fetchSavedState();
+		// Always fetch the challenge so that we have the data for the day.
+		await fetchChallenge();
+
+		// Always try to load a saved state if one exists.
+		if (browser) {
+			// For anonymous users, check localStorage
+			if (!currentUser) {
+				if (localStorage.getItem(`daily-challenge-day-${day}`)) {
+					await fetchSavedState();
+					alreadyPlayed = guessedCorrectly || guessesLeft === 0;
+				}
+			} else {
+				// For authenticated users, check Supabase storage for a saved file
+				const { data, error } = await supabase.storage
+					.from('games')
+					.list(`daily-challenge/${currentUser.id}/`, { search: `${day}.json` });
+				if (!error && data.length > 0) {
+					await fetchSavedState();
+					alreadyPlayed = guessedCorrectly || guessesLeft === 0;
+				}
+			}
 		}
 	}
 
@@ -84,15 +103,49 @@
 		}
 	}
 
+	async function updateSavedState() {
+		const gameState = {
+			guessedCorrectly,
+			guessesLeft,
+			currentHint,
+			lastUpdated: new Date().toISOString()
+		};
+
+		if (!currentUser) {
+			if (typeof window !== 'undefined') {
+				localStorage.setItem(`daily-challenge-day-${day}`, JSON.stringify(gameState));
+			}
+		} else {
+			const filePath = `daily-challenge/${currentUser.id}/${day}.json`;
+			try {
+				const fileContent = new Blob([JSON.stringify(gameState)], { type: 'application/json' });
+				const { error } = await supabase.storage
+					.from('games')
+					.upload(filePath, fileContent, { upsert: true });
+				if (error) {
+					console.error('Error updating saved state to Supabase storage:', error.message);
+				}
+			} catch (error) {
+				console.error('Error updating saved state:', error.message);
+			}
+		}
+	}
+
 	// Check if the user has already played this day
 	async function checkIfPlayed() {
 		if (!currentUser) {
-			// Ensure localStorage is only accessed on the client
 			if (typeof window !== 'undefined') {
 				const localState = localStorage.getItem(`daily-challenge-day-${day}`);
-				alreadyPlayed = !!localState;
-			} else {
-				alreadyPlayed = false;
+				if (localState) {
+					try {
+						const parsed = JSON.parse(localState);
+						// Mark as already played only if the game is finished.
+						alreadyPlayed = parsed.guessedCorrectly || parsed.guessesLeft === 0;
+					} catch (error) {
+						console.error('Error parsing local saved state:', error);
+						alreadyPlayed = false;
+					}
+				}
 			}
 		} else {
 			const { data, error } = await supabase.storage
@@ -105,7 +158,21 @@
 			}
 
 			if (data.length > 0) {
-				alreadyPlayed = true;
+				// For logged-in users, download and check the saved state.
+				const filePath = `daily-challenge/${currentUser.id}/${day}.json`;
+				const { data: fileData, error: downloadError } = await supabase.storage
+					.from('games')
+					.download(filePath);
+				if (!downloadError && fileData) {
+					try {
+						const text = await fileData.text();
+						const parsed = JSON.parse(text);
+						alreadyPlayed = parsed.guessedCorrectly || parsed.guessesLeft === 0;
+					} catch (e) {
+						console.error('Error parsing saved state for logged-in user:', e);
+						alreadyPlayed = false;
+					}
+				}
 			}
 		}
 	}
@@ -175,8 +242,10 @@
 		guessedCorrectly = savedState.guessedCorrectly ?? false;
 		guessesLeft = savedState.guessesLeft ?? 3;
 		currentHint = savedState.currentHint ?? 1;
+		// Do not set alreadyPlayed here because it’s determined by the game progress.
+		// The UI will check guessedCorrectly or guessesLeft === 0.
 
-		// Ensure the challenge data is loaded
+		// If the challenge wasn’t loaded yet, try to fetch it.
 		if (!challenge) {
 			fetchChallenge();
 		}
@@ -249,21 +318,24 @@
 
 		if (userGuess.toLowerCase() === challenge.title.toLowerCase()) {
 			guessedCorrectly = true;
+			guessesLeft = 0;
 			saveGameResult();
-			guessesLeft = 0; // Set guessesLeft to 0 when guessed correctly
-			checkIfFavorite(); // Check and update favorite status
+			checkIfFavorite();
 		} else {
 			incorrectGuess = true;
 			setTimeout(() => (incorrectGuess = false), 1000);
 			guessesLeft--;
 			if (guessesLeft === 0) {
-				// Trigger when out of guesses
+				currentHint = 3;
 				saveGameResult();
 				checkIfFavorite();
+			} else {
+				// Save state after an in-progress guess.
+				updateSavedState();
 			}
 		}
 
-		currentHint = Math.max(currentHint + 1, 3); // Increment hint level
+		currentHint = Math.max(currentHint + 1, 3);
 		userGuess = '';
 		suggestions = [];
 		isSuggestionsOpen = false;
@@ -277,6 +349,9 @@
 			if (guessesLeft === 0) {
 				currentHint = 3;
 				saveGameResult();
+			} else {
+				// Save state after an in-progress skip.
+				updateSavedState();
 			}
 		}
 	}
