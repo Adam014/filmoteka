@@ -6,8 +6,8 @@
 
 	export let data;
 
-	const movies = data?.movies
-	const detailed_movies = data?.detailed_movies
+	const movies = data?.movies;
+	const detailed_movies = data?.detailed_movies;
 
 	let currentUser = null;
 	let username;
@@ -99,7 +99,6 @@
 </script>
 
 <div class="root-container">
-	
 	<!-- <div class="welcome-container">
 		<h1>Welcome {username ? username : 'user'}!</h1>
 	</div> -->
@@ -155,8 +154,8 @@
 			</a>
 		</div>
 	</div>
-	
-	<RootMovies movies={movies} detailed_movies={detailed_movies} />
+
+	<RootMovies {movies} {detailed_movies} />
 
 	<div class="cards-layout">
 		<div class="cards-container">
@@ -186,7 +185,6 @@
 			</div>
 		</div>
 	</div>
-
 </div>
 
 <style>
@@ -200,7 +198,7 @@
 		text-decoration: underline dotted;
 	}
 
-	.cards-layout{
+	.cards-layout {
 		display: flex;
 		justify-content: left;
 		padding: 0px 30px 50px 30px;
@@ -313,7 +311,7 @@
 		.cards-container {
 			grid-template-columns: 1fr;
 		}
-		
+
 		.button2 {
 			width: 80px;
 			height: 80px;

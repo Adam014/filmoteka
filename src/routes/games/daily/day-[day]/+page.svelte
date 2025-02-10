@@ -410,10 +410,7 @@
 				{/if}
 
 				{#if guessesLeft === 0 || alreadyPlayed}
-					<div
-						class="favorite-icon {isFavorite ? 'filled' : ''}"
-						on:click={toggleFavorite}
-					>
+					<div class="favorite-icon {isFavorite ? 'filled' : ''}" on:click={toggleFavorite}>
 						{isFavorite ? '★' : '☆'}
 					</div>
 				{/if}
@@ -548,7 +545,7 @@
 		padding-bottom: 30px;
 	}
 
-	.poster-wrapper a{
+	.poster-wrapper a {
 		display: flex;
 	}
 
