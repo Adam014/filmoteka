@@ -63,6 +63,10 @@
 
 <style>
 
+    .commit-comment{
+        padding-top: 4px;
+    }
+
     .upcoming-card-container {
         display: grid;
         grid-template-columns: repeat(3, 2fr);
@@ -127,8 +131,9 @@
     }
 
     .commit-image img{
-        height: 3rem;
-        width: 3rem;
+        height: 4rem;
+        width: 4rem;
+        border-radius: 30%;
     }
 
     .commit-image{
