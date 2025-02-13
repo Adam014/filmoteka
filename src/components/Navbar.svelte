@@ -183,6 +183,10 @@
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Shadows+Into+Light&display=swap');
 
+	h2{
+		padding-bottom: 0.5rem;
+	}
+
 	.nav-items {
 		display: flex;
 		width: 100%;
@@ -335,7 +339,6 @@
 		text-decoration: none;
 		color: white;
 		font-size: 1.2rem;
-		padding: 10px 0;
 	}
 
 	/* logout button */

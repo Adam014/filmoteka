@@ -18,7 +18,7 @@
                 <a href={commit.html_url} target=”_blank”>
                     <div class="commit-card" key={index}>
                         <div class="commit-image">
-                            <img src={commit.committer.avatar_url}>
+                            <img src={commit.committer.avatar_url} alt="committer"/>
                         </div>
                         <div class="commit-comment">
                             <h5>Commiter: {commit.commit.author.name}</h5>
