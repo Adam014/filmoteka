@@ -86,7 +86,7 @@
 		font-size: 2rem;
 	}
 
-	.info h3{
+	.info h3 {
 		padding: 10px;
 	}
 
@@ -246,7 +246,7 @@
 			font-size: 1.3rem;
 		}
 
-		.movies-layout{
+		.movies-layout {
 			padding: 0;
 			justify-content: center;
 			display: grid;

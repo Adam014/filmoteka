@@ -183,7 +183,7 @@
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Shadows+Into+Light&display=swap');
 
-	h2{
+	h2 {
 		padding-bottom: 0.5rem;
 	}
 

@@ -1,13 +1,7 @@
 <script>
-
-
 </script>
 
-<div class="changelog-container"></div>
+<div class="changelog-container" />
 
 <style>
-
-
-
-
 </style>
