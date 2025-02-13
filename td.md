@@ -10,6 +10,9 @@ TODO: Add that you can add reviews of each movies, on the /profile page in the F
 /settings
 TODO: Add account settings
 
+Navbar
+TODO: Fix the navbar height on mobile
+
 /spotlight || feed
 TODO: Add users feed, where users can write posts, like posts, or even when they like movie it will appear there
 
