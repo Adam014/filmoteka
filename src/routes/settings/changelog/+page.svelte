@@ -33,7 +33,7 @@
             <h3>Upcoming</h3>
             <div class="upcoming-card-container">
                 <div class="completed-card">
-                    🗸 Add Top 10 Actors to root
+                    &#10004; Add Top 10 Actors to root
                 </div>
                 <div class="upcoming-card">
                     ❔ Add Account settings
