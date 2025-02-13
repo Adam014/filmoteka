@@ -3,9 +3,6 @@
     import { formatDate } from '../../../lib/utils';
 
     const commits = data?.commits.data;
-
-    console.log(commits)
-
 </script>
 
 <svelte:head>
@@ -36,28 +33,28 @@
             <h3>Upcoming</h3>
             <div class="upcoming-card-container">
                 <div class="upcoming-card">
-                    Add Top 10 Actors to root
+                    ❔ Add Top 10 Actors to root
                 </div>
                 <div class="upcoming-card">
-                    Add Account settings
+                    ❔ Add Account settings
                 </div>
                 <div class="upcoming-card">
-                    Add users profiles to root
+                    ❔ Add users profiles to root
                 </div>
                 <div class="upcoming-card">
-                    Create a contact page
+                    ❔ Create a contact page
                 </div>
                 <div class="upcoming-card">
-                    Add a new feed, more like twitter
+                    ❔ Add a new feed, more like twitter
                 </div>
                 <div class="upcoming-card">
-                    Add movies you might like to /profile
+                    ❔ Add movies you might like to /profile
                 </div>
                 <div class="upcoming-card">
-                    Add you can add users as friends
+                    ❔ Add you can add users as friends
                 </div>
                 <div class="upcoming-card">
-                    Add options to review films
+                    ❔ Add options to review films
                 </div>
             </div>
         </div>
@@ -76,7 +73,8 @@
     .upcoming-card{
         padding: 15px;
         height: auto;
-        background-color: #3A7D44;
+        background-color: #F9CB43;
+        color: black;
         border-radius: 15px;
     }
 
