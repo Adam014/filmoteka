@@ -10,6 +10,10 @@
 	];
 </script>
 
+<svelte:head>
+	<title>Games</title>
+</svelte:head>
+
 <div class="games-hub">
 	<h1 class="hub-title">🎮 Game Hub</h1>
 	<p class="hub-subtitle">Choose a game and put your movie knowledge to the test!</p>

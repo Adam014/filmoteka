@@ -126,6 +126,12 @@
 					<hr />
 					<a href="/contact" on:click={closeMenu}>Contact</a>
 				</div>
+				<div class="center-nav-menu-items">
+					<h2>Settings</h2>
+					<a href="/settings/changelog" on:click={closeMenu}>Changelog</a>
+					<hr />
+					<a href="/settings/account" on:click={closeMenu}>Account</a>
+				</div>
 			</div>
 			<div class="logout-container">
 				<div class="profile-logout-container">

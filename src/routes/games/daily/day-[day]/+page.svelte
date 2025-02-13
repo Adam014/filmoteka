@@ -442,6 +442,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Games | Day {day}</title>
+</svelte:head>
+
 {#if challenge}
 	<div class="challenge-container">
 		<div class="header fade-in">

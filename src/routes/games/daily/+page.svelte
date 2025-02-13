@@ -102,6 +102,10 @@
 	{/each}
 </div>
 
+<svelte:head>
+	<title>Games | Daily Challenge</title>
+</svelte:head>
+
 <style>
 	.title-container {
 		text-align: left;
