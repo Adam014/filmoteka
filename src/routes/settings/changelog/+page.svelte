@@ -32,8 +32,8 @@
         <div class="upcoming">
             <h3>Upcoming</h3>
             <div class="upcoming-card-container">
-                <div class="upcoming-card">
-                    ❔ Add Top 10 Actors to root
+                <div class="completed-card">
+                    🗸 Add Top 10 Actors to root
                 </div>
                 <div class="upcoming-card">
                     ❔ Add Account settings
@@ -70,12 +70,16 @@
         padding-top: 10px;
     }
 
-    .upcoming-card{
+    .upcoming-card, .completed-card{
         padding: 15px;
         height: auto;
         background-color: #F9CB43;
         color: black;
         border-radius: 15px;
+    }
+
+    .completed-card{
+        background-color: #A0C878;
     }
 
     .changelog-container{

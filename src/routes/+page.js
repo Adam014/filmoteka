@@ -18,14 +18,22 @@ async function fetchMovieImage(movieId) {
 }
 
 export async function load() {
-	// Fetch top 10 movies
+	// Fetch top 9 movies
 	const { data: movies, error: moviesError } = await supabase
 		.from('films')
 		.select('*')
 		.order('popularity', { ascending: false })
 		.limit(9);
 
-	if (moviesError) {
+	const { data: actors, error: actorsError } = await supabase
+		.from('person_detailed')
+		.select('*')
+		.eq('known_for_department', 'Acting')
+		.not('movies', 'is', null)
+		.order('popularity', { ascending: false })
+		.limit(9);
+
+	if (moviesError || actorsError) {
 		console.error('Error fetching top movies:', moviesError);
 		return { movies: [], detailed_movies: [] };
 	}
@@ -53,5 +61,5 @@ export async function load() {
 		})
 	);
 
-	return { movies: moviesWithImages, detailed_movies: detailedMovies };
+	return { movies: moviesWithImages, detailed_movies: detailedMovies, actors: actors };
 }
