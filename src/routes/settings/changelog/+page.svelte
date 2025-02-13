@@ -42,10 +42,22 @@
                     Add Account settings
                 </div>
                 <div class="upcoming-card">
-                    Add users to root
+                    Add users profiles to root
                 </div>
                 <div class="upcoming-card">
                     Create a contact page
+                </div>
+                <div class="upcoming-card">
+                    Add a new feed, more like twitter
+                </div>
+                <div class="upcoming-card">
+                    Add movies you might like to /profile
+                </div>
+                <div class="upcoming-card">
+                    Add you can add users as friends
+                </div>
+                <div class="upcoming-card">
+                    Add options to review films
                 </div>
             </div>
         </div>
