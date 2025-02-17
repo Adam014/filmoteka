@@ -191,7 +191,7 @@
 	}
 
 	.search-input {
-		width: 90%;
+		width: 85%;
 		padding: 10px;
 		border: 1px solid #ccc;
 		border-radius: 4px;

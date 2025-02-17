@@ -414,7 +414,7 @@
 
 	/* Video container styles to ensure width matches description */
 	.video-container {
-		margin: 1rem 2.5rem;
+		padding: 20px;
 	}
 
 	iframe {
@@ -428,10 +428,6 @@
 		.movie-title-container {
 			display: grid;
 			grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-		}
-
-		.movie-details {
-			padding: 30px 20px;
 		}
 	}
 </style>
