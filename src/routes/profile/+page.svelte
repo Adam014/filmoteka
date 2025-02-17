@@ -11,7 +11,7 @@
 		if (currentUser) {
 			goto(`/profile/${currentUser.user_metadata.display_name}`);
 		} else {
-			goto('/?page=1');
+			goto('/');
 		}
 	}
 

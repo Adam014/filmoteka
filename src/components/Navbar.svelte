@@ -130,7 +130,7 @@
 					<h2>Settings</h2>
 					<a href="/settings/changelog" on:click={closeMenu}>Changelog</a>
 					<hr />
-					<!-- <a href="/settings/account" on:click={closeMenu}>Account</a> -->
+					<a href="/settings/account" on:click={closeMenu}>Account</a>
 				</div>
 			</div>
 			<div class="logout-container">
@@ -175,6 +175,12 @@
 					<hr />
 					<a href="/register" on:click={closeMenu}>Register</a>
 				</div>
+				<div class="center-nav-menu-items">
+					<h2>Settings</h2>
+					<a href="/settings/changelog" on:click={closeMenu}>Changelog</a>
+					<hr />
+					<a href="/settings/account" on:click={closeMenu}>Account</a>
+				</div>
 			</div>
 		{/if}
 	</div>
@@ -183,7 +189,7 @@
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Shadows+Into+Light&display=swap');
 
-	h2{
+	h2 {
 		padding-bottom: 0.5rem;
 	}
 

@@ -133,6 +133,7 @@
 		</div>
 
 		<p class="footer">Already have an account? <a href="/login">Login here</a></p>
+		<p class="footer">Forgot password? <a href="/settings/account">Reset password</a></p>
 		<p class="supabase">
 			Powered by <a class="supabase-link" href="https://supabase.com"
 				><img src={supabase_logo} alt="supabase_logo" /></a

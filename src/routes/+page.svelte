@@ -179,7 +179,6 @@
 
 	<RootMovies {movies} {detailed_movies} />
 
-	
 	<!-- <div class="cards-layout">
 		<div class="cards-container">
 			<div class="card">
@@ -209,7 +208,6 @@
 		</div>
 	</div> -->
 
-
 	<h2>Top 10 Actors by TMDB</h2>
 	<div class="actors-container">
 		{#each actors as actor, index}
@@ -223,35 +221,33 @@
 			</a>
 		{/each}
 	</div>
-
-
 </div>
 
 <style>
-	a{
+	a {
 		text-decoration: none;
 		color: white;
 	}
 
-	.actors-container{
+	.actors-container {
 		padding: 30px 65px 50px 65px;
 		display: flex;
 		flex-wrap: wrap;
 	}
 
-	h2{
+	h2 {
 		padding: 40px 0px 10px 65px;
 		text-decoration: underline;
 	}
 
-	.actor-info img{
+	.actor-info img {
 		height: 10rem;
 		width: 10rem;
 		border-radius: 50%;
 		object-fit: cover;
 	}
 
-	.actor-card{
+	.actor-card {
 		display: grid;
 		justify-content: center;
 		padding: 10px 10px;
@@ -259,7 +255,7 @@
 		cursor: pointer;
 	}
 
-	.actor-card h3{
+	.actor-card h3 {
 		padding-top: 10px;
 	}
 
@@ -409,25 +405,25 @@
 	}
 
 	@media (max-width: 768px) {
-		.actors-container{
+		.actors-container {
 			display: grid;
 			grid-template-columns: repeat(2, 2fr);
 			padding-left: 5px;
 		}
 
-		h2{
+		h2 {
 			padding-left: 10px;
 		}
 	}
 
 	@media (max-width: 700px) {
-		.title-container{
+		.title-container {
 			display: block;
 			padding: 0;
 			padding-bottom: 20px;
 		}
 
-		.root-container{
+		.root-container {
 			padding: 0px 10px 0px 30px;
 		}
 	}

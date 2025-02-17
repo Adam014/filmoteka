@@ -93,25 +93,24 @@ export async function getBestAvailableVideoWithCheck(movieId) {
 }
 
 export async function getCommits() {
-	const url = "https://api.github.com/repos/Adam014/filmoteka/commits?per_page=7";
-  
+	const url = 'https://api.github.com/repos/Adam014/filmoteka/commits?per_page=7';
+
 	try {
-	  const response = await fetch(url);
-  
-	  if (!response.ok) {
-		console.log(response.status, response.statusText);
-		return null;
-	  }
-  
-	  const data = await response.json();
-	  // Process the 'data' array containing the first 5 commits
-	  return data;
-  
+		const response = await fetch(url);
+
+		if (!response.ok) {
+			console.log(response.status, response.statusText);
+			return null;
+		}
+
+		const data = await response.json();
+		// Process the 'data' array containing the first 5 commits
+		return data;
 	} catch (error) {
-	  console.log("Error fetching Filmoteka commits:", error);
-	  return null;
+		console.log('Error fetching Filmoteka commits:', error);
+		return null;
 	}
-  }
+}
 
 /**
  * Loads the popular movies for the specified page from the Supabase `films` table.

@@ -1,58 +1,43 @@
 <script>
-	import { user } from '../../../stores/user';
-	import { onMount, onDestroy } from 'svelte';
-	import { goto } from '$app/navigation';
+	import { supabase } from '../../lib/db/supabaseClient';
 	import toast from 'svelte-french-toast';
-	import { supabase } from '../../../lib/db/supabaseClient';
+	import { goto } from '$app/navigation';
 
-	let currentUser;
-	let email = '';
+	let newPassword = '';
 
-	const unsubscribe = user.subscribe((value) => {
-		currentUser = value;
-	});
-
-	async function handlePasswordReset() {
-		// The redirectTo URL should match one allowed in your Supabase settings.
-		const { error } = await supabase.auth.resetPasswordForEmail(email, {
-			redirectTo: 'https://filmoteka.app/reset-password'
-		});
+	async function updatePassword() {
+		const { error } = await supabase.auth.updateUser({ password: newPassword });
 
 		if (error) {
-			toast.error(`Error sending reset email: ${error.message}`);
+			toast.error(`Error updating password: ${error.message}`);
 		} else {
-			email = '';
-			toast.success('Password reset email sent. Please check your inbox.');
+			toast.success('Password updated successfully.');
+			// Redirect user after successful update – adjust as needed (e.g., to the login page)
+			goto('/');
 		}
 	}
-
-	onDestroy(() => {
-		unsubscribe(); // Clean up subscription
-	});
 </script>
 
 <svelte:head>
-	<title>Account Settings</title>
+	<title>Update Password</title>
 </svelte:head>
 
 <div class="account-container">
-	<h1>Account Settings</h1>
 	<div class="reset-password">
 		<h2>Reset password</h2>
 		<div class="reset-form">
 			<div class="input-container">
-				<input type="email" bind:value={email} required />
-				<label for="input" class="label">Enter your email</label>
+				<input type="email" bind:value={newPassword} required />
+				<label for="input" class="label">Enter your new password</label>
 				<div class="underline" />
 			</div>
-			<button on:click={handlePasswordReset}>Send Reset Link</button>
+			<button on:click={updatePassword}>Update</button>
 		</div>
 	</div>
 </div>
 
 <style>
-	.reset-password,
-	h1 {
+	.reset-password {
 		padding: 5rem 0rem 0rem 5rem;
 	}
 
@@ -117,7 +102,7 @@
 		left: 0;
 		height: 2px;
 		width: 100%;
-		background-color: #ccc;
+		background-color: #333;
 		transform: scaleX(0);
 		transition: all 0.3s ease;
 	}
