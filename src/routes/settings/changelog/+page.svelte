@@ -41,7 +41,10 @@
 				<div class="upcoming-card">❔ Add you can add users as friends</div>
 				<div class="upcoming-card">❔ Add options to review films</div>
 				<div class="upcoming-card">❔ Be able to login only anon</div>
+			</div>
 		</div>
+	</div>
+</div>
 
 <style>
 	.commit-comment {
