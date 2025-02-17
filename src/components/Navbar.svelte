@@ -189,6 +189,10 @@
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Shadows+Into+Light&display=swap');
 
+	nav{
+		z-index: 999;
+	}
+
 	h2 {
 		padding-bottom: 0.5rem;
 	}

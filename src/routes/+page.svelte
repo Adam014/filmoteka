@@ -305,7 +305,7 @@
 
 	.button-library {
 		position: fixed;
-		z-index: 999;
+		z-index: 99;
 		bottom: 0;
 		right: 0;
 		padding: 30px;
