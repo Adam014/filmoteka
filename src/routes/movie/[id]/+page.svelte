@@ -183,27 +183,8 @@
 </svelte:head>
 
 <section class="movie-details">
-	<div class="movie-title-container">
-		{#if id}
-			<h3>ID: {id}</h3>
-		{/if}
-
-		{#if original_language}
-			<h3>Lang: {original_language}</h3>
-		{/if}
-
-		{#if status}
-			<h3>{status} {status === 'Released' && release_date ? release_date : ''}</h3>
-		{/if}
-
-		{#if adult !== null && adult !== undefined}
-			<h3>Adult: {adult ? 'Yes' : 'No'}</h3>
-		{/if}
-
-		{#if homepage}
-			<h3><a href={homepage}>HomePage</a></h3>
-		{/if}
-
+	<div class="title">
+		<h1>{original_title}</h1>
 		<div class="favorite-icon" on:click={toggleFavorite} class:isFavorite>
 			{isFavorite ? '★' : '☆'}
 		</div>
@@ -211,7 +192,7 @@
 
 	{#if isLoading}
 		<Loader />
-	{:else if finalTrailer}
+		{:else if finalTrailer}
 		<div class="video-container">
 			<iframe
 				title="youtube-video"
@@ -237,7 +218,29 @@
 	<!-- Add images right under the trailer, lets say 5-6 images -->
 
 	<div>
-		<h1>{imdb_id} | {original_title}</h1>
+			<div class="movie-title-container">
+		{#if id}
+			<h3>ID: {imdb_id}</h3>
+		{/if}
+
+		{#if original_language}
+			<h3>Lang: {original_language}</h3>
+		{/if}
+
+		{#if status}
+			<h3>{status} {status === 'Released' && release_date ? release_date : ''}</h3>
+		{/if}
+
+		{#if adult !== null && adult !== undefined}
+			<h3>Adult: {adult ? 'Yes' : 'No'}</h3>
+		{/if}
+
+		{#if homepage}
+			<h3><a href={homepage}>HomePage</a></h3>
+		{/if}
+
+	</div>
+
 		<p class="overview">{overview}</p>
 
 		<p class="tagline">{tagline !== '' ? '"' + tagline + '"' : ''}</p>
@@ -314,6 +317,11 @@
 		justify-content: center;
 	}
 
+	.title{
+		display: flex;
+		align-items: center;
+	}
+
 	.no-trailer {
 		padding: 50px 2.5rem 50px 2.5rem;
 	}
@@ -333,7 +341,8 @@
 	}
 
 	.favorite-icon {
-		font-size: 2rem;
+		font-size: 3rem;
+		width: auto;
 		cursor: pointer;
 		color: rgba(255, 215, 0, 0.8);
 		text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.6);
@@ -346,7 +355,6 @@
 	}
 
 	.favorite-icon:hover {
-		transform: scale(1.1);
 		color: gold;
 	}
 
@@ -427,7 +435,19 @@
 	@media screen and (max-width: 768px) {
 		.movie-title-container {
 			display: grid;
-			grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+			grid-template-columns: repeat(2, 1fr);
+			text-align: center;
+		}
+		h3{
+			padding: 1rem 0;
+		}
+		h1{
+			font-size: 1.5rem;
+			padding:0;
+		}
+
+		.title{
+			padding-left: 1.5rem;
 		}
 	}
 </style>

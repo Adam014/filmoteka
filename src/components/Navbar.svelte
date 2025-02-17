@@ -241,7 +241,7 @@
 
 		.search-container {
 			position: absolute;
-			top: 10%;
+			top: 12%;
 			width: 100%;
 		}
 	}
