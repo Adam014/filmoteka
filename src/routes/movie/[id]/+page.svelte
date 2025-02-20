@@ -192,7 +192,7 @@
 
 	{#if isLoading}
 		<Loader />
-		{:else if finalTrailer}
+	{:else if finalTrailer}
 		<div class="video-container">
 			<iframe
 				title="youtube-video"
@@ -218,28 +218,27 @@
 	<!-- Add images right under the trailer, lets say 5-6 images -->
 
 	<div>
-			<div class="movie-title-container">
-		{#if id}
-			<h3>ID: {imdb_id}</h3>
-		{/if}
+		<div class="movie-title-container">
+			{#if id}
+				<h3>ID: {imdb_id}</h3>
+			{/if}
 
-		{#if original_language}
-			<h3>Lang: {original_language}</h3>
-		{/if}
+			{#if original_language}
+				<h3>Lang: {original_language}</h3>
+			{/if}
 
-		{#if status}
-			<h3>{status} {status === 'Released' && release_date ? release_date : ''}</h3>
-		{/if}
+			{#if status}
+				<h3>{status} {status === 'Released' && release_date ? release_date : ''}</h3>
+			{/if}
 
-		{#if adult !== null && adult !== undefined}
-			<h3>Adult: {adult ? 'Yes' : 'No'}</h3>
-		{/if}
+			{#if adult !== null && adult !== undefined}
+				<h3>Adult: {adult ? 'Yes' : 'No'}</h3>
+			{/if}
 
-		{#if homepage}
-			<h3><a href={homepage}>HomePage</a></h3>
-		{/if}
-
-	</div>
+			{#if homepage}
+				<h3><a href={homepage}>HomePage</a></h3>
+			{/if}
+		</div>
 
 		<p class="overview">{overview}</p>
 
@@ -317,7 +316,7 @@
 		justify-content: center;
 	}
 
-	.title{
+	.title {
 		display: flex;
 		align-items: center;
 	}
@@ -438,15 +437,15 @@
 			grid-template-columns: repeat(2, 1fr);
 			text-align: center;
 		}
-		h3{
+		h3 {
 			padding: 1rem 0;
 		}
-		h1{
+		h1 {
 			font-size: 1.5rem;
-			padding:0;
+			padding: 0;
 		}
 
-		.title{
+		.title {
 			padding-left: 1.5rem;
 		}
 	}

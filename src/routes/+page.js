@@ -33,6 +33,12 @@ export async function load() {
 		.order('popularity', { ascending: false })
 		.limit(9);
 
+	// Fetch users via the admin API
+	const { data: users, error } = await supabase.auth.admin.listUsers();
+	if (error) {
+		console.error('Error fetching users:', error);
+	}
+
 	if (moviesError || actorsError) {
 		console.error('Error fetching top movies:', moviesError);
 		return { movies: [], detailed_movies: [] };
@@ -61,5 +67,10 @@ export async function load() {
 		})
 	);
 
-	return { movies: moviesWithImages, detailed_movies: detailedMovies, actors: actors };
+	return {
+		movies: moviesWithImages,
+		detailed_movies: detailedMovies,
+		actors: actors,
+		users: users
+	};
 }

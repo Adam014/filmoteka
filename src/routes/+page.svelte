@@ -3,34 +3,21 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { supabase } from '../lib/db/supabaseClient';
 	import RootMovies from '../components/Root.svelte';
+	import Users from '../components/Users.svelte';
+	import TopActors from '../components/TopActors.svelte';
 
 	export let data;
 
 	const movies = data?.movies;
 	const detailed_movies = data?.detailed_movies;
 	const actors = data?.actors;
+	const users = data?.users.users;
 
 	let currentUser = null;
 	let username;
 
-	let totalFilmsCount = 0;
-	let totalPersonsCount = 0;
-	let totalCategoriesCount = 0;
-
-	let earliestYear = '';
-	let earliestId = '';
-	let latestYear = '';
-	let latestId = '';
-
 	// Variable for GitHub repository last updated date
 	let repoUpdatedDate = 'Loading...';
-
-	// If the number is 0 or null, just return "0"
-	function formatNumberWithSpaces(num) {
-		if (!num) return '0';
-		// Using Intl.NumberFormat to group digits, then replace commas with spaces.
-		return num.toLocaleString('en-US').replace(/,/g, ' ');
-	}
 
 	// Subscribe to the user store
 	const unsubscribe = user.subscribe((value) => {
@@ -43,63 +30,6 @@
 	});
 
 	onMount(async () => {
-		try {
-			// 1) Total films
-			const { count: filmsCount, error: filmsError } = await supabase
-				.from('films')
-				.select('*', { count: 'exact', head: true });
-			if (filmsError) throw filmsError;
-			totalFilmsCount = filmsCount || 0;
-
-			// 2) Total persons
-			const { count: personsCount, error: personsError } = await supabase
-				.from('person_detailed')
-				.select('*', { count: 'exact', head: true });
-			if (personsError) throw personsError;
-			totalPersonsCount = personsCount || 0;
-
-			// 3) Total distinct categories
-			const { data: filmDetailedData, error: filmDetailedError } = await supabase
-				.from('film_detailed')
-				.select('genres');
-			if (filmDetailedError) throw filmDetailedError;
-
-			const genresSet = new Set();
-			filmDetailedData.forEach((row) => {
-				row.genres?.forEach((genreObj) => {
-					genresSet.add(genreObj.name);
-				});
-			});
-			totalCategoriesCount = genresSet.size;
-
-			// Earliest film:
-			const { data: earliest, error: earliestError } = await supabase
-				.from('films')
-				.select('id, release_date')
-				.order('release_date', { ascending: true })
-				.limit(1);
-			if (earliestError) throw earliestError;
-
-			// Latest film:
-			const { data: latest, error: latestError } = await supabase
-				.from('films')
-				.select('id, release_date')
-				.order('release_date', { ascending: false })
-				.limit(1);
-			if (latestError) throw latestError;
-
-			if (earliest?.[0]) {
-				earliestYear = new Date(earliest[0].release_date).getFullYear();
-				earliestId = earliest[0].id;
-			}
-			if (latest?.[0]) {
-				latestYear = new Date(latest[0].release_date).getFullYear();
-				latestId = latest[0].id;
-			}
-		} catch (err) {
-			console.error('Error fetching stats:', err);
-		}
-
 		// Fetch the GitHub repository last updated date
 		try {
 			const res = await fetch('https://api.github.com/repos/Adam014/filmoteka');
@@ -179,84 +109,15 @@
 
 	<RootMovies {movies} {detailed_movies} />
 
-	<!-- <div class="cards-layout">
-		<div class="cards-container">
-			<div class="card">
-				<div class="card-title">Total Films</div>
-				<div class="card-number">{formatNumberWithSpaces(totalFilmsCount)}</div>
-			</div>
-			<div class="card">
-				<div class="card-title">Total Actors/Directors</div>
-				<div class="card-number">{formatNumberWithSpaces(totalPersonsCount)}</div>
-			</div>
-			<div class="card">
-				<div class="card-title">Total Categories</div>
-				<div class="card-number">{formatNumberWithSpaces(totalCategoriesCount)}</div>
-			</div>
-			<div class="card">
-				<div class="card-title">Earliest-Latest Release</div>
-				<div class="card-number">
-					{#if earliestYear && earliestId && latestYear && latestId}
-						<a href="/movie/{earliestId}">{earliestYear}</a>
-						-
-						<a href="/movie/{latestId}">{latestYear}</a>
-					{:else}
-						No data
-					{/if}
-				</div>
-			</div>
-		</div>
-	</div> -->
+	<TopActors {actors} />
 
-	<h2>Top 10 Actors by TMDB</h2>
-	<div class="actors-container">
-		{#each actors as actor, index}
-			<a href={'/person/' + actor.id}>
-				<div class="actor-card" key={index}>
-					<div class="actor-info">
-						<img src={'https://image.tmdb.org/t/p/w300' + actor?.profile_path} alt={actor?.name} />
-					</div>
-					<h3>{actor.name}</h3>
-				</div>
-			</a>
-		{/each}
-	</div>
+	<Users {users} />
 </div>
 
 <style>
 	a {
 		text-decoration: none;
 		color: white;
-	}
-
-	.actors-container {
-		padding: 30px 65px 50px 65px;
-		display: flex;
-		flex-wrap: wrap;
-	}
-
-	h2 {
-		padding: 40px 0px 10px 65px;
-		text-decoration: underline;
-	}
-
-	.actor-info img {
-		height: 10rem;
-		width: 10rem;
-		border-radius: 50%;
-		object-fit: cover;
-	}
-
-	.actor-card {
-		display: grid;
-		justify-content: center;
-		padding: 10px 10px;
-		text-align: center;
-		cursor: pointer;
-	}
-
-	.actor-card h3 {
-		padding-top: 10px;
 	}
 
 	/* .root-container {
@@ -274,33 +135,6 @@
 		padding: 10px 0;
 		font-size: 2rem;
 		text-decoration: underline dotted;
-	}
-
-	.cards-layout {
-		display: flex;
-		justify-content: left;
-		padding: 0px 30px 50px 30px;
-	}
-
-	.cards-container {
-		width: 100%;
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-	}
-
-	.card {
-		padding: 1rem;
-		border: 1px solid #ccc;
-	}
-
-	.card-title {
-		font-size: 1.5rem;
-		margin-bottom: 0.25rem;
-	}
-
-	.card-number {
-		font-size: 3rem;
-		font-weight: bold;
 	}
 
 	.button-library {
@@ -401,18 +235,6 @@
 		}
 		.button-library {
 			padding-top: 20px;
-		}
-	}
-
-	@media (max-width: 768px) {
-		.actors-container {
-			display: grid;
-			grid-template-columns: repeat(2, 2fr);
-			padding-left: 5px;
-		}
-
-		h2 {
-			padding-left: 10px;
 		}
 	}
 
