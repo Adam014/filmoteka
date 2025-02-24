@@ -37,7 +37,7 @@
 				<div class="completed-card">&#10004; Add users profiles to root</div>
 				<div class="upcoming-card">❔ Add a new feed, more like twitter</div>
 				<div class="upcoming-card">❔ Add movies you might like to /profile</div>
-				<div class="completed-card">&#1000 Add you can add users as friends</div>
+				<div class="completed-card">&#10004; Add you can add users as friends</div>
 				<div class="upcoming-card">❔ Add options to review films</div>
 				<div class="upcoming-card">❔ Be able to login only anon</div>
 				<div class="upcoming-card">❔ Add notification button to navbar</div>
