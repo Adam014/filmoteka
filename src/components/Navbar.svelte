@@ -123,8 +123,6 @@
 					>
 					<hr />
 					<a href="/random" on:click={closeMenu}>Random-Movie</a>
-					<hr />
-					<a href="/contact" on:click={closeMenu}>Contact</a>
 				</div>
 				<div class="center-nav-menu-items">
 					<h2>Settings</h2>

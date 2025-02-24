@@ -35,7 +35,6 @@
 				<div class="completed-card">&#10004; Add Top 10 Actors to root</div>
 				<div class="completed-card">&#10004; Add Account settings</div>
 				<div class="completed-card">&#10004; Add users profiles to root</div>
-				<div class="upcoming-card">❔ Create a contact page</div>
 				<div class="upcoming-card">❔ Add a new feed, more like twitter</div>
 				<div class="upcoming-card">❔ Add movies you might like to /profile</div>
 				<div class="upcoming-card">❔ Add you can add users as friends</div>
@@ -162,8 +161,6 @@
 		.changelog {
 			display: grid;
 			justify-content: center;
-			width: 100%;
-			padding-left: 30px;
 		}
 
 		.released {
