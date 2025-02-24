@@ -1,7 +1,5 @@
 <script>
 	export let users;
-
-	console.log(users);
 </script>
 
 <div class="users-container">
