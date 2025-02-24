@@ -9,6 +9,8 @@
 
 	let currentUser;
 	let menuOpen = false;
+	let subscription; // for realtime channel
+	let notificationsLoaded = false; // flag to avoid persisting until after load
 
 	const unsubscribe = user.subscribe((value) => {
 		currentUser = value;
@@ -47,19 +49,100 @@
 		}
 	}
 
+	// --------------- Notifications Logic ----------------
+	let showNotificationsModal = false;
+	let notifications = [];
+
+	// On mount, load stored notifications from localStorage (only in browser)
 	onMount(() => {
+		if (typeof localStorage !== 'undefined') {
+			const stored = localStorage.getItem('notifications');
+			if (stored) {
+				notifications = JSON.parse(stored);
+			}
+		}
+		notificationsLoaded = true; // now we consider notifications loaded
 		if (typeof document !== 'undefined') {
 			document.addEventListener('click', closeMenuOnOutsideClick);
 		}
 
-		return () => unsubscribe();
+		// The realtime subscription will be set up in the reactive block below
+		return () => {
+			unsubscribe();
+		};
 	});
 
 	onDestroy(() => {
 		if (typeof document !== 'undefined') {
 			document.removeEventListener('click', closeMenuOnOutsideClick);
 		}
+		if (subscription) {
+			supabase.removeChannel(subscription);
+		}
 	});
+
+	// Persist notifications to localStorage whenever they change,
+	// but only after we have loaded the stored notifications.
+	$: if (notificationsLoaded && typeof localStorage !== 'undefined') {
+		localStorage.setItem('notifications', JSON.stringify(notifications));
+	}
+
+	// Compute unread notifications count
+	$: unreadCount = notifications.filter((n) => !n.read).length;
+
+	// Reactive subscription: when currentUser is available and no subscription exists, set it up.
+	$: if (currentUser && !subscription) {
+		subscription = supabase
+			.channel('realtime-notifications')
+			.on(
+				'postgres_changes',
+				{ event: 'INSERT', schema: 'public', table: 'follows' },
+				async (payload) => {
+					// Check if this new follow event is for the current user
+					if (payload.new.followed_id === currentUser.id) {
+						// Fetch all users so we can map the follower's info
+						const { data: allUsers, error: usersError } = await supabase.auth.admin.listUsers();
+						if (usersError) {
+							console.error('Error fetching users:', usersError);
+							return;
+						}
+						let followerUser = allUsers?.users.find((u) => u.id === payload.new.follower_id);
+						// Construct the notification object
+						const notification = {
+							id: payload.new.created_at + '-' + payload.new.follower_id, // composite id
+							message: `Hey, ${followerUser?.user_metadata?.display_name} started following you!`,
+							read: false,
+							created_at: payload.new.created_at,
+							follower: followerUser
+						};
+						notifications = [notification, ...notifications];
+					}
+				}
+			)
+			.subscribe();
+	}
+
+	// Toggle notifications modal
+	function toggleNotifications() {
+		showNotificationsModal = !showNotificationsModal;
+	}
+
+	// Mark a single notification as read
+	function markAsRead(id) {
+		notifications = notifications.map((n) => (n.id === id ? { ...n, read: true } : n));
+	}
+
+	// Mark all notifications as read
+	function markAllAsRead() {
+		notifications = notifications.map((n) => ({ ...n, read: true }));
+	}
+
+	// Helper to format notification time
+	function formatTime(dateString) {
+		const date = new Date(dateString);
+		return date.toLocaleString();
+	}
+	// -----------------------------------------------------
 </script>
 
 <nav class="navbar-container {currentUser ? 'logged-in' : 'logged-out'}">
@@ -83,16 +166,25 @@
 	<div class="search-container">
 		<Search placeholder="Search for a movie or person..." />
 	</div>
+
 	<div class="nav-links">
 		{#if currentUser}
+			<!-- Notifications Bell Icon (placed to the left of the profile icon) -->
+			<div class="notifications-container" on:click={toggleNotifications}>
+				<img
+					src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAABc0lEQVR4nO3ZP0oDQRSA8RdFQStF64jp9AZpgwiCinVsRPEOKRS2EPuUdnoFUSxErAQLDxE9gX8KRZBPRlOIJpus2XmzE94PBgKThHxMZjdMRIwxQQAlYBu4bA/3uCSxAfb5a09iAowCLx1Cnt2cxAIo011ZYgFUU0KqUmTACLAJ3NKbe069cJsfWATuyM69ZkGKANjosrH75S4A66EjloA3BvcOrISKqAy4Er+595oPcde+Jn9X2iHL+FPTDDnzGHKqFTGZ0wbv5hWY0LpS+VbTCNlVCNnRCGkohDQ0QhKFkMRC+mUrkk0ivtmKZJPYivTLvlrZJOLbMK1Ipf3D0eeoeA8xJkfu3AloAkfKowms5RXhjjZDq+cRchK6AjjOI2RrKFbkx/lulj3SSvlQrYx7ZFVCAMaBp5SQR2BMio7vO38vume8/wFMAx8pEW5uSmIAXKSEnEssgDngoUPEfVR/hjrALHAI3LTHATDzNWmMEW2fnD0mYsu13JQAAAAASUVORK5CYII="
+					alt="bell"
+				/>
+				{#if unreadCount > 0}
+					<span class="badge">{unreadCount}</span>
+				{/if}
+			</div>
+
+			<!-- Profile Icon -->
 			<div class="profile-container">
 				<a href={`/profile/${currentUser.user_metadata.display_name}`}>
 					{#if currentUser.user_metadata && currentUser.user_metadata.avatar_url}
-						<img
-							src={currentUser.user_metadata.avatar_url}
-							alt="Profile Picture"
-							class="profile-picture"
-						/>
+						<img src={currentUser.user_metadata.avatar_url} alt="Profile Picture" class="profile-picture" />
 					{:else}
 						<span class="placeholder-icon">👤</span>
 					{/if}
@@ -118,9 +210,7 @@
 					<h2>Explore</h2>
 					<a href="/library" on:click={closeMenu}>Library</a>
 					<hr />
-					<a href={`/profile/${currentUser.user_metadata.display_name}`} on:click={closeMenu}
-						>Profile</a
-					>
+					<a href={`/profile/${currentUser.user_metadata.display_name}`} on:click={closeMenu}>Profile</a>
 					<hr />
 					<a href="/random" on:click={closeMenu}>Random-Movie</a>
 				</div>
@@ -135,11 +225,7 @@
 				<div class="profile-logout-container">
 					<a href={`/profile/${currentUser.user_metadata.display_name}`} on:click={closeMenu}>
 						{#if currentUser.user_metadata && currentUser.user_metadata.avatar_url}
-							<img
-								src={currentUser.user_metadata.avatar_url}
-								alt="Profile Picture"
-								class="profile-picture"
-							/>
+							<img src={currentUser.user_metadata.avatar_url} alt="Profile Picture" class="profile-picture" />
 						{:else}
 							<span class="placeholder-icon">👤</span>
 						{/if}
@@ -182,6 +268,42 @@
 			</div>
 		{/if}
 	</div>
+
+	{#if showNotificationsModal}
+		<div class="notification-overlay" on:click={() => showNotificationsModal = false}>
+			<div class="notifications-modal" on:click|stopPropagation>
+				<div class="arrow"></div>
+				<div class="notifications-header">
+					<h3>Notifications</h3>
+					<button class="mark-all" on:click={markAllAsRead}>Mark all as read</button>
+				</div>
+				{#if notifications.length > 0}
+					<ul>
+						{#each notifications as notif (notif.id)}
+							<li class="notification-item">
+								<a class="notification-link" href={`/profile/${notif.follower?.user_metadata?.display_name}`}>
+									{#if notif.follower && notif.follower.user_metadata && notif.follower.user_metadata.avatar_url}
+										<img src={notif.follower.user_metadata.avatar_url} alt="Avatar" class="notification-avatar" />
+									{:else}
+										<span class="notification-placeholder">👤</span>
+									{/if}
+									<div class="notification-info">
+										<span class="notification-text">{notif.message}</span>
+										<span class="notification-time">{formatTime(notif.created_at)}</span>
+									</div>
+								</a>
+								{#if !notif.read}
+									<button class="mark-btn" on:click={() => markAsRead(notif.id)}>Mark as read</button>
+								{/if}
+							</li>
+						{/each}
+					</ul>
+				{:else}
+					<p class="notification-empty">Nothing here</p>
+				{/if}
+			</div>
+		</div>
+	{/if}
 </nav>
 
 <style>
@@ -216,25 +338,151 @@
 		gap: 1rem;
 	}
 
+	/* Notifications Styles */
+	.notifications-container {
+		position: relative;
+		cursor: pointer;
+		padding: 0 0 0 20px;
+	}
+	.notifications-container img {
+		height: 2rem;
+	}
+	.badge {
+		position: absolute;
+		top: -5px;
+		right: -5px;
+		background-color: red;
+		color: white;
+		border-radius: 50%;
+		padding: 2px 6px;
+		font-size: 0.75rem;
+	}
+	/* Overlay that covers the entire viewport */
+	.notification-overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: transparent;
+		z-index: 1000;
+	}
+	/* Modal that pops up from the bell */
+	.notifications-modal {
+		position: fixed;
+		top: 7rem;; /* adjust as needed to align with the bell */
+		right: 5.8rem; /* adjust to align with the bell */
+		background: rgba(255, 255, 255, 0.9);
+		backdrop-filter: blur(10px);
+		border-radius: 8px;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		padding: 1rem;
+		width: 300px;
+	}
+	/* Arrow above the modal */
+	.arrow {
+		position: absolute;
+		top: -10px;
+		right: 20px;
+		width: 0;
+		height: 0;
+		border-left: 10px solid transparent;
+		border-right: 10px solid transparent;
+		border-bottom: 10px solid rgba(255, 255, 255, 0.9);
+	}
+	.notifications-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 0.5rem;
+	}
+	.notifications-header h3 {
+		margin: 0;
+		font-size: 1.1rem;
+		color: #333;
+	}
+	.mark-all {
+		background: none;
+		border: none;
+		color: #007bff;
+		font-size: 0.9rem;
+		cursor: pointer;
+	}
+	.notification-item {
+		display: flex;
+		align-items: center;
+		padding: 0.5rem 0;
+		border-bottom: 1px solid #eee;
+	}
+	.notification-item:last-child {
+		border-bottom: none;
+	}
+	.notification-link {
+		display: flex;
+		align-items: center;
+		text-decoration: none;
+		color: inherit;
+		flex-grow: 1;
+	}
+	.notification-avatar {
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		object-fit: cover;
+		margin-right: 1rem;
+	}
+	.notification-placeholder {
+		font-size: 1.5rem;
+		padding-right: 2rem;
+	}
+	.notification-info {
+		display: flex;
+		flex-direction: column;
+	}
+	.notification-text {
+		font-size: 0.9rem;
+		color: #333;
+	}
+	.notification-time {
+		font-size: 0.75rem;
+		color: #666;
+	}
+	.mark-btn {
+		background: none;
+		border: none;
+		color: #007bff;
+		font-size: 0.8rem;
+		cursor: pointer;
+		margin-left: 0.5rem;
+	}
+	.notification-empty {
+		text-align: center;
+		color: #666;
+		font-size: 0.9rem;
+	}
+
+	.profile-container {
+		margin-left: auto;
+	}
+
 	@media (max-width: 965px) {
 		.nav-items {
 			display: grid;
 			justify-content: center;
 		}
 		.nav-items div {
-			padding-left: 0px;
+			padding-left: 0;
 			padding-bottom: 50px;
 		}
 	}
 
 	@media (max-width: 768px) {
 		.signup-container {
-			padding-left: 0px;
+			padding-left: 0;
 		}
 
 		.nav-links {
-			flex-direction: column;
-			align-items: flex-start;
+			align-items: center;
 		}
 
 		.search-container {
@@ -350,7 +598,6 @@
 	}
 
 	/* logout button */
-
 	.logout-container {
 		position: absolute;
 		bottom: 1%;
@@ -365,7 +612,11 @@
 	}
 
 	.logout-container a {
-		font-size: 0rem;
+		font-size: 0;
+	}
+
+	ul{
+		padding: 0;
 	}
 
 	.Btn {
@@ -383,7 +634,6 @@
 		background-color: transparent;
 	}
 
-	/* plus sign */
 	.sign {
 		width: 100%;
 		transition-duration: 0.3s;
@@ -400,7 +650,6 @@
 		fill: white;
 	}
 
-	/* button click effect*/
 	.Btn:active {
 		transform: translate(2px, 2px);
 	}
@@ -409,14 +658,6 @@
 		width: 50px;
 		height: 50px;
 		border-radius: 50%;
-	}
-
-	.profile-container {
-		margin-left: auto;
-	}
-
-	.signup-link {
-		margin-left: auto;
 	}
 
 	.placeholder-icon {
@@ -434,5 +675,13 @@
 		.nav-items {
 			top: 8%;
 		}
+		.notifications-container {
+			padding: 10px 0 0 20px;
+		}
+		.notifications-modal {
+		top: 5rem;; /* adjust as needed to align with the bell */
+		right: 3em; /* adjust to align with the bell */
+
+	}
 	}
 </style>
