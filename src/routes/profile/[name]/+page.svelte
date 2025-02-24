@@ -14,6 +14,12 @@
 	let favoriteMovies = [];
 	let loading = true;
 
+	// State for follow functionality
+	let isFollowing = false;
+	let followLoading = false;
+	let followersCount = 0;
+	let followingCount = 0;
+
 	// Subscribe to the user store
 	const unsubscribe = user.subscribe((value) => {
 		currentUser = value;
@@ -24,7 +30,7 @@
 		loading = true;
 
 		try {
-			// Fetch all users
+			// Fetch all users from Supabase Auth
 			const { data, error } = await supabase.auth.admin.listUsers();
 			if (error) {
 				console.error('Error fetching users:', error);
@@ -32,14 +38,24 @@
 				return;
 			}
 
-			// Access the 'users' array and find the user by display name
+			// Find the user by display name from user_metadata
 			const users = data?.users || [];
-			profileUser = users.find((user) => user.user_metadata?.display_name === name);
+			profileUser = users.find(
+				(user) => user.user_metadata?.display_name === name
+			);
 
 			if (!profileUser) {
 				console.error('User not found');
 				loading = false;
 				return;
+			}
+
+			// Fetch follow stats for the profile user
+			await fetchFollowStats();
+
+			// If viewing someone else's profile, check follow status
+			if (currentUser && profileUser.id !== currentUser.id) {
+				await checkFollowStatus();
 			}
 
 			// Fetch favorite movies for the profile user
@@ -85,6 +101,79 @@
 		} finally {
 			loading = false;
 		}
+	}
+
+	// Check if the current user is following the profile user
+	async function checkFollowStatus() {
+		if (currentUser && profileUser && currentUser.id !== profileUser.id) {
+			const { data, error } = await supabase
+				.from('follows')
+				.select('*')
+				.eq('follower_id', currentUser.id)
+				.eq('followed_id', profileUser.id);
+			if (error) {
+				console.error('Error checking follow status:', error);
+			} else {
+				isFollowing = data && data.length > 0;
+			}
+		}
+	}
+
+	// Fetch follower and following counts for the profile user
+	async function fetchFollowStats() {
+		if (!profileUser) return;
+
+		// Count followers (users following profileUser)
+		const { count: countFollowers, error: errFollowers } = await supabase
+			.from('follows')
+			.select('*', { count: 'exact', head: true })
+			.eq('followed_id', profileUser.id);
+		if (errFollowers) {
+			console.error('Error counting followers:', errFollowers);
+		} else {
+			followersCount = countFollowers;
+		}
+
+		// Count following (users that profileUser is following)
+		const { count: countFollowing, error: errFollowing } = await supabase
+			.from('follows')
+			.select('*', { count: 'exact', head: true })
+			.eq('follower_id', profileUser.id);
+		if (errFollowing) {
+			console.error('Error counting following:', errFollowing);
+		} else {
+			followingCount = countFollowing;
+		}
+	}
+
+	// Toggle follow/unfollow when the button is clicked
+	async function toggleFollow() {
+		followLoading = true;
+		if (isFollowing) {
+			// Unfollow
+			const { data, error } = await supabase
+				.from('follows')
+				.delete()
+				.match({ follower_id: currentUser.id, followed_id: profileUser.id });
+			if (error) {
+				console.error('Error unfollowing user:', error);
+			} else {
+				isFollowing = false;
+			}
+		} else {
+			// Follow
+			const { data, error } = await supabase
+				.from('follows')
+				.insert([{ follower_id: currentUser.id, followed_id: profileUser.id }]);
+			if (error) {
+				console.error('Error following user:', error);
+			} else {
+				isFollowing = true;
+			}
+		}
+		// Update follow stats after toggling
+		await fetchFollowStats();
+		followLoading = false;
 	}
 
 	// Watch for changes in the route params and fetch data
@@ -141,6 +230,23 @@
 					{/if}
 					<p>Last sign in: <b>{formatDate(profileUser?.last_sign_in_at)}</b></p>
 				</div>
+
+				<!-- Follow Stats -->
+				<div class="follow-stats">
+					<span>{followersCount} Followers</span> • 
+					<span>{followingCount} Following</span>
+				</div>
+
+				<!-- Show follow/unfollow button only if this isn't the current user's profile -->
+				{#if currentUser && profileUser && profileUser.id !== currentUser.id}
+					<button class="follow-button" on:click={toggleFollow} disabled={followLoading}>
+						{#if followLoading}
+							Loading...
+						{:else}
+							{isFollowing ? 'Unfollow' : 'Follow'}
+						{/if}
+					</button>
+				{/if}
 			</div>
 		</div>
 		<div class="favorites-container">
@@ -185,6 +291,36 @@
 		font-size: 2.5rem;
 		color: #fff;
 		margin-bottom: 1.5rem;
+	}
+
+	.follow-stats {
+		margin-top: 1rem;
+		font-size: 0.9rem;
+		color: #ccc;
+	}
+	.follow-stats span {
+		margin-right: 0.5rem;
+	}
+
+	.follow-button {
+		margin-top: 1rem;
+		padding: 0.5rem 1rem;
+		font-size: 1rem;
+		border: none;
+		border-radius: 6px;
+		cursor: pointer;
+		background-color: #7a1cac;
+		color: #fff;
+		transition: background-color 0.3s ease;
+	}
+
+	.follow-button:hover:not(:disabled) {
+		background-color: #a13dc2;
+	}
+
+	.follow-button:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
 	}
 
 	.favorites-container {

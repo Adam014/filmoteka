@@ -291,3 +291,22 @@ export async function fetchUserProfile(username) {
 	}
 	return data;
 }
+
+// Follow a user
+export const followUser = async (currentUserId, otherUserId) => {
+	const { data, error } = await supabase
+	  .from('follows')
+	  .insert([{ follower_id: currentUserId, followed_id: otherUserId }]);
+	if (error) console.error('Error following user:', error);
+	return data;
+  };
+  
+// Unfollow a user
+export const unfollowUser = async (currentUserId, otherUserId) => {
+const { data, error } = await supabase
+	.from('follows')
+	.delete()
+	.match({ follower_id: currentUserId, followed_id: otherUserId });
+	if (error) console.error('Error unfollowing user:', error);
+	return data;
+};
