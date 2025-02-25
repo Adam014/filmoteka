@@ -154,6 +154,22 @@
 		}
 	}
 
+	async function unfollowUser(userId) {
+		const { data, error } = await supabase
+			.from('follows')
+			.delete()
+			.match({ follower_id: currentUser.id, followed_id: userId });
+		if (error) {
+			console.error('Error unfollowing user:', error);
+			toast.error('Error unfollowing user');
+		} else {
+			// Update the following list and count
+			followingList = followingList.filter((u) => u.id !== userId);
+			followingCount = followingCount - 1;
+			toast.success('Unfollowed user');
+		}
+	}
+
 	// Toggle follow/unfollow when the button is clicked
 	async function toggleFollow() {
 		followLoading = true;
@@ -349,16 +365,20 @@
 			{#if followingList.length > 0}
 				<ul class="user-list">
 					{#each followingList as user (user.id)}
-						<a href={'/profile/' + user.user_metadata?.display_name}>
-							<li class="user-item">
+						<li class="user-item">
+							<a href={'/profile/' + user.user_metadata?.display_name} class="user-link">
 								{#if user.user_metadata?.avatar_url}
 									<img src={user.user_metadata.avatar_url} alt="Avatar" class="user-avatar" />
 								{:else}
 									<span class="user-placeholder">👤</span>
 								{/if}
 								<span class="user-name">{user.user_metadata?.display_name || 'Unknown'}</span>
-							</li>
-						</a>
+							</a>
+							<!-- New unfollow button added next to each followed user -->
+							<button class="unfollow-btn" on:click|stopPropagation={() => unfollowUser(user.id)}
+								>Unfollow</button
+							>
+						</li>
 					{/each}
 				</ul>
 			{:else}
@@ -369,9 +389,25 @@
 {/if}
 
 <style>
+	.unfollow-btn {
+		background: #ff4d4d;
+		border: none;
+		color: white;
+		padding: 0.3rem 0.6rem;
+		border-radius: 4px;
+		cursor: pointer;
+		font-size: 0.8rem;
+		transition: background 0.2s ease;
+	}
+	.unfollow-btn:hover {
+		background: #e60000;
+	}
+
 	a {
 		text-decoration: none;
 		color: white;
+		display: flex;
+		align-items: center;
 	}
 
 	.container {
@@ -529,6 +565,7 @@
 		align-items: center;
 		padding: 0.5rem 0;
 		border-bottom: 1px solid #eee;
+		justify-content: space-between;
 	}
 
 	.user-item:last-child {

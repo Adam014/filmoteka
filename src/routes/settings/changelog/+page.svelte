@@ -42,6 +42,7 @@
 				<div class="upcoming-card">❔ Add options to review films</div>
 				<div class="upcoming-card">❔ Be able to login only anon</div>
 				<div class="completed-card">&#10004; Add notification button to navbar</div>
+				<div class="completed-card">&#10004; Implementing unfollow button to Following</div>
 			</div>
 		</div>
 	</div>

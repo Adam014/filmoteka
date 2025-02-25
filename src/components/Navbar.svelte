@@ -184,7 +184,11 @@
 			<div class="profile-container">
 				<a href={`/profile/${currentUser.user_metadata.display_name}`}>
 					{#if currentUser.user_metadata && currentUser.user_metadata.avatar_url}
-						<img src={currentUser.user_metadata.avatar_url} alt="Profile Picture" class="profile-picture" />
+						<img
+							src={currentUser.user_metadata.avatar_url}
+							alt="Profile Picture"
+							class="profile-picture"
+						/>
 					{:else}
 						<span class="placeholder-icon">👤</span>
 					{/if}
@@ -210,7 +214,9 @@
 					<h2>Explore</h2>
 					<a href="/library" on:click={closeMenu}>Library</a>
 					<hr />
-					<a href={`/profile/${currentUser.user_metadata.display_name}`} on:click={closeMenu}>Profile</a>
+					<a href={`/profile/${currentUser.user_metadata.display_name}`} on:click={closeMenu}
+						>Profile</a
+					>
 					<hr />
 					<a href="/random" on:click={closeMenu}>Random-Movie</a>
 				</div>
@@ -225,7 +231,11 @@
 				<div class="profile-logout-container">
 					<a href={`/profile/${currentUser.user_metadata.display_name}`} on:click={closeMenu}>
 						{#if currentUser.user_metadata && currentUser.user_metadata.avatar_url}
-							<img src={currentUser.user_metadata.avatar_url} alt="Profile Picture" class="profile-picture" />
+							<img
+								src={currentUser.user_metadata.avatar_url}
+								alt="Profile Picture"
+								class="profile-picture"
+							/>
 						{:else}
 							<span class="placeholder-icon">👤</span>
 						{/if}
@@ -270,9 +280,9 @@
 	</div>
 
 	{#if showNotificationsModal}
-		<div class="notification-overlay" on:click={() => showNotificationsModal = false}>
+		<div class="notification-overlay" on:click={() => (showNotificationsModal = false)}>
 			<div class="notifications-modal" on:click|stopPropagation>
-				<div class="arrow"></div>
+				<div class="arrow" />
 				<div class="notifications-header">
 					<h3>Notifications</h3>
 					<button class="mark-all" on:click={markAllAsRead}>Mark all as read</button>
@@ -281,9 +291,16 @@
 					<ul>
 						{#each notifications as notif (notif.id)}
 							<li class="notification-item">
-								<a class="notification-link" href={`/profile/${notif.follower?.user_metadata?.display_name}`}>
+								<a
+									class="notification-link"
+									href={`/profile/${notif.follower?.user_metadata?.display_name}`}
+								>
 									{#if notif.follower && notif.follower.user_metadata && notif.follower.user_metadata.avatar_url}
-										<img src={notif.follower.user_metadata.avatar_url} alt="Avatar" class="notification-avatar" />
+										<img
+											src={notif.follower.user_metadata.avatar_url}
+											alt="Avatar"
+											class="notification-avatar"
+										/>
 									{:else}
 										<span class="notification-placeholder">👤</span>
 									{/if}
@@ -293,7 +310,9 @@
 									</div>
 								</a>
 								{#if !notif.read}
-									<button class="mark-btn" on:click={() => markAsRead(notif.id)}>Mark as read</button>
+									<button class="mark-btn" on:click={() => markAsRead(notif.id)}
+										>Mark as read</button
+									>
 								{/if}
 							</li>
 						{/each}
@@ -370,7 +389,7 @@
 	/* Modal that pops up from the bell */
 	.notifications-modal {
 		position: fixed;
-		top: 7rem;; /* adjust as needed to align with the bell */
+		top: 7rem; /* adjust as needed to align with the bell */
 		right: 5.8rem; /* adjust to align with the bell */
 		background: rgba(255, 255, 255, 0.9);
 		backdrop-filter: blur(10px);
@@ -615,7 +634,7 @@
 		font-size: 0;
 	}
 
-	ul{
+	ul {
 		padding: 0;
 	}
 
@@ -679,9 +698,8 @@
 			padding: 10px 0 0 20px;
 		}
 		.notifications-modal {
-		top: 5rem;; /* adjust as needed to align with the bell */
-		right: 3em; /* adjust to align with the bell */
-
-	}
+			top: 5rem; /* adjust as needed to align with the bell */
+			right: 3em; /* adjust to align with the bell */
+		}
 	}
 </style>
