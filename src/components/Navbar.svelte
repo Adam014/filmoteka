@@ -102,32 +102,10 @@
 			.channel('realtime-notifications')
 			.on(
 				'postgres_changes',
-				{ event: 'INSERT', schema: 'public', table: 'follows' },
-				async (payload) => {
-					if (payload.new.followed_id === currentUser.id) {
-						const { data: allUsers, error: usersError } = await supabase.auth.admin.listUsers();
-						if (usersError) {
-							console.error('Error fetching users:', usersError);
-							return;
-						}
-
-						let followerUser = allUsers?.users.find((u) => u.id === payload.new.follower_id);
-
-						const notification = {
-							user_id: currentUser.id,
-							message: `Hey, ${followerUser?.user_metadata?.display_name} started following you!`,
-							read: false,
-							created_at: payload.new.created_at
-						};
-
-						// Save to Supabase
-						const { error } = await supabase.from('notifications').insert([notification]);
-
-						if (error) {
-							console.error('Error saving notification:', error);
-						} else {
-							notifications = [notification, ...notifications];
-						}
+				{ event: 'INSERT', schema: 'public', table: 'notifications' },
+				(payload) => {
+					if (payload.new.user_id === currentUser.id) {
+						notifications = [payload.new, ...notifications];
 					}
 				}
 			)
