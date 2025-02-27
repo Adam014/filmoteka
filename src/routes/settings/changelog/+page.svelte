@@ -38,7 +38,7 @@
 				<div class="upcoming-card">❔ Add a new feed, more like twitter</div>
 				<div class="upcoming-card">❔ Add movies you might like to /profile</div>
 				<div class="completed-card">&#10004; Add you can add users as friends</div>
-				<div class="upcoming-card">❔ Fix notifications, that it works across devices</div>
+				<div class="completed-card">&#10004; Fix notifications, that it works across devices</div>
 				<div class="upcoming-card">❔ Add options to review films</div>
 				<div class="upcoming-card">❔ Be able to login only anon</div>
 				<div class="completed-card">&#10004; Add notification button to navbar</div>
