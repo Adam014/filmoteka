@@ -54,19 +54,25 @@
 	let notifications = [];
 
 	// On mount, load stored notifications from localStorage (only in browser)
-	onMount(() => {
-		if (typeof localStorage !== 'undefined') {
-			const stored = localStorage.getItem('notifications');
-			if (stored) {
-				notifications = JSON.parse(stored);
+	onMount(async () => {
+		if (currentUser) {
+			const { data, error } = await supabase
+				.from('notifications')
+				.select('*')
+				.eq('user_id', currentUser.id)
+				.order('created_at', { ascending: false });
+
+			if (!error) {
+				notifications = data || [];
+			} else {
+				console.error('Error fetching notifications:', error);
 			}
 		}
-		notificationsLoaded = true; // now we consider notifications loaded
+
 		if (typeof document !== 'undefined') {
 			document.addEventListener('click', closeMenuOnOutsideClick);
 		}
 
-		// The realtime subscription will be set up in the reactive block below
 		return () => {
 			unsubscribe();
 		};
@@ -98,24 +104,30 @@
 				'postgres_changes',
 				{ event: 'INSERT', schema: 'public', table: 'follows' },
 				async (payload) => {
-					// Check if this new follow event is for the current user
 					if (payload.new.followed_id === currentUser.id) {
-						// Fetch all users so we can map the follower's info
 						const { data: allUsers, error: usersError } = await supabase.auth.admin.listUsers();
 						if (usersError) {
 							console.error('Error fetching users:', usersError);
 							return;
 						}
+
 						let followerUser = allUsers?.users.find((u) => u.id === payload.new.follower_id);
-						// Construct the notification object
+
 						const notification = {
-							id: payload.new.created_at + '-' + payload.new.follower_id, // composite id
+							user_id: currentUser.id,
 							message: `Hey, ${followerUser?.user_metadata?.display_name} started following you!`,
 							read: false,
-							created_at: payload.new.created_at,
-							follower: followerUser
+							created_at: payload.new.created_at
 						};
-						notifications = [notification, ...notifications];
+
+						// Save to Supabase
+						const { error } = await supabase.from('notifications').insert([notification]);
+
+						if (error) {
+							console.error('Error saving notification:', error);
+						} else {
+							notifications = [notification, ...notifications];
+						}
 					}
 				}
 			)
@@ -128,13 +140,27 @@
 	}
 
 	// Mark a single notification as read
-	function markAsRead(id) {
-		notifications = notifications.map((n) => (n.id === id ? { ...n, read: true } : n));
+	async function markAsRead(id) {
+		const { error } = await supabase.from('notifications').update({ read: true }).eq('id', id);
+
+		if (!error) {
+			notifications = notifications.map((n) => (n.id === id ? { ...n, read: true } : n));
+		} else {
+			console.error('Error marking notification as read:', error);
+		}
 	}
 
-	// Mark all notifications as read
-	function markAllAsRead() {
-		notifications = notifications.map((n) => ({ ...n, read: true }));
+	async function markAllAsRead() {
+		const { error } = await supabase
+			.from('notifications')
+			.update({ read: true })
+			.eq('user_id', currentUser.id);
+
+		if (!error) {
+			notifications = notifications.map((n) => ({ ...n, read: true }));
+		} else {
+			console.error('Error marking all notifications as read:', error);
+		}
 	}
 
 	// Helper to format notification time
