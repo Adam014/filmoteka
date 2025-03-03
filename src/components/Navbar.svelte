@@ -297,16 +297,20 @@
 							<li class="notification-item">
 								<a
 									class="notification-link"
-									href={`/profile/${notif.follower?.user_metadata?.display_name}`}
+									href={notif.type === 'global'
+										? '#'
+										: `/profile/${notif.follower?.user_metadata?.display_name}`}
 								>
-									{#if notif.follower && notif.follower.user_metadata && notif.follower.user_metadata.avatar_url}
-										<img
-											src={notif.follower.user_metadata.avatar_url}
-											alt="Avatar"
-											class="notification-avatar"
-										/>
-									{:else}
-										<span class="notification-placeholder">👤</span>
+									{#if notif.type !== 'global'}
+										{#if notif.follower?.user_metadata?.avatar_url}
+											<img
+												src={notif.follower.user_metadata.avatar_url}
+												alt="Avatar"
+												class="notification-avatar"
+											/>
+										{:else}
+											<span class="notification-placeholder">👤</span>
+										{/if}
 									{/if}
 									<div class="notification-info">
 										<span class="notification-text">{notif.message}</span>
