@@ -25,7 +25,7 @@
 
 	img {
 		width: 60%;
-		height: 103vh;
+		height: auto;
 		object-fit: cover;
 		position: relative;
 	}

@@ -42,6 +42,20 @@
 			toast.success('You are logged in!', { duration: 10000 });
 		}
 	}
+
+	async function signInAnonymously() {
+		errorMessage = '';
+		const { data, error } = await supabase.auth.signInAnonymously();
+
+		if (error) {
+			errorMessage = error.message;
+			toast.error(error.message);
+		} else {
+			// Redirect to homepage after successful anonymous login
+			goto('/');
+			toast.success('Signed in as guest!', { duration: 10000 });
+		}
+	}
 </script>
 
 <svelte:head>
@@ -72,6 +86,14 @@
 
 				<button type="submit">Login</button>
 			</form>
+
+			<!-- OR Separator -->
+			<div class="separator">
+				<span>OR</span>
+			</div>
+
+			<!-- Guest Login as Text Button -->
+			<p class="guest-text" on:click={signInAnonymously}>Continue as Guest</p>
 		</div>
 
 		<p class="footer">Don't have an account? <a href="/register">Register here</a></p>
@@ -157,6 +179,8 @@
 		color: #fff;
 		cursor: pointer;
 		transition: 0.2s ease-in;
+		font-size: 1rem;
+		font-weight: bold;
 	}
 
 	button:hover {
@@ -165,6 +189,41 @@
 
 	button:disabled {
 		background-color: #ccc;
+	}
+
+	.separator {
+		display: flex;
+		align-items: center;
+		text-align: center;
+		margin: 20px 0;
+	}
+
+	.separator::before,
+	.separator::after {
+		content: '';
+		flex: 1;
+		border-bottom: 1px solid #ddd;
+	}
+
+	.separator span {
+		padding: 0 10px;
+		color: #ddd;
+		font-size: 1rem;
+	}
+
+	.guest-text {
+		text-align: center;
+		color: #7a1cac;
+		font-size: 1.2rem;
+		cursor: pointer;
+		font-weight: bold;
+		transition: 0.2s ease-in;
+		margin-top: 10px;
+	}
+
+	.guest-text:hover {
+		text-decoration: underline;
+		color: #ad49e1;
 	}
 
 	.footer {
@@ -211,11 +270,6 @@
 
 		form {
 			width: 70%;
-		}
-
-		.form-container {
-			display: flex;
-			justify-content: center;
 		}
 
 		h1 {
