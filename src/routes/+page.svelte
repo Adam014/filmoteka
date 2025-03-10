@@ -5,6 +5,7 @@
 	import RootMovies from '../components/Root.svelte';
 	import Users from '../components/Users.svelte';
 	import TopActors from '../components/TopActors.svelte';
+	import TopMovies from '../components/TopMovies.svelte';
 
 	export let data;
 
@@ -12,6 +13,7 @@
 	const detailed_movies = data?.detailed_movies;
 	const actors = data?.actors;
 	const users = data?.users.users;
+	const topRatedMovies = data?.topRatedMovies;
 
 	let currentUser = null;
 	let username;
@@ -111,7 +113,9 @@
 
 	<TopActors {actors} />
 
-	<Users {users} />
+	<TopMovies {topRatedMovies}/>
+
+	<!-- <Users {users} /> -->
 </div>
 
 <style>

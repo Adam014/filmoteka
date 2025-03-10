@@ -40,6 +40,12 @@
 				<div class="completed-card">&#10004; Add you can add users as friends</div>
 				<div class="completed-card">&#10004; Fix notifications, that it works across devices</div>
 				<div class="upcoming-card">❔ Add options to review films</div>
+				<div class="upcoming-card">❔ Implement series</div>
+				<div class="upcoming-card">❔ Implement games</div>
+				<div class="upcoming-card">❔ Bring back when we dont have the film in db, fetch the data, dont save it anywhere</div>
+				<div class="upcoming-card">❔ Implement more top eveyrthing to root from TMDB</div>
+				<div class="completed-card">&#10004; Implement top movies to root</div>
+				<div class="upcoming-card">❔ Sync everything with TMDB, try to use everything from tmdb</div>
 				<div class="completed-card">&#10004; Be able to login only anon</div>
 				<div class="completed-card">&#10004; Add notification button to navbar</div>
 				<div class="completed-card">&#10004; Implementing unfollow button to Following</div>
