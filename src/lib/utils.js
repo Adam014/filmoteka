@@ -200,7 +200,7 @@ export async function getDetailedMovie(id) {
 		// Return detailed data including poster_path
 		return {
 			...detailedData,
-			poster_path: detailedData.films?.poster_path || null // Include poster_path in the result
+			poster_path: detailedData?.films?.poster_path || null // Include poster_path in the result
 		};
 	} catch (error) {
 		console.error('Error in getDetailedMovie:', error.message);

@@ -14,6 +14,7 @@
 	const actors = data?.actors;
 	const users = data?.users.users;
 	const topRatedMovies = data?.topRatedMovies;
+	console.log(topRatedMovies);
 
 	let currentUser = null;
 	let username;
@@ -113,9 +114,9 @@
 
 	<TopActors {actors} />
 
-	<TopMovies {topRatedMovies}/>
+	<!-- <TopMovies {topRatedMovies} /> -->
 
-	<!-- <Users {users} /> -->
+	<Users {users} />
 </div>
 
 <style>

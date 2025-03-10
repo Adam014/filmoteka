@@ -17,30 +17,20 @@ async function fetchMovieImage(movieId) {
 	return null; // Return null if no image found
 }
 
-async function fetchTopRatedMovies(page_num) {
-	try {
-	  const response = await fetch(
-		`${TMDB_BASE_URL}/top_rated?language=en-US&page=${page_num}`,
-		{
-		  headers: {
-			// For TMDB v4, you need to pass the API key as a Bearer token.
-			Authorization: `Bearer ${TMDB_API_KEY}`,
-			"Content-Type": "application/json;charset=utf-8"
-		  }
+async function fetchTopRatedMovies(page_num){
+	try{
+		const response = await fetch(`${TMDB_BASE_URL}/top_rated?language=en-US&page=${page_num}?api_key=${TMDB_API_KEY}`)
+		const data = await response.json();
+
+		if (!response.ok){
+			console.log(response);
 		}
-	  );
-	  
-	  const data = await response.json();
-  
-	  if (!response.ok) {
-		console.error(response);
-	  }
-	  
-	  return data?.results?.slice(0, 9);
-	} catch (error) {
-	  console.error(error);
+		
+		return data.results?.slice(0, 9);
+	} catch (error){
+		console.log(error)
 	}
-  }
+}
 
 export async function load() {
 	// Fetch top 9 movies

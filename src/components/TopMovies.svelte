@@ -1,19 +1,18 @@
 <script>
     export let topRatedMovies;
-    console.log(topRatedMovies)
-
+	console.log(topRatedMovies);
 </script>
 
 <div>
     <h2>Top Rated Movies</h2>
     <div class="topmovies-container">
-        {#each topRatedMovies as movie, index}
-            <a href={"/movie/"+movie.id}>
+        {#each topRatedMovies as topRatedMovie, index}
+            <a href={"/movie/" + topRatedMovie?.id}>
                 <div class="movie-card" key={index}>
                     <div class="movie-thumb">
-                        <img src={'https://image.tmdb.org/t/p/w300' + movie?.backdrop_path} alt={movie.original_title} />
+                        <img src={'https://image.tmdb.org/t/p/w300' + topRatedMovie?.backdrop_path} alt={topRatedMovie?.original_title} />
                     </div>
-                    <h3>{movie.original_title}</h3>
+                    <h3>{topRatedMovie?.original_title}</h3>
                 </div>
             </a>
         {/each}
