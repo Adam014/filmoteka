@@ -114,7 +114,7 @@
 
 	<TopActors {actors} />
 
-	<!-- <TopMovies {topRatedMovies} /> -->
+	<TopMovies {topRatedMovies} />
 
 	<Users {users} />
 </div>
