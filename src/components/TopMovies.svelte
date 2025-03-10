@@ -1,6 +1,5 @@
 <script>
     export let topRatedMovies;
-	console.log(topRatedMovies);
 </script>
 
 <div>

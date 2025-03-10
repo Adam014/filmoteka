@@ -2,6 +2,7 @@ import { supabase } from '../lib/db/supabaseClient';
 import { TMDB_API_KEY } from '../lib/utils';
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3/movie';
+const TMDB_FETCH_API_KEY = import.meta.env.VITE_TMDB_FETCH_API_KEY
 
 async function fetchMovieImage(movieId) {
 	try {
@@ -22,26 +23,24 @@ async function fetchTopRatedMovies(page_num) {
 	  const response = await fetch(
 		`${TMDB_BASE_URL}/top_rated?language=en-US&page=${page_num}`,
 		{
-		  headers: {
-			// For TMDB v4, you need to pass the API key as a Bearer token.
-			Authorization: `Bearer ${TMDB_API_KEY}`,
-			"Content-Type": "application/json;charset=utf-8"
-		  }
+			headers: {
+				accept: 'application/json',
+				Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
+			}
 		}
 	  );
-	  
+  
 	  const data = await response.json();
   
 	  if (!response.ok) {
 		console.error(response);
 	  }
-	  
+  
 	  return data?.results?.slice(0, 9);
 	} catch (error) {
 	  console.error(error);
 	}
   }
-  
 
 export async function load() {
 	// Fetch top 9 movies
@@ -93,7 +92,7 @@ export async function load() {
 		})
 	);
 
-	const topRatedMovies = fetchTopRatedMovies(1)
+	const topRatedMovies = await fetchTopRatedMovies(1)
 
 	return {
 		movies: moviesWithImages,
