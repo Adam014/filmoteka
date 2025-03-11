@@ -14,7 +14,6 @@
 	const actors = data?.actors;
 	const users = data?.users.users;
 	const topRatedMovies = data?.topRatedMovies;
-	console.log(topRatedMovies);
 
 	let currentUser = null;
 	let username;

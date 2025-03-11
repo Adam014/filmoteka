@@ -43,7 +43,7 @@
 		display: grid;
 		justify-content: center;
 		padding: 10px 10px;
-		text-align: center;
+		text-align: left;
 		cursor: pointer;
 	}
 
