@@ -4,6 +4,8 @@ import { goto } from '$app/navigation';
 
 export const API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
 export const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+export const TMDB_BASE_URL = 'https://api.themoviedb.org/3/movie';
+export const TMDB_FETCH_API_KEY = import.meta.env.VITE_TMDB_FETCH_API_KEY
 
 export async function handleSearch(searchQuery, closeSearchPopup) {
 	if (searchQuery.trim()) {
@@ -71,6 +73,7 @@ export async function getBestAvailableVideoWithCheck(movieId) {
 
 	try {
 		const response = await fetch(url);
+
 		if (!response.ok) {
 			console.error(`Error fetching TMDB videos: ${response.status} - ${response.statusText}`);
 			return null;
@@ -184,23 +187,106 @@ export async function getAllMovies(page) {
 	}
 }
 
+async function fetchDetailed(id) {
+	try {
+		const response = await fetch(
+			`${TMDB_BASE_URL}/${id}`,
+			{
+				headers: {
+					accept: 'application/json',
+					Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
+				}
+			}
+		);
+  
+		const data = await response.json();
+  
+		if (!response.ok) {
+			console.error('Error fetching from TMDB:', response);
+			return null;
+		}
+  
+		return data;
+	} catch (error) {
+		console.error('Error fetching detailed movie from TMDB:', error);
+		return null;
+	}
+}
+
+async function fetchCredits(id) {
+	try {
+		const response = await fetch(
+			`${TMDB_BASE_URL}/${id}/credits`,
+			{
+				headers: {
+					accept: 'application/json',
+					Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
+				}
+			}
+		);
+  
+		const data = await response.json();
+  
+		if (!response.ok) {
+			console.error('Error fetching from TMDB:', response);
+			return null;
+		}
+  
+		return data;
+	} catch (error) {
+		console.error('Error fetching detailed movie from TMDB:', error);
+		return null;
+	}
+}
+
 export async function getDetailedMovie(id) {
 	try {
-		// Fetch detailed data with poster_path from films table
-		const { data: detailedData, error } = await supabase
+		// Fetch detailed data from Supabase
+		let { data: detailedData, error } = await supabase
 			.from('film_detailed')
 			.select('*, films(poster_path)')
 			.eq('id', id)
 			.single();
 
-		if (error) {
-			throw new Error(`Error fetching detailed movie: ${error.message}`);
+		if (error || !detailedData) {
+			// If not found in Supabase, fetch from TMDB
+			console.warn(`Movie ID ${id} not found in Supabase, fetching from TMDB...`);
+			const apiData = await fetchDetailed(id);
+			const credits = await fetchCredits(id);
+
+			if (!apiData) {
+				throw new Error('Could not fetch movie details from TMDB');
+			}
+
+			// Return the fetched data from TMDB
+			return {
+				id: apiData.id,
+				original_language: apiData.original_language,
+				imdb_id: apiData.imdb_id,
+				budget: apiData.budget,
+				revenue: apiData.revenue,
+				original_title: apiData.original_title,
+				title: apiData.title,
+				overview: apiData.overview,
+				release_date: apiData.release_date,
+				popularity: apiData.popularity,
+				genres: apiData.genres,
+				poster_path: apiData.poster_path,
+				tagline: apiData.tagline,
+				backdrop_path: apiData.backdrop_path,
+				adult: apiData.adult,
+				production_companies: apiData.production_companies,
+				production_countries: apiData.production_countries,
+				status: apiData.status,
+				homepage: apiData.homepage,
+				credits: credits
+			};
 		}
 
-		// Return detailed data including poster_path
+		// Return detailed data from Supabase
 		return {
 			...detailedData,
-			poster_path: detailedData?.films?.poster_path || null // Include poster_path in the result
+			poster_path: detailedData?.films?.poster_path || null
 		};
 	} catch (error) {
 		console.error('Error in getDetailedMovie:', error.message);

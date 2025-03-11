@@ -42,8 +42,8 @@
 				<div class="upcoming-card">❔ Add options to review films</div>
 				<div class="upcoming-card">❔ Implement series</div>
 				<div class="upcoming-card">❔ Implement games</div>
-				<div class="upcoming-card">❔ Bring back when we dont have the film in db, fetch the data, dont save it anywhere</div>
-				<div class="upcoming-card">❔ Implement more top eveyrthing to root from TMDB</div>
+				<div class="completed-card">&#10004; Bring back when we dont have the film in db, fetch the data, dont save it anywhere</div>
+				<div class="upcoming-card">&#10004; Implement more top eveyrthing to root from TMDB</div>
 				<div class="completed-card">&#10004; Implement top movies to root</div>
 				<div class="upcoming-card">❔ Sync everything with TMDB, try to use everything from tmdb</div>
 				<div class="completed-card">&#10004; Be able to login only anon</div>

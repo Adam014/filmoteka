@@ -71,9 +71,9 @@
 				/>
 				<div class="controls">
 					<h3>{movie.title}</h3>
-					<a href={`movie/${movie.id}`}>
-						<button class="watch">Watch</button>
-					</a>
+					<button class="watch" on:click={() => window.location.href = `/movie/${movie.id}`}>
+						Watch
+					</button>
 				</div>
 			</div>
 		{/each}

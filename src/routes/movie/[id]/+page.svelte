@@ -38,6 +38,8 @@
 	let homepage = '';
 	let poster_path = '';
 	let popularity = 0;
+	let formattedBudget;
+	let formattedRevenue;
 
 	const unsubscribe = user.subscribe((value) => {
 		currentUser = value;
@@ -65,9 +67,9 @@
 		status = movieDetails.status || 'N/A';
 		release_date = movieDetails.release_date || 'N/A';
 		tagline = movieDetails.tagline || '';
-		revenue = movieDetails.revenue || 0;
+		revenue = movieDetails.revenue;
 		genres = movieDetails.genres || [];
-		budget = movieDetails.budget || 0;
+		budget = movieDetails.budget;
 		adult = movieDetails.adult || false;
 		imdb_id = movieDetails.imdb_id || 'N/A';
 		overview = movieDetails.overview || 'No overview available.';
@@ -76,6 +78,9 @@
 		homepage = movieDetails.homepage || '';
 		poster_path = movieDetails.poster_path || '';
 		popularity = movieDetails.popularity || 0;
+
+		formattedBudget = formatCurrency(budget);
+		formattedRevenue = formatCurrency(revenue);
 
 		// Fetch the best available video and check if the movie is a favorite
 		fetchBestAvailableVideo();
@@ -166,9 +171,6 @@
 			toast.error('Failed to update favorites.');
 		}
 	}
-
-	const formattedBudget = formatCurrency(budget);
-	const formattedRevenue = formatCurrency(revenue);
 
 	onMount(() => {
 		fetchBestAvailableVideo();

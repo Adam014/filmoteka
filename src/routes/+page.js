@@ -1,8 +1,5 @@
 import { supabase } from '../lib/db/supabaseClient';
-import { TMDB_API_KEY } from '../lib/utils';
-
-const TMDB_BASE_URL = 'https://api.themoviedb.org/3/movie';
-const TMDB_FETCH_API_KEY = import.meta.env.VITE_TMDB_FETCH_API_KEY
+import { TMDB_API_KEY, TMDB_FETCH_API_KEY, TMDB_BASE_URL } from '../lib/utils';
 
 async function fetchMovieImage(movieId) {
 	try {

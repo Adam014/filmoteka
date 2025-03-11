@@ -1,5 +1,6 @@
 import { getDetailedMovie } from '../../../lib/utils';
 
+
 export async function load({ params }) {
 	try {
 		let detailedData = await getDetailedMovie(params.id);
