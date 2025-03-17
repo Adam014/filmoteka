@@ -112,6 +112,30 @@ async function fetchTopRatedMovies(page_num) {
 	}
   }
 
+  async function fetchTrendingMovies(page_num) {
+	try {
+	  const response = await fetch(
+		`https://api.themoviedb.org/3/trending/movie/week?language=en-US&page=${page_num}`,
+		{
+			headers: {
+				accept: 'application/json',
+				Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
+			}
+		}
+	  );
+  
+	  const data = await response.json();
+  
+	  if (!response.ok) {
+		console.error(response);
+	  }
+  
+	  return data?.results?.slice(0, 10);
+	} catch (error) {
+	  console.error(error);
+	}
+  }
+
 export async function load() {
 	// Fetch top 9 movies
 	const { data: movies, error: moviesError } = await supabase
@@ -166,12 +190,14 @@ export async function load() {
 	const upcomingMovies = await fetchUpcoming(1);
 	const nowPlayingMovies = await fetchNowPlaying(1);
 	const popularActors = await fetchPopularActors(1);
+	const trendingMovies = await fetchTrendingMovies(1);
 
 	return {
 		movies: moviesWithImages,
 		topRatedMovies: topRatedMovies,
 		upcomingMovies: upcomingMovies,
 		nowPlayingMovies: nowPlayingMovies,
+		trendingMovies: trendingMovies,
 		detailed_movies: detailedMovies,
 		actors: actors,
 		popularActors: popularActors,

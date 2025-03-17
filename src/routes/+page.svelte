@@ -17,6 +17,7 @@
 	const upcomingMovies = data?.upcomingMovies;
 	const nowPlayingMovies = data?.nowPlayingMovies;
 	const popularActors = data?.popularActors;
+	const trendingMovies = data?.trendingMovies;
 
 	let currentUser = null;
 	let username;
@@ -113,6 +114,8 @@
 	</div>
 
 	<RootMovies {movies} {detailed_movies} />
+
+	<MovieGrid data={trendingMovies} headline={"Trending Movies"} />
 
 	<MovieGrid data={nowPlayingMovies} headline={"In Theathres in Czechia"}  />
 
