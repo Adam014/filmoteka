@@ -51,8 +51,8 @@
 				<div class="upcoming-card">
 					❔ Sync everything with TMDB, try to use everything from tmdb
 				</div>
-				<div class="upcoming-card">
-					❔ Add localization so on root the region changes with the localization of the user
+				<div class="completed-card">
+					&#10004; Add localization so on root the region changes with the localization of the user
 				</div>
 				<div class="upcoming-card">
 					❔ Add option to change the region in the movie grids in root
