@@ -1,17 +1,18 @@
 <script>
-	export let actors;
+	export let data;
+    export let headline;
 </script>
 
 <div>
-	<h2>Top 10 Actors by TMDB</h2>
-	<div class="actors-container">
-		{#each actors as actor, index}
-			<a href={'/person/' + actor.id}>
+	<h2>{headline}</h2>
+	<div class="people-container">
+		{#each data as person, index}
+			<a href={'/person/' + person.id}>
 				<div class="actor-card" key={index}>
 					<div class="actor-info">
-						<img src={'https://image.tmdb.org/t/p/w300' + actor?.profile_path} alt={actor?.name} />
+						<img src={'https://image.tmdb.org/t/p/w300' + person?.profile_path} alt={person?.name} />
 					</div>
-					<h3>{actor.name}</h3>
+					<h3>{person.name}</h3>
 				</div>
 			</a>
 		{/each}
@@ -24,7 +25,7 @@
 		color: white;
 	}
 
-	.actors-container {
+	.people-container {
 		padding: 30px 65px 50px 65px;
 		display: flex;
 		flex-wrap: wrap;
@@ -55,7 +56,7 @@
 	}
 
 	@media (max-width: 768px) {
-		.actors-container {
+		.people-container {
 			display: grid;
 			grid-template-columns: repeat(2, 2fr);
 			padding-left: 5px;

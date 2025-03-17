@@ -4,8 +4,8 @@
 	import { supabase } from '../lib/db/supabaseClient';
 	import RootMovies from '../components/Root.svelte';
 	import Users from '../components/Users.svelte';
-	import TopActors from '../components/TopActors.svelte';
-	import TopMovies from '../components/TopMovies.svelte';
+	import MovieGrid from '../components/MovieGrid.svelte';
+	import PeopleGrid from '../components/PeopleGrid.svelte';
 
 	export let data;
 
@@ -14,6 +14,9 @@
 	const actors = data?.actors;
 	const users = data?.users.users;
 	const topRatedMovies = data?.topRatedMovies;
+	const upcomingMovies = data?.upcomingMovies;
+	const nowPlayingMovies = data?.nowPlayingMovies;
+	const popularActors = data?.popularActors;
 
 	let currentUser = null;
 	let username;
@@ -111,11 +114,17 @@
 
 	<RootMovies {movies} {detailed_movies} />
 
-	<TopActors {actors} />
+	<MovieGrid data={nowPlayingMovies} headline={"In Theathres in Czechia"}  />
 
-	<TopMovies {topRatedMovies} />
+	<PeopleGrid data={actors} headline={"Top Actors by TMDB"} />
+
+	<MovieGrid data={topRatedMovies} headline={"Top Rated Movies"} />
+
+	<PeopleGrid data={popularActors} headline={"Popular Actors"} />
 
 	<Users {users} />
+
+	<MovieGrid data={upcomingMovies} headline={"Upcoming Movies in Czechia"} />
 </div>
 
 <style>

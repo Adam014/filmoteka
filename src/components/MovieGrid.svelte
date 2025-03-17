@@ -1,17 +1,19 @@
 <script>
-    export let topRatedMovies;
+    export let data;
+    export let headline;
+
 </script>
 
 <div>
-    <h2>Top Rated Movies</h2>
-    <div class="topmovies-container">
-        {#each topRatedMovies as topRatedMovie, index}
-            <a href={"/movie/" + topRatedMovie?.id}>
+    <h2>{headline}</h2>
+    <div class="movies-container">
+        {#each data as movie, index}
+            <a href={"/movie/" + movie?.id}>
                 <div class="movie-card" key={index}>
                     <div class="movie-thumb">
-                        <img src={'https://image.tmdb.org/t/p/w300' + topRatedMovie?.backdrop_path} alt={topRatedMovie?.original_title} />
+                        <img src={'https://image.tmdb.org/t/p/w300' + movie?.backdrop_path} alt={movie?.original_title} />
                     </div>
-                    <h3>{topRatedMovie?.original_title}</h3>
+                    <h3>{movie?.original_title}</h3>
                 </div>
             </a>
         {/each}
@@ -23,7 +25,7 @@
 		text-decoration: none;
 		color: white;
 	}
-    .topmovies-container {
+    .movies-container {
 		padding: 30px 65px 50px 65px;
 		display: flex;
 		flex-wrap: wrap;
@@ -52,7 +54,7 @@
 	}
 
     @media (max-width: 768px) {
-		.topmovies-container {
+		.movies-container {
 			display: grid;
 			grid-template-columns: repeat(2, 2fr);
 			padding-left: 5px;

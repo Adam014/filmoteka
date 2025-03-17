@@ -18,7 +18,80 @@ async function fetchMovieImage(movieId) {
 async function fetchTopRatedMovies(page_num) {
 	try {
 	  const response = await fetch(
-		`${TMDB_BASE_URL}/top_rated?language=en-US&page=${page_num}`,
+		`${TMDB_BASE_URL}/top_rated?language=en-US&page=${page_num}&region=CZ`,
+		{
+			headers: {
+				accept: 'application/json',
+				Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
+			}
+		}
+	  );
+  
+	  const data = await response.json();
+  
+	  if (!response.ok) {
+		console.error(response);
+	  }
+  
+	  return data?.results?.slice(0, 10);
+	} catch (error) {
+	  console.error(error);
+	}
+  }
+
+
+  async function fetchUpcoming(page_num) {
+	try {
+	  const response = await fetch(
+		`${TMDB_BASE_URL}/upcoming?language=en-US&page=${page_num}&region=CZ`,
+		{
+			headers: {
+				accept: 'application/json',
+				Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
+			}
+		}
+	  );
+  
+	  const data = await response.json();
+  
+	  if (!response.ok) {
+		console.error(response);
+	  }
+  
+	  return data?.results?.slice(0, 10);
+	} catch (error) {
+	  console.error(error);
+	}
+  }
+
+  async function fetchNowPlaying(page_num) {
+	try {
+	  const response = await fetch(
+		`${TMDB_BASE_URL}/now_playing?language=en-US&page=${page_num}&region=CZ`,
+		{
+			headers: {
+				accept: 'application/json',
+				Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
+			}
+		}
+	  );
+  
+	  const data = await response.json();
+  
+	  if (!response.ok) {
+		console.error(response);
+	  }
+  
+	  return data?.results?.slice(0, 10);
+	} catch (error) {
+	  console.error(error);
+	}
+  }
+
+  async function fetchPopularActors(page_num) {
+	try {
+	  const response = await fetch(
+		`https://api.themoviedb.org/3/person/popular?language=en-US&page=${page_num}`,
 		{
 			headers: {
 				accept: 'application/json',
@@ -90,12 +163,18 @@ export async function load() {
 	);
 
 	const topRatedMovies = await fetchTopRatedMovies(1)
+	const upcomingMovies = await fetchUpcoming(1);
+	const nowPlayingMovies = await fetchNowPlaying(1);
+	const popularActors = await fetchPopularActors(1);
 
 	return {
 		movies: moviesWithImages,
 		topRatedMovies: topRatedMovies,
+		upcomingMovies: upcomingMovies,
+		nowPlayingMovies: nowPlayingMovies,
 		detailed_movies: detailedMovies,
 		actors: actors,
+		popularActors: popularActors,
 		users: users
 	};
 }
