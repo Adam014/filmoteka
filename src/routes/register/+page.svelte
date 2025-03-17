@@ -231,7 +231,6 @@
 		color: #ad49e1;
 	}
 
-
 	.form-wrapper img {
 		width: 90px;
 	}

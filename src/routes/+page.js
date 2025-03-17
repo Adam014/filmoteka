@@ -15,128 +15,130 @@ async function fetchMovieImage(movieId) {
 	return null; // Return null if no image found
 }
 
-async function fetchTopRatedMovies(page_num) {
+async function fetchTopRatedMovies(page_num, region) {
 	try {
-	  const response = await fetch(
-		`${TMDB_BASE_URL}/top_rated?language=en-US&page=${page_num}&region=CZ`,
-		{
-			headers: {
-				accept: 'application/json',
-				Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
+		const response = await fetch(
+			`${TMDB_BASE_URL}/top_rated?language=en-US&page=${page_num}&region=${region}`,
+			{
+				headers: {
+					accept: 'application/json',
+					Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
+				}
 			}
+		);
+
+		const data = await response.json();
+
+		if (!response.ok) {
+			console.error(response);
 		}
-	  );
-  
-	  const data = await response.json();
-  
-	  if (!response.ok) {
-		console.error(response);
-	  }
-  
-	  return data?.results?.slice(0, 10);
+
+		return data?.results?.slice(0, 10);
 	} catch (error) {
-	  console.error(error);
+		console.error(error);
 	}
-  }
+}
 
-
-  async function fetchUpcoming(page_num) {
+async function fetchUpcoming(page_num, region) {
 	try {
-	  const response = await fetch(
-		`${TMDB_BASE_URL}/upcoming?language=en-US&page=${page_num}&region=CZ`,
-		{
-			headers: {
-				accept: 'application/json',
-				Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
+		const response = await fetch(
+			`${TMDB_BASE_URL}/upcoming?language=en-US&page=${page_num}&region=${region}`,
+			{
+				headers: {
+					accept: 'application/json',
+					Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
+				}
 			}
-		}
-	  );
-  
-	  const data = await response.json();
-  
-	  if (!response.ok) {
-		console.error(response);
-	  }
-  
-	  return data?.results?.slice(0, 10);
-	} catch (error) {
-	  console.error(error);
-	}
-  }
+		);
 
-  async function fetchNowPlaying(page_num) {
+		const data = await response.json();
+
+		if (!response.ok) {
+			console.error(response);
+		}
+
+		return data?.results?.slice(0, 10);
+	} catch (error) {
+		console.error(error);
+	}
+}
+
+async function fetchNowPlaying(page_num, region) {
 	try {
-	  const response = await fetch(
-		`${TMDB_BASE_URL}/now_playing?language=en-US&page=${page_num}&region=CZ`,
-		{
-			headers: {
-				accept: 'application/json',
-				Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
+		const response = await fetch(
+			`${TMDB_BASE_URL}/now_playing?language=en-US&page=${page_num}&region=${region}`,
+			{
+				headers: {
+					accept: 'application/json',
+					Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
+				}
 			}
-		}
-	  );
-  
-	  const data = await response.json();
-  
-	  if (!response.ok) {
-		console.error(response);
-	  }
-  
-	  return data?.results?.slice(0, 10);
-	} catch (error) {
-	  console.error(error);
-	}
-  }
+		);
 
-  async function fetchPopularActors(page_num) {
+		const data = await response.json();
+
+		if (!response.ok) {
+			console.error(response);
+		}
+
+		return data?.results?.slice(0, 10);
+	} catch (error) {
+		console.error(error);
+	}
+}
+
+async function fetchPopularActors(page_num) {
 	try {
-	  const response = await fetch(
-		`https://api.themoviedb.org/3/person/popular?language=en-US&page=${page_num}`,
-		{
-			headers: {
-				accept: 'application/json',
-				Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
+		const response = await fetch(
+			`https://api.themoviedb.org/3/person/popular?language=en-US&page=${page_num}`,
+			{
+				headers: {
+					accept: 'application/json',
+					Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
+				}
 			}
-		}
-	  );
-  
-	  const data = await response.json();
-  
-	  if (!response.ok) {
-		console.error(response);
-	  }
-  
-	  return data?.results?.slice(0, 9);
-	} catch (error) {
-	  console.error(error);
-	}
-  }
+		);
 
-  async function fetchTrendingMovies(page_num) {
+		const data = await response.json();
+
+		if (!response.ok) {
+			console.error(response);
+		}
+
+		return data?.results?.slice(0, 9);
+	} catch (error) {
+		console.error(error);
+	}
+}
+
+async function fetchTrendingMovies(page_num) {
 	try {
-	  const response = await fetch(
-		`https://api.themoviedb.org/3/trending/movie/week?language=en-US&page=${page_num}`,
-		{
-			headers: {
-				accept: 'application/json',
-				Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
+		const response = await fetch(
+			`https://api.themoviedb.org/3/trending/movie/week?language=en-US&page=${page_num}`,
+			{
+				headers: {
+					accept: 'application/json',
+					Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
+				}
 			}
-		}
-	  );
-  
-	  const data = await response.json();
-  
-	  if (!response.ok) {
-		console.error(response);
-	  }
-  
-	  return data?.results?.slice(0, 10);
-	} catch (error) {
-	  console.error(error);
-	}
-  }
+		);
 
-export async function load() {
+		const data = await response.json();
+
+		if (!response.ok) {
+			console.error(response);
+		}
+
+		return data?.results?.slice(0, 10);
+	} catch (error) {
+		console.error(error);
+	}
+}
+
+export async function load({ url }) {
+	const region = url.searchParams.get('region') || 'CZ';
+	console.log(region);
+
 	// Fetch top 9 movies
 	const { data: movies, error: moviesError } = await supabase
 		.from('films')
@@ -186,9 +188,9 @@ export async function load() {
 		})
 	);
 
-	const topRatedMovies = await fetchTopRatedMovies(1)
-	const upcomingMovies = await fetchUpcoming(1);
-	const nowPlayingMovies = await fetchNowPlaying(1);
+	const topRatedMovies = await fetchTopRatedMovies(1, region);
+	const upcomingMovies = await fetchUpcoming(1, region);
+	const nowPlayingMovies = await fetchNowPlaying(1, region);
 	const popularActors = await fetchPopularActors(1);
 	const trendingMovies = await fetchTrendingMovies(1);
 

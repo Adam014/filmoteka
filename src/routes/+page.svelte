@@ -6,6 +6,7 @@
 	import Users from '../components/Users.svelte';
 	import MovieGrid from '../components/MovieGrid.svelte';
 	import PeopleGrid from '../components/PeopleGrid.svelte';
+	import { goto } from '$app/navigation';
 
 	export let data;
 
@@ -35,7 +36,39 @@
 		unsubscribe();
 	});
 
+	let country = '';
+	let error = '';
+	let loading = true;
+
 	onMount(async () => {
+		if ('geolocation' in navigator) {
+			navigator.geolocation.getCurrentPosition(
+				async (position) => {
+					const { latitude, longitude } = position.coords;
+					try {
+						const res = await fetch(
+							`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+						);
+						const data = await res.json();
+						country = data.address?.country || 'Unknown';
+						// Optionally, convert the full country name to its ISO country code if needed
+						// Then update the URL to include the new region parameter.
+						goto(`?region=${country}`, { replaceState: true });
+					} catch (err) {
+						error = 'Failed to retrieve location details';
+					} finally {
+						loading = false;
+					}
+				},
+				(err) => {
+					error = err.message;
+					loading = false;
+				}
+			);
+		} else {
+			error = 'Geolocation is not supported by your browser.';
+			loading = false;
+		}
 		// Fetch the GitHub repository last updated date
 		try {
 			const res = await fetch('https://api.github.com/repos/Adam014/filmoteka');
@@ -115,19 +148,19 @@
 
 	<RootMovies {movies} {detailed_movies} />
 
-	<MovieGrid data={trendingMovies} headline={"Trending Movies"} />
+	<MovieGrid data={trendingMovies} headline={'Trending Movies'} />
 
-	<MovieGrid data={nowPlayingMovies} headline={"In Theathres in Czechia"}  />
+	<MovieGrid data={nowPlayingMovies} headline={'In Theathres in ' + country} />
 
-	<PeopleGrid data={actors} headline={"Top Actors by TMDB"} />
+	<PeopleGrid data={actors} headline={'Top Actors by TMDB'} />
 
-	<MovieGrid data={topRatedMovies} headline={"Top Rated Movies"} />
+	<MovieGrid data={topRatedMovies} headline={'Top Rated Movies'} />
 
-	<PeopleGrid data={popularActors} headline={"Popular Actors"} />
+	<PeopleGrid data={popularActors} headline={'Popular Actors'} />
 
 	<Users {users} />
 
-	<MovieGrid data={upcomingMovies} headline={"Upcoming Movies in Czechia"} />
+	<MovieGrid data={upcomingMovies} headline={'Upcoming Movies in ' + country} />
 </div>
 
 <style>

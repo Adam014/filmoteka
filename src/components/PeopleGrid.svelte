@@ -1,6 +1,6 @@
 <script>
 	export let data;
-    export let headline;
+	export let headline;
 </script>
 
 <div>
@@ -10,7 +10,10 @@
 			<a href={'/person/' + person.id}>
 				<div class="actor-card" key={index}>
 					<div class="actor-info">
-						<img src={'https://image.tmdb.org/t/p/w300' + person?.profile_path} alt={person?.name} />
+						<img
+							src={'https://image.tmdb.org/t/p/w300' + person?.profile_path}
+							alt={person?.name}
+						/>
 					</div>
 					<h3>{person.name}</h3>
 				</div>

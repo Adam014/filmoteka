@@ -5,7 +5,7 @@ import { goto } from '$app/navigation';
 export const API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
 export const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 export const TMDB_BASE_URL = 'https://api.themoviedb.org/3/movie';
-export const TMDB_FETCH_API_KEY = import.meta.env.VITE_TMDB_FETCH_API_KEY
+export const TMDB_FETCH_API_KEY = import.meta.env.VITE_TMDB_FETCH_API_KEY;
 
 export async function handleSearch(searchQuery, closeSearchPopup) {
 	if (searchQuery.trim()) {
@@ -189,23 +189,20 @@ export async function getAllMovies(page) {
 
 async function fetchDetailed(id) {
 	try {
-		const response = await fetch(
-			`${TMDB_BASE_URL}/${id}`,
-			{
-				headers: {
-					accept: 'application/json',
-					Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
-				}
+		const response = await fetch(`${TMDB_BASE_URL}/${id}`, {
+			headers: {
+				accept: 'application/json',
+				Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
 			}
-		);
-  
+		});
+
 		const data = await response.json();
-  
+
 		if (!response.ok) {
 			console.error('Error fetching from TMDB:', response);
 			return null;
 		}
-  
+
 		return data;
 	} catch (error) {
 		console.error('Error fetching detailed movie from TMDB:', error);
@@ -215,23 +212,20 @@ async function fetchDetailed(id) {
 
 async function fetchCredits(id) {
 	try {
-		const response = await fetch(
-			`${TMDB_BASE_URL}/${id}/credits`,
-			{
-				headers: {
-					accept: 'application/json',
-					Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
-				}
+		const response = await fetch(`${TMDB_BASE_URL}/${id}/credits`, {
+			headers: {
+				accept: 'application/json',
+				Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
 			}
-		);
-  
+		});
+
 		const data = await response.json();
-  
+
 		if (!response.ok) {
 			console.error('Error fetching from TMDB:', response);
 			return null;
 		}
-  
+
 		return data;
 	} catch (error) {
 		console.error('Error fetching detailed movie from TMDB:', error);
