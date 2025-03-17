@@ -46,6 +46,8 @@
 				<div class="completed-card">&#10004; Implement more top eveyrthing to root from TMDB</div>
 				<div class="completed-card">&#10004; Implement top movies to root</div>
 				<div class="upcoming-card">❔ Sync everything with TMDB, try to use everything from tmdb</div>
+				<div class="upcoming-card">❔ Add localization so on root the region changes with the localization of the user</div>
+				<div class="upcoming-card">❔ Add option to change the region in the movie grids in root</div>
 				<div class="completed-card">&#10004; Be able to login only anon</div>
 				<div class="completed-card">&#10004; Add notification button to navbar</div>
 				<div class="completed-card">&#10004; Implementing unfollow button to Following</div>
