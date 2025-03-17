@@ -137,7 +137,6 @@ async function fetchTrendingMovies(page_num) {
 
 export async function load({ url }) {
 	const region = url.searchParams.get('region') || 'CZ';
-	console.log(region);
 
 	// Fetch top 9 movies
 	const { data: movies, error: moviesError } = await supabase
