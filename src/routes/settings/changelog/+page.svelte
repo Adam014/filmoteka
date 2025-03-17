@@ -54,9 +54,6 @@
 				<div class="completed-card">
 					&#10004; Add localization so on root the region changes with the localization of the user
 				</div>
-				<div class="upcoming-card">
-					❔ Add option to change the region in the movie grids in root
-				</div>
 				<div class="completed-card">&#10004; Be able to login only anon</div>
 				<div class="completed-card">&#10004; Add notification button to navbar</div>
 				<div class="completed-card">&#10004; Implementing unfollow button to Following</div>

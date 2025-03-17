@@ -1,6 +1,7 @@
 import { supabase } from './db/supabaseClient';
 import toast from 'svelte-french-toast';
 import { goto } from '$app/navigation';
+import { is_void } from 'svelte/internal';
 
 export const API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
 export const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -68,8 +69,8 @@ function selectBestMatch(movies, searchQuery) {
  * @param {number} movieId - The TMDB movie ID.
  * @returns {Promise<object|null>} - The best available video object.
  */
-export async function getBestAvailableVideoWithCheck(movieId) {
-	const url = `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${TMDB_API_KEY}`;
+export async function getBestAvailableVideoWithCheck(movieId, isMovie) {
+	const url = isMovie ? `https://api.themoviedb.org/3//${movieId}/videos?api_key=${TMDB_API_KEY}` : `https://api.themoviedb.org/3/tv/${movieId}/videos?api_key=${TMDB_API_KEY}`;
 
 	try {
 		const response = await fetch(url);
@@ -187,9 +188,10 @@ export async function getAllMovies(page) {
 	}
 }
 
-async function fetchDetailed(id) {
+async function fetchDetailed(id, isMovie) {
+	const url = isMovie ? `${TMDB_BASE_URL}/${id}` : `https://api.themoviedb.org/3/tv/${id}`
 	try {
-		const response = await fetch(`${TMDB_BASE_URL}/${id}`, {
+		const response = await fetch(url, {
 			headers: {
 				accept: 'application/json',
 				Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
@@ -210,9 +212,10 @@ async function fetchDetailed(id) {
 	}
 }
 
-async function fetchCredits(id) {
+async function fetchCredits(id, isMovie) {
+	const url = isMovie ? `${TMDB_BASE_URL}/${id}/credits` : `https://api.themoviedb.org/3/tv/${id}/credits`
 	try {
-		const response = await fetch(`${TMDB_BASE_URL}/${id}/credits`, {
+		const response = await fetch(url, {
 			headers: {
 				accept: 'application/json',
 				Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
@@ -233,9 +236,54 @@ async function fetchCredits(id) {
 	}
 }
 
-export async function getDetailedMovie(id) {
+export async function getDetailedMovie(id, isMovie) {
 	try {
-		// Fetch detailed data from Supabase
+		// For TV shows (isMovie === false), always fetch directly from the API first
+		if (!isMovie) {
+			console.info(`TV show with ID ${id} - fetching from TMDB directly...`);
+			const apiData = await fetchDetailed(id, false);
+			console.log(apiData);
+			const credits = await fetchCredits(id, false);
+			
+			if (!apiData) {
+				throw new Error('Could not fetch TV show details from TMDB');
+			}
+			
+			return {
+				created_by: apiData.created_by,
+				episode_run_time: apiData.episode_run_time,
+				first_air_date: apiData.first_air_date,
+				last_air_date: apiData.last_air_date,
+				last_episode_to_air: apiData.last_episode_to_air,
+				networks: apiData.networks,
+				next_episodes_to_air: apiData.next_episodes_to_air,
+				number_episodes: apiData.number_of_episodes,
+				number_seasons: apiData.number_of_seasons,
+				season: apiData.seasons,
+				type: apiData.type,
+				id: apiData.id,
+				original_language: apiData.original_language,
+				imdb_id: apiData.imdb_id,
+				budget: apiData.budget,
+				revenue: apiData.revenue,
+				original_title: apiData.original_name,
+				overview: apiData.overview,
+				release_date: apiData.release_date,
+				popularity: apiData.popularity,
+				genres: apiData.genres,
+				poster_path: apiData.poster_path,
+				tagline: apiData.tagline,
+				backdrop_path: apiData.backdrop_path,
+				adult: apiData.adult,
+				production_companies: apiData.production_companies,
+				production_countries: apiData.production_countries,
+				status: apiData.status,
+				homepage: apiData.homepage,
+				credits: credits
+			};
+		}
+
+		// For movies, try to fetch from Supabase first
 		let { data: detailedData, error } = await supabase
 			.from('film_detailed')
 			.select('*, films(poster_path)')
@@ -243,16 +291,14 @@ export async function getDetailedMovie(id) {
 			.single();
 
 		if (error || !detailedData) {
-			// If not found in Supabase, fetch from TMDB
 			console.warn(`Movie ID ${id} not found in Supabase, fetching from TMDB...`);
-			const apiData = await fetchDetailed(id);
-			const credits = await fetchCredits(id);
+			const apiData = await fetchDetailed(id, true);
+			const credits = await fetchCredits(id, true);
 
 			if (!apiData) {
 				throw new Error('Could not fetch movie details from TMDB');
 			}
 
-			// Return the fetched data from TMDB
 			return {
 				id: apiData.id,
 				original_language: apiData.original_language,
@@ -277,7 +323,7 @@ export async function getDetailedMovie(id) {
 			};
 		}
 
-		// Return detailed data from Supabase
+		// Return the detailed data from Supabase if found
 		return {
 			...detailedData,
 			poster_path: detailedData?.films?.poster_path || null
@@ -287,6 +333,7 @@ export async function getDetailedMovie(id) {
 		return null;
 	}
 }
+
 
 // Format date function
 export function formatDate(dateString) {

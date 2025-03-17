@@ -40,6 +40,17 @@
 	let popularity = 0;
 	let formattedBudget;
 	let formattedRevenue;
+    let created_by;
+    let episode_run_time;
+    let first_air_date;
+    let last_air_date;
+    let last_episode_to_air;
+    let networks;
+    let next_episodes_to_air;
+    let number_episodes;
+    let number_seasons;
+    let season;
+    let type;
 
 	const unsubscribe = user.subscribe((value) => {
 		currentUser = value;
@@ -78,6 +89,17 @@
 		homepage = movieDetails.homepage || '';
 		poster_path = movieDetails.poster_path || '';
 		popularity = movieDetails.popularity || 0;
+        created_by = movieDetails.created_by || null;
+        episode_run_time = movieDetails.episode_run_time || null;
+        first_air_date = movieDetails.first_air_date || null;
+        last_air_date = movieDetails.last_air_date || null;
+        last_episode_to_air = movieDetails.last_episode_to_air || null;
+        networks = movieDetails.networks || null;
+        next_episodes_to_air = movieDetails.next_episodes_to_air || null;
+        number_episodes = movieDetails.number_episodes || null;
+        number_seasons = movieDetails.number_seasons || null;
+        season = movieDetails.season || null;
+        type = movieDetails.type || null;
 
 		formattedBudget = formatCurrency(budget);
 		formattedRevenue = formatCurrency(revenue);
@@ -92,7 +114,7 @@
 
 		try {
 			// Fetch the best trailer using the utility function
-			const bestVideo = await getBestAvailableVideoWithCheck(movieDetails.id, true);
+			const bestVideo = await getBestAvailableVideoWithCheck(movieDetails.id, false);
 
 			if (!bestVideo) {
 				// Only show toast here
@@ -222,7 +244,7 @@
 	<div>
 		<div class="movie-title-container">
 			{#if id}
-				<h3>ID: {imdb_id}</h3>
+				<h3>ID: {imdb_id && id}</h3>
 			{/if}
 
 			{#if original_language}
@@ -270,8 +292,10 @@
 
 		<hr />
 
-		<p>{budget === 0 ? '' : 'movie budget -> ' + formattedBudget}</p>
-		<p>{revenue === 0 ? '' : 'movie revenue -> ' + formattedRevenue}</p>
+        {#if (budget && revenue)}
+            <p>{budget === 0 ? '' : 'movie budget -> ' + formattedBudget}</p>
+            <p>{revenue === 0 ? '' : 'movie revenue -> ' + formattedRevenue}</p>
+        {/if}
 	</div>
 
 	<!-- reviews from people, make it a grid, left side stats and right side reviews underthemselve, on mobile everything underthemsekves, api reference /reviews -->
