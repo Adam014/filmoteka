@@ -7,7 +7,7 @@
 	import MovieGrid from '../components/MovieGrid.svelte';
 	import PeopleGrid from '../components/PeopleGrid.svelte';
 	import { goto } from '$app/navigation';
-	import { countryToAlpha2, countryToAlpha3 } from "country-to-iso";
+	import { countryToAlpha2 } from "country-to-iso";
 
 	export let data;
 
@@ -18,7 +18,6 @@
 	const topRatedMovies = data?.topRatedMovies;
 	const upcomingMovies = data?.upcomingMovies;
 	const nowPlayingMovies = data?.nowPlayingMovies;
-	const popularActors = data?.popularActors;
 	const trendingMovies = data?.trendingMovies;
 
 	let currentUser = null;
@@ -155,8 +154,6 @@
 	<PeopleGrid data={actors} headline={'Top Actors by TMDB'} />
 
 	<MovieGrid data={topRatedMovies} headline={'Top Rated Movies'} />
-
-	<PeopleGrid data={popularActors} headline={'Popular Actors'} />
 
 	<Users {users} />
 

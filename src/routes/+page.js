@@ -87,30 +87,6 @@ async function fetchNowPlaying(page_num, region) {
 	}
 }
 
-async function fetchPopularActors(page_num) {
-	try {
-		const response = await fetch(
-			`https://api.themoviedb.org/3/person/popular?language=en-US&page=${page_num}`,
-			{
-				headers: {
-					accept: 'application/json',
-					Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
-				}
-			}
-		);
-
-		const data = await response.json();
-
-		if (!response.ok) {
-			console.error(response);
-		}
-
-		return data?.results?.slice(0, 9);
-	} catch (error) {
-		console.error(error);
-	}
-}
-
 async function fetchTrendingMovies(page_num) {
 	try {
 		const response = await fetch(
