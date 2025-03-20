@@ -14,7 +14,7 @@
 	const movies = data?.movies;
 	const detailed_movies = data?.detailed_movies;
 	const actors = data?.actors;
-	const users = data?.users.users;
+	const users = data?.users;
 	const topRatedMovies = data?.topRatedMovies;
 	const upcomingMovies = data?.upcomingMovies;
 	const nowPlayingMovies = data?.nowPlayingMovies;

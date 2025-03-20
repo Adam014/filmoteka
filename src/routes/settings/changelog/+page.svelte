@@ -57,6 +57,9 @@
 				<div class="completed-card">&#10004; Be able to login only anon</div>
 				<div class="completed-card">&#10004; Add notification button to navbar</div>
 				<div class="completed-card">&#10004; Implementing unfollow button to Following</div>
+				<div class="upcoming-card">❔ Implement series into library</div>
+				<div class="upcoming-card">❔ Improve anon mode</div>
+				<div class="completed-card">&#10004; Hide anons from user list</div>
 			</div>
 		</div>
 	</div>

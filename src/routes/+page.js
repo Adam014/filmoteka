@@ -129,10 +129,14 @@ export async function load({ url }) {
 		.order('popularity', { ascending: false })
 		.limit(9);
 
+	let authenticatedUsers = [];
 	// Fetch users via the admin API
-	const { data: users, error } = await supabase.auth.admin.listUsers();
+	const { data, error } = await supabase.auth.admin.listUsers();
 	if (error) {
 		console.error('Error fetching users:', error);
+	} else {
+		// Assign to the outer variable
+		authenticatedUsers = data.users.filter(user => user.confirmed_at);
 	}
 
 	if (moviesError || actorsError) {
@@ -176,6 +180,6 @@ export async function load({ url }) {
 		trendingMovies: trendingMovies,
 		detailed_movies: detailedMovies,
 		actors: actors,
-		users: users
+		users: authenticatedUsers,
 	};
 }
