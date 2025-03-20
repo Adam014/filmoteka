@@ -15,14 +15,14 @@ async function fetchMovieImage(movieId) {
 	return null; // Return null if no image found
 }
 
-async function fetchTopRatedMovies(page_num, region) {
+async function fetchData(page_num, url, key, number, region){
 	try {
 		const response = await fetch(
-			`${TMDB_BASE_URL}/top_rated?language=en-US&page=${page_num}&region=${region}`,
+			`${url}&page=${page_num}&region=${region}`,
 			{
 				headers: {
 					accept: 'application/json',
-					Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
+					Authorization: `Bearer ${key}`
 				}
 			}
 		);
@@ -33,106 +33,10 @@ async function fetchTopRatedMovies(page_num, region) {
 			console.error(response);
 		}
 
-		return data?.results?.slice(0, 10);
+		return data?.results?.slice(0, number);
 	} catch (error) {
 		console.error(error);
-	}
-}
-
-async function fetchUpcoming(page_num, region) {
-	try {
-		const response = await fetch(
-			`${TMDB_BASE_URL}/upcoming?language=en-US&page=${page_num}&region=${region}`,
-			{
-				headers: {
-					accept: 'application/json',
-					Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
-				}
-			}
-		);
-
-		const data = await response.json();
-
-		if (!response.ok) {
-			console.error(response);
-		}
-
-		return data?.results?.slice(0, 10);
-	} catch (error) {
-		console.error(error);
-	}
-}
-
-async function fetchNowPlaying(page_num, region) {
-	try {
-		const response = await fetch(
-			`${TMDB_BASE_URL}/now_playing?language=en-US&page=${page_num}&region=${region}`,
-			{
-				headers: {
-					accept: 'application/json',
-					Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
-				}
-			}
-		);
-
-		const data = await response.json();
-
-		if (!response.ok) {
-			console.error(response);
-		}
-
-		return data?.results?.slice(0, 10);
-	} catch (error) {
-		console.error(error);
-	}
-}
-
-async function fetchTrendingMovies(page_num) {
-	try {
-		const response = await fetch(
-			`https://api.themoviedb.org/3/trending/movie/week?language=en-US&page=${page_num}`,
-			{
-				headers: {
-					accept: 'application/json',
-					Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
-				}
-			}
-		);
-
-		const data = await response.json();
-
-		if (!response.ok) {
-			console.error(response);
-		}
-
-		return data?.results?.slice(0, 10);
-	} catch (error) {
-		console.error(error);
-	}
-}
-
-async function fetchTopRatedSeries(page_num) {
-	try {
-		const response = await fetch(
-			`https://api.themoviedb.org/3/tv/top_rated?language=en-US&page=${page_num}`,
-			{
-				headers: {
-					accept: 'application/json',
-					Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
-				}
-			}
-		);
-
-		const data = await response.json();
-
-		if (!response.ok) {
-			console.error(response);
-		}
-
-		return data?.results?.slice(0, 10);
-	} catch (error) {
-		console.error(error);
-	}
+	}	
 }
 
 export async function load({ url }) {
@@ -191,11 +95,11 @@ export async function load({ url }) {
 		})
 	);
 
-	const topRatedMovies = await fetchTopRatedMovies(1, region);
-	const upcomingMovies = await fetchUpcoming(1, region);
-	const nowPlayingMovies = await fetchNowPlaying(1, region);
-	const trendingMovies = await fetchTrendingMovies(1);
-	const topRatedSeries = await fetchTopRatedSeries(1);
+	const topRatedMovies = await fetchData(1, "https://api.themoviedb.org/3/movie/top_rated?language=en-US", TMDB_FETCH_API_KEY, 10, region)
+	const upcomingMovies = await fetchData(1, "https://api.themoviedb.org/3/movie/upcoming?language=en-US", TMDB_FETCH_API_KEY, 10, region)
+	const nowPlayingMovies = await fetchData(1, "https://api.themoviedb.org/3/movie/now_playing?language=en-US", TMDB_FETCH_API_KEY, 10, region)
+	const trendingMovies = await fetchData(1, "https://api.themoviedb.org/3/trending/movie/week?language=en-US", TMDB_FETCH_API_KEY, 10)
+	const topRatedSeries = await fetchData(1, "https://api.themoviedb.org/3/tv/top_rated?language=en-US", TMDB_FETCH_API_KEY, 10)
 
 	return {
 		movies: moviesWithImages,
