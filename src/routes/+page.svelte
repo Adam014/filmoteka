@@ -7,6 +7,7 @@
 	import MovieGrid from '../components/MovieGrid.svelte';
 	import PeopleGrid from '../components/PeopleGrid.svelte';
 	import { goto } from '$app/navigation';
+	import { countryToAlpha2, countryToAlpha3 } from "country-to-iso";
 
 	export let data;
 
@@ -51,9 +52,8 @@
 						);
 						const data = await res.json();
 						country = data.address?.country || 'Unknown';
-						// Optionally, convert the full country name to its ISO country code if needed
-						// Then update the URL to include the new region parameter.
-						goto(`?region=${country}`, { replaceState: true });
+						let iso = countryToAlpha2(country);
+						goto(`?region=${iso}`, { replaceState: true });
 					} catch (err) {
 						error = 'Failed to retrieve location details';
 					} finally {
