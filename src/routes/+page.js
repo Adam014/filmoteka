@@ -111,6 +111,30 @@ async function fetchTrendingMovies(page_num) {
 	}
 }
 
+async function fetchTopRatedSeries(page_num) {
+	try {
+		const response = await fetch(
+			`https://api.themoviedb.org/3/tv/top_rated?language=en-US&page=${page_num}`,
+			{
+				headers: {
+					accept: 'application/json',
+					Authorization: `Bearer ${TMDB_FETCH_API_KEY}`
+				}
+			}
+		);
+
+		const data = await response.json();
+
+		if (!response.ok) {
+			console.error(response);
+		}
+
+		return data?.results?.slice(0, 10);
+	} catch (error) {
+		console.error(error);
+	}
+}
+
 export async function load({ url }) {
 	const region = url.searchParams.get('region') || 'CZ';
 
@@ -171,6 +195,7 @@ export async function load({ url }) {
 	const upcomingMovies = await fetchUpcoming(1, region);
 	const nowPlayingMovies = await fetchNowPlaying(1, region);
 	const trendingMovies = await fetchTrendingMovies(1);
+	const topRatedSeries = await fetchTopRatedSeries(1);
 
 	return {
 		movies: moviesWithImages,
@@ -181,5 +206,6 @@ export async function load({ url }) {
 		detailed_movies: detailedMovies,
 		actors: actors,
 		users: authenticatedUsers,
+		topRatedSeries: topRatedSeries,
 	};
 }

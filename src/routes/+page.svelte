@@ -19,6 +19,7 @@
 	const upcomingMovies = data?.upcomingMovies;
 	const nowPlayingMovies = data?.nowPlayingMovies;
 	const trendingMovies = data?.trendingMovies;
+	const topRatedSeries = data?.topRatedSeries;
 
 	let currentUser = null;
 	let username;
@@ -147,17 +148,19 @@
 
 	<RootMovies {movies} {detailed_movies} />
 
-	<MovieGrid data={trendingMovies} headline={'Trending Movies'} />
+	<MovieGrid data={trendingMovies} headline={'Trending Movies'} isMovie={true }/>
 
-	<MovieGrid data={nowPlayingMovies} headline={'In Theathres in ' + country} />
+	<MovieGrid data={nowPlayingMovies} headline={'In Theathres in ' + country} isMovie={true} />
 
 	<PeopleGrid data={actors} headline={'Top Actors by TMDB'} />
 
-	<MovieGrid data={topRatedMovies} headline={'Top Rated Movies'} />
+	<MovieGrid data={topRatedSeries} headline={'Top Rated Series'} isMovie={false} />
+
+	<MovieGrid data={topRatedMovies} headline={'Top Rated Movies'} isMovie={true} />
 
 	<Users {users} />
 
-	<MovieGrid data={upcomingMovies} headline={'Upcoming Movies in ' + country} />
+	<MovieGrid data={upcomingMovies} headline={'Upcoming Movies in ' + country} isMovie={true} />
 </div>
 
 <style>

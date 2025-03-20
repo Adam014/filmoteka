@@ -1,13 +1,16 @@
 <script>
 	export let data;
 	export let headline;
+	export let isMovie;
+
+	const redirect = isMovie ? "/movie/" : "/series/"
 </script>
 
 <div>
 	<h2>{headline}</h2>
 	<div class="movies-container">
 		{#each data as movie, index}
-			<a href={'/movie/' + movie?.id}>
+			<a href={redirect + movie?.id}>
 				<div class="movie-card" key={index}>
 					<div class="movie-thumb">
 						<img
@@ -15,7 +18,7 @@
 							alt={movie?.original_title}
 						/>
 					</div>
-					<h3>{movie?.original_title}</h3>
+					<h3>{movie?.original_title || movie?.name}</h3>
 				</div>
 			</a>
 		{/each}
