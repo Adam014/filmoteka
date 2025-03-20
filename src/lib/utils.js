@@ -1,7 +1,5 @@
 import { supabase } from './db/supabaseClient';
-import toast from 'svelte-french-toast';
 import { goto } from '$app/navigation';
-import { is_void } from 'svelte/internal';
 
 export const API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
 export const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -70,7 +68,7 @@ function selectBestMatch(movies, searchQuery) {
  * @returns {Promise<object|null>} - The best available video object.
  */
 export async function getBestAvailableVideoWithCheck(movieId, isMovie) {
-	const url = isMovie ? `https://api.themoviedb.org/3//${movieId}/videos?api_key=${TMDB_API_KEY}` : `https://api.themoviedb.org/3/tv/${movieId}/videos?api_key=${TMDB_API_KEY}`;
+	const url = isMovie ? `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${TMDB_API_KEY}` : `https://api.themoviedb.org/3/tv/${movieId}/videos?api_key=${TMDB_API_KEY}`;
 
 	try {
 		const response = await fetch(url);
