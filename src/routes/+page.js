@@ -166,7 +166,6 @@ export async function load({ url }) {
 	const topRatedMovies = await fetchTopRatedMovies(1, region);
 	const upcomingMovies = await fetchUpcoming(1, region);
 	const nowPlayingMovies = await fetchNowPlaying(1, region);
-	const popularActors = await fetchPopularActors(1);
 	const trendingMovies = await fetchTrendingMovies(1);
 
 	return {
@@ -177,7 +176,6 @@ export async function load({ url }) {
 		trendingMovies: trendingMovies,
 		detailed_movies: detailedMovies,
 		actors: actors,
-		popularActors: popularActors,
 		users: users
 	};
 }
