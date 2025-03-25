@@ -539,8 +539,8 @@
 
 	.hamburger {
 		cursor: pointer;
-		height: 50px !important;
-		width: 50px !important;
+		height: 70px !important;
+		width: 70px !important;
 		z-index: 999;
 		padding-left: 20px;
 	}
