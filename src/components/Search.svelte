@@ -191,7 +191,7 @@
 	}
 
 	.search-input {
-		width: 85%;
+		width: 100%;
 		padding: 10px;
 		border: 1px solid #ccc;
 		border-radius: 4px;
@@ -282,5 +282,11 @@
 		color: #ccc;
 		text-align: center;
 		margin: 10px 0;
+	}
+
+	@media (max-width: 1200px) {
+		.search-input{
+			width: 90%;
+		}
 	}
 </style>

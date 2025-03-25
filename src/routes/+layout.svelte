@@ -47,9 +47,54 @@
 </main>
 
 <style>
+	:global(body) {
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
+		font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		overflow-x: hidden;
+		--primary-color: #3a86ff;
+		--secondary-color: #ff006e;
+		--accent-color: #8338ec;
+		--dark-bg: #121212;
+		--darker-bg: #0a0a0a;
+		--light-text: #f8f9fa;
+		--gray-text: #adb5bd;
+		--card-bg: #1e1e1e;
+		--gradient-bg: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+		
+		background-color: var(--dark-bg);
+		background-image: radial-gradient(circle at 20% 50%, rgba(51, 16, 117, 0.4) 0%, rgba(13, 13, 13, 0.95) 100%);
+		background-attachment: fixed;
+		color: var(--light-text);
+	}
+
+	:global(*) {
+		box-sizing: border-box;
+	}
+
+	.main-content {
+		min-height: 100vh;
+	}
+
 	@media (max-width: 768px) {
 		.main-content {
 			padding-top: 60px;
 		}
+	}
+
+	/* Toast styling overrides */
+	:global(.toaster) {
+		--toastBackground: var(--darker-bg, #0a0a0a);
+		--toastColor: var(--light-text, #f8f9fa);
+		--toastBorder: 1px solid rgba(255, 255, 255, 0.1);
+		--toastBarBackground: var(--secondary-color, #ff006e);
+	}
+
+	:global(.toaster .toast) {
+		border-radius: 0.75rem;
+		box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
 	}
 </style>

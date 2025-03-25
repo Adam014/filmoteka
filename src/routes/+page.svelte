@@ -85,217 +85,428 @@
 </script>
 
 <svelte:head>
-	<title>Filmoteka</title>
+	<title>Filmoteka - Your Movie Database</title>
+	<meta name="description" content="Explore the latest movies, series, and actors with Filmoteka" />
 </svelte:head>
 
 <div class="root-container">
-	<div class="title-container">
-		<h1>Welcome {username ? username : 'user'}!</h1>
-		<h4>Last Updated: {repoUpdatedDate}</h4>
+	<div class="hero-and-featured">
+		<header class="hero">
+			<div class="hero-content">
+				<h1>Welcome, <span class="username">{username ? username : 'user'}</span>!</h1>
+				<p class="hero-subtitle">Discover your next favorite movie with Filmoteka</p>
+				<p class="update-info">Last updated: {repoUpdatedDate}</p>
+			</div>
+		</header>
+
+		<section class="featured-section">
+			<RootMovies {movies} {detailed_movies} />
+		</section>
 	</div>
-	<div class="button-library">
-		<div class="first-button">
-			<a href="/games/daily">
-				<button class="button2">
-					<p class="button__text">
-						<span style="--index: 0;">D</span>
-						<span style="--index: 1;">A</span>
-						<span style="--index: 2;">I</span>
-						<span style="--index: 3;">L</span>
-						<span style="--index: 4;">Y</span>
-						<span style="--index: 6;">C</span>
-						<span style="--index: 7;">H</span>
-						<span style="--index: 8;">A</span>
-						<span style="--index: 9;">L</span>
-						<span style="--index: 10;">L</span>
-						<span style="--index: 11;">E</span>
-						<span style="--index: 12;">N</span>
-						<span style="--index: 13;">G</span>
-						<span style="--index: 14;">E</span>
-					</p>
 
-					<div class="button__circle">
-						<svg
-							viewBox="0 0 14 15"
-							fill="none"
-							xmlns="http://www.w3.org/2000/svg"
-							class="button__icon"
-							width="14"
-						>
-							<path
-								d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z"
-								fill="currentColor"
-							/>
-						</svg>
-
-						<svg
-							viewBox="0 0 14 15"
-							fill="none"
-							width="14"
-							xmlns="http://www.w3.org/2000/svg"
-							class="button__icon button__icon--copy"
-						>
-							<path
-								d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z"
-								fill="currentColor"
-							/>
+	<div class="floating-button">
+		<a href="/games/daily" aria-label="Daily Challenge">
+			<button class="daily-challenge">
+				<div class="button-content">
+					<span class="challenge-text">Daily Challenge</span>
+					<div class="challenge-icon">
+						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M7 17L17 7M17 7H10M17 7V14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 						</svg>
 					</div>
-				</button>
-			</a>
-		</div>
+				</div>
+			</button>
+		</a>
 	</div>
 
-	<RootMovies {movies} {detailed_movies} />
+	<main class="content-grid">
+		<section class="content-section">
+			<div class="section-header">
+				<h2 class="section-title">Trending Movies</h2>
+				<div class="title-underline"></div>
+			</div>
+			<MovieGrid data={trendingMovies} headline={''} isMovie={true} />
+		</section>
 
-	<MovieGrid data={trendingMovies} headline={'Trending Movies'} isMovie={true }/>
+		<section class="content-section alt-section full-width">
+			<div class="section-header">
+				<h2 class="section-title">In Theaters in {country}</h2>
+				<div class="title-underline light"></div>
+			</div>
+			<MovieGrid data={nowPlayingMovies} headline={''} isMovie={true} />
+		</section>
 
-	<MovieGrid data={nowPlayingMovies} headline={'In Theathres in ' + country} isMovie={true} />
+		<section class="content-section">
+			<div class="section-header">
+				<h2 class="section-title">Top Rated Actors</h2>
+				<div class="title-underline"></div>
+			</div>
+			<PeopleGrid data={actors} headline={''} />
+		</section>
 
-	<PeopleGrid data={actors} headline={'Top Actors by TMDB'} />
+		<section class="content-section alt-section full-width">
+			<div class="section-header">
+				<h2 class="section-title">Top Rated Series</h2>
+				<div class="title-underline light"></div>
+			</div>
+			<MovieGrid data={topRatedSeries} headline={''} isMovie={false} />
+		</section>
 
-	<MovieGrid data={topRatedSeries} headline={'Top Rated Series'} isMovie={false} />
+		<section class="content-section">
+			<div class="section-header">
+				<h2 class="section-title">Top Rated Movies</h2>
+				<div class="title-underline"></div>
+			</div>
+			<MovieGrid data={topRatedMovies} headline={''} isMovie={true} />
+		</section>
 
-	<MovieGrid data={topRatedMovies} headline={'Top Rated Movies'} isMovie={true} />
+		<section class="content-section alt-section full-width">
+			<div class="section-header">
+				<h2 class="section-title">Community Users</h2>
+				<div class="title-underline light"></div>
+			</div>
+			<Users {users} />
+		</section>
 
-	<Users {users} />
-
-	<MovieGrid data={upcomingMovies} headline={'Upcoming Movies in ' + country} isMovie={true} />
+		<section class="content-section">
+			<div class="section-header">
+				<h2 class="section-title">Upcoming Movies in {country}</h2>
+				<div class="title-underline"></div>
+			</div>
+			<MovieGrid data={upcomingMovies} headline={''} isMovie={true} />
+		</section>
+	</main>
 </div>
 
 <style>
-	a {
+	.root-container {
+		max-width: 100%;
+		overflow-x: hidden;
+	}
+
+	/* Hero and featured section combined */
+	.hero-and-featured {
+		position: relative;
+		width: 100vw;
+		margin-left: 50%;
+		transform: translateX(-50%);
+		max-width: 100%;
+		overflow: hidden;
+		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+		backdrop-filter: blur(5px);
+	}
+
+	/* Hero section */
+	.hero {
+		padding: 3rem 2rem 1rem;
+		position: relative;
+		text-align: center;
+		z-index: 2;
+	}
+
+	.hero-content {
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	.hero h1 {
+		font-size: 3.5rem;
+		font-weight: 800;
+		margin-bottom: 0.75rem;
+		background: var(--gradient-bg);
+		-webkit-background-clip: text;
+		background-clip: text;
+		color: transparent;
 		text-decoration: none;
-		color: white;
+		text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 	}
 
-	/* .root-container {
-		padding: 80px;
-	} */
-
-	.title-container {
-		padding: 20px 65px;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
+	.username {
+		color: var(--secondary-color);
+		text-decoration: underline;
+		text-decoration-color: var(--accent-color);
+		text-decoration-thickness: 3px;
+		text-underline-offset: 4px;
 	}
 
-	h1 {
-		padding: 10px 0;
-		font-size: 2rem;
-		text-decoration: underline dotted;
+	.hero-subtitle {
+		font-size: 1.5rem;
+		color: var(--light-text);
+		margin-bottom: 0.5rem;
+		text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
 	}
 
-	.button-library {
-		position: fixed;
-		z-index: 99;
-		bottom: 0;
-		right: 0;
-		padding: 30px;
+	.update-info {
+		font-size: 0.9rem;
+		color: var(--gray-text);
+		opacity: 0.7;
+		margin-bottom: 0.5rem;
 	}
 
-	.button2 {
-		cursor: pointer;
-		border: none;
-		background: #7808d0;
-		color: #fff;
-		width: 100px;
-		height: 100px;
-		border-radius: 50%;
-		overflow: hidden;
-		position: relative;
+	/* Featured section */
+	.featured-section {
+		padding: 0 2rem 2rem;
+		max-width: 1400px;
+		margin: 0 auto;
+	}
+
+	/* Content grid layout */
+	.content-grid {
 		display: grid;
-		place-content: center;
-		transition: background 300ms, transform 200ms;
-		font-weight: 600;
+		grid-template-columns: minmax(0, 1fr);
+		max-width: 1400px;
+		margin: 0 auto;
+		padding: 3rem 2rem 0;
+		gap: 4rem;
 	}
 
-	.button__text {
-		position: absolute;
-		inset: 0;
-		animation: text-rotation 8s linear infinite;
+	.full-width {
+		width: 100vw;
+		margin-left: 50%;
+		transform: translateX(-50%);
+		padding: 3rem 2rem;
 	}
 
-	.button__text span {
-		position: absolute;
-		transform: rotate(calc(19deg * var(--index)));
-		inset: 7px;
+	.content-section {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
 	}
 
-	.button__circle {
+	/* Section header styling */
+	.section-header {
+		display: flex;
+		flex-direction: column;
+		margin-bottom: 1rem;
 		position: relative;
-		width: 40px;
-		height: 40px;
+	}
+
+	.section-title {
+		font-size: 2rem;
+		font-weight: 700;
+		margin: 0 0 0.7rem 0;
+		position: relative;
+		display: inline-block;
+		padding-bottom: 0.3rem;
+	}
+
+	.title-underline {
+		height: 4px;
+		width: 8rem;
+		border-radius: 2px;
+		background: var(--gradient-bg);
+		margin-bottom: 1.5rem;
+		position: relative;
 		overflow: hidden;
-		background: #fff;
-		color: #7808d0;
-		border-radius: 50%;
+	}
+
+	.title-underline::after {
+		content: "";
+		position: absolute;
+		top: 0;
+		left: -100%;
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+		animation: shine 3s infinite;
+	}
+
+	.title-underline.light {
+		background: linear-gradient(90deg, var(--accent-color), var(--primary-color));
+	}
+
+	@keyframes shine {
+		0% {
+			left: -100%;
+		}
+		50% {
+			left: 100%;
+		}
+		100% {
+			left: 100%;
+		}
+	}
+
+	.alt-section {
+		position: relative;
+		overflow: hidden;
+		box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+	}
+
+	.alt-section::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background-color: rgba(10, 10, 10, 0.3);
+		z-index: -1;
+	}
+
+	/* Floating daily challenge button */
+	.floating-button {
+		position: fixed;
+		bottom: 2rem;
+		right: 2rem;
+		z-index: 100;
+	}
+
+	.daily-challenge {
+		background: var(--gradient-bg);
+		color: white;
+		border: none;
+		border-radius: 3rem;
+		padding: 1rem 1.5rem;
+		font-size: 1rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		box-shadow: 0 10px 30px rgba(51, 51, 51, 0.4);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 	}
 
-	.button__icon--copy {
-		position: absolute;
-		transform: translate(-150%, 150%);
+	.button-content {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 	}
 
-	.button2:hover {
-		background: #000;
-		transform: scale(1.05);
+	.challenge-text {
+		white-space: nowrap;
 	}
 
-	.button2:hover .button__icon {
-		color: #000;
+	.challenge-icon {
+		background: rgba(255, 255, 255, 0.2);
+		border-radius: 50%;
+		width: 2rem;
+		height: 2rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: transform 0.3s ease;
 	}
 
-	.button2:hover .button__icon:first-child {
-		transition: transform 0.3s ease-in-out;
-		transform: translate(150%, -150%);
+	.challenge-icon svg {
+		width: 1.2rem;
+		height: 1.2rem;
 	}
 
-	.button2:hover .button__icon--copy {
-		transition: transform 0.3s ease-in-out 0.1s;
-		transform: translate(0);
+	.daily-challenge:hover {
+		transform: translateY(-5px);
+		box-shadow: 0 15px 35px rgba(131, 56, 236, 0.5);
 	}
 
-	@keyframes text-rotation {
-		to {
-			rotate: 360deg;
+	.daily-challenge:hover .challenge-icon {
+		transform: rotate(45deg);
+	}
+
+	a {
+		text-decoration: none;
+		color: inherit;
+	}
+
+	/* Responsive styles */
+	@media (max-width: 1200px) {
+		.hero h1 {
+			font-size: 3rem;
+		}
+		
+		.section-title {
+			font-size: 1.8rem;
+		}
+		
+		.content-grid {
+			padding: 2rem 1.5rem 0;
+			gap: 3rem;
+		}
+		
+		.featured-section {
+			padding: 0 1.5rem 2rem;
+		}
+	}
+
+	@media (max-width: 900px) {
+		.hero {
+			padding: 2.5rem 1.5rem 1rem;
+		}
+		
+		.hero h1 {
+			font-size: 2.5rem;
+		}
+		
+		.hero-subtitle {
+			font-size: 1.2rem;
+		}
+		
+		.featured-section {
+			padding: 0 1.5rem 1.5rem;
+		}
+		
+		.full-width {
+			padding: 2.5rem 1.5rem;
+		}
+		
+		.content-grid {
+			gap: 2.5rem;
+		}
+		
+		.section-title {
+			font-size: 1.6rem;
 		}
 	}
 
 	@media (max-width: 600px) {
-		.root-container {
-			padding: 20px;
+		.hero {
+			padding: 2rem 1rem 0.5rem;
 		}
-
-		.cards-container {
-			grid-template-columns: 1fr;
+		
+		.hero h1 {
+			font-size: 2rem;
 		}
-
-		.button2 {
-			width: 80px;
-			height: 80px;
+		
+		.hero-subtitle {
+			font-size: 1rem;
 		}
-
-		.button__text {
-			font-size: 0.6rem;
+		
+		.featured-section {
+			padding: 0 1rem 1.5rem;
 		}
-		.button-library {
-			padding-top: 20px;
+		
+		.content-grid {
+			padding: 2rem 1rem 0;
+			gap: 2rem;
 		}
-	}
-
-	@media (max-width: 700px) {
-		.title-container {
-			display: block;
-			padding: 0;
-			padding-bottom: 20px;
+		
+		.full-width {
+			padding: 2rem 1rem;
 		}
-
-		.root-container {
-			padding: 0px 10px 0px 30px;
+		
+		.section-title {
+			font-size: 1.4rem;
+		}
+		
+		.title-underline {
+			width: 6rem;
+			height: 3px;
+		}
+		
+		.daily-challenge {
+			padding: 0.8rem 1.2rem;
+			font-size: 0.9rem;
+		}
+		
+		.challenge-icon {
+			width: 1.8rem;
+			height: 1.8rem;
+		}
+		
+		.floating-button {
+			bottom: 1.5rem;
+			right: 1.5rem;
 		}
 	}
 </style>
