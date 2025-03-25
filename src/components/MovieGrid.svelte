@@ -2,8 +2,6 @@
 	export let data = [];
 	export let headline;
 	export let isMovie;
-
-	console.log(data)
 </script>
 
 {#if headline}

@@ -101,16 +101,19 @@ export async function getCommits() {
 		const response = await fetch(url);
 
 		if (!response.ok) {
-			console.log(response.status, response.statusText);
-			return null;
+			const statusText = response.statusText;
+			throw new Error(`Failed to fetch commits: ${response.status} ${statusText}`);
 		}
 
 		const data = await response.json();
-		// Process the 'data' array containing the first 5 commits
+		if (!data || !Array.isArray(data) || data.length === 0) {
+			throw new Error('No commit data available');
+		}
+		
 		return data;
 	} catch (error) {
-		console.log('Error fetching Filmoteka commits:', error);
-		return null;
+		console.error('Error fetching Filmoteka commits:', error);
+		throw error; // Re-throw to allow proper error handling upstream
 	}
 }
 
@@ -177,7 +180,7 @@ export function formatCurrency(num) {
 
 export async function getAllMovies(page) {
 	try {
-		const { data: films, error } = await supabase.from('films').select('*').eq('page', page);
+		const { data: films } = await supabase.from('films').select('*').eq('page', page);
 
 		return films || null;
 	} catch (error) {

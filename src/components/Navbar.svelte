@@ -698,7 +698,7 @@
 		}
 		.nav-menu a {
 			font-size: 2.5rem;
-		}
+		}	
 		.nav-items {
 			top: 8%;
 		}
