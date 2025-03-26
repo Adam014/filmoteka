@@ -30,12 +30,11 @@
 
 	// Close menu when clicking outside
 	function closeMenuOnOutsideClick(event) {
-		const hamburger = document.querySelector('.hamburger input');
-		if (menuOpen && !event.target.closest('.nav-menu') && !event.target.closest('.hamburger')) {
+		if (menuOpen && 
+            !event.target.closest('.sidenav') && 
+            !event.target.closest('.hamburger') && 
+            !event.target.closest('.mobile-menu-btn')) {
 			menuOpen = false;
-			if (hamburger) {
-				hamburger.checked = false;
-			}
 		}
 	}
 
@@ -146,568 +145,1021 @@
 		const date = new Date(dateString);
 		return date.toLocaleString();
 	}
+
+	// Přidám kód pro synchronizaci těla s rozšířenou navigací
+	$: if (typeof document !== 'undefined') {
+		if (menuOpen) {
+			document.body.classList.add('nav-expanded');
+		} else {
+			document.body.classList.remove('nav-expanded');
+		}
+	}
 	// -----------------------------------------------------
 </script>
 
-<nav class="navbar-container {currentUser ? 'logged-in' : 'logged-out'}">
-	<label class="hamburger">
-		<input type="checkbox" on:click={toggleMenu} />
-		<svg viewBox="0 0 36 36">
-			<path
-				class="line line-top-bottom"
-				d="M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22"
-			/>
-			<path class="line" d="M7 16 27 16" />
-		</svg>
-	</label>
+<!-- Navigační bar vždy fixně vlevo, obsah je odstupňovaný -->
+<div class="page-container">
+    <!-- Mobilní horní navigace - viditelná pouze na malých obrazovkách -->
+    <div class="mobile-topnav">
+        <div class="mobile-logo">
+            <a href="/">
+                <img src={logo} alt="Filmoteka" class="mobile-logo-img" />
+            </a>
+        </div>
+        
+        <div class="mobile-actions">
+            {#if currentUser}
+                <button class="mobile-btn" on:click={toggleNotifications} title="Notifications">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/>
+                    </svg>
+                    {#if unreadCount > 0}
+                        <span class="mobile-badge">{unreadCount}</span>
+                    {/if}
+                </button>
+                <a href={`/profile/${currentUser.user_metadata.display_name}`} class="mobile-btn" title="Profile">
+                    {#if currentUser.user_metadata && currentUser.user_metadata.avatar_url}
+                        <img src={currentUser.user_metadata.avatar_url} alt="Profile" class="mobile-avatar" />
+                    {:else}
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                        </svg>
+                    {/if}
+                </a>
+            {:else}
+                <a href="/login" class="mobile-btn" title="Log In">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14z"/>
+                    </svg>
+                </a>
+            {/if}
+            
+            <button class="mobile-menu-btn {menuOpen ? 'expanded' : ''}" on:click={toggleMenu} aria-label="Menu">
+                <span class="mobile-menu-icon"></span>
+            </button>
+        </div>
+    </div>
 
-	<div class="header-container">
-		<a href="/">
-			<img src={logo} alt="logo" class="logo" />
-		</a>
-	</div>
+    <!-- Boční navigace - na mobilu se vysune z levé strany -->
+    <aside class="sidenav {menuOpen ? 'expanded' : ''}">
+        <!-- Hamburger pro rozbalení/sbalení -->
+        <div class="nav-item hamburger-container">
+            <button class="hamburger" on:click={toggleMenu} aria-label="Menu">
+                <span class="hamburger-icon"></span>
+            </button>
+        </div>
+        
+        <!-- Logo -->
+        <div class="nav-item logo-container">
+            <a href="/">
+                <img src={logo} alt="Filmoteka" class="logo" />
+            </a>
+        </div>
+        
+        <!-- Hlavní navigační ikony -->
+        <div class="nav-menu">
+            <div class="nav-item">
+                <a href="/library" title="Library">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/>
+                    </svg>
+                    <span class="nav-text">Library</span>
+                </a>
+            </div>
+            
+            <div class="nav-item">
+                <a href="/games" title="Games">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M15 7.5V2H9v5.5l3 3 3-3zM7.5 9H2v6h5.5l3-3-3-3zM9 16.5V22h6v-5.5l-3-3-3 3zM16.5 9l-3 3 3 3H22V9h-5.5z"/>
+                    </svg>
+                    <span class="nav-text">Games</span>
+                </a>
+            </div>
+            
+            <div class="nav-item">
+                <a href="/games/daily" title="Daily Challenge">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7v-5z"/>
+                    </svg>
+                    <span class="nav-text">Daily Challenge</span>
+                </a>
+            </div>
+            
+            <div class="nav-item">
+                <a href="/random" title="Random Movie">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/>
+                    </svg>
+                    <span class="nav-text">Random Movie</span>
+                </a>
+            </div>
+            
+            <div class="nav-item">
+                <a href="/settings/account" title="Settings">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                    </svg>
+                    <span class="nav-text">Settings</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Vyhledávání (viditelné při rozbalení) -->
+        <div class="search-container">
+            <Search placeholder="Search movies or people..." />
+        </div>
+        
+        <!-- Spodní část navigace -->
+        <div class="nav-footer">
+            {#if currentUser}
+                <div class="nav-item notifications-icon" on:click={toggleNotifications} title="Notifications">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/>
+                    </svg>
+                    {#if unreadCount > 0}
+                        <span class="badge">{unreadCount}</span>
+                    {/if}
+                </div>
+                
+                <div class="nav-item profile">
+                    <a href={`/profile/${currentUser.user_metadata.display_name}`} title="Profile">
+                        {#if currentUser.user_metadata && currentUser.user_metadata.avatar_url}
+                            <img src={currentUser.user_metadata.avatar_url} alt="Profile" class="avatar" />
+                        {:else}
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                            </svg>
+                        {/if}
+                        <span class="nav-text">{currentUser.user_metadata.display_name}</span>
+                    </a>
+                </div>
+                
+                <div class="nav-item logout-btn" on:click={signOut} title="Log Out">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                    </svg>
+                    <span class="nav-text">Log Out</span>
+                </div>
+            {:else}
+                <div class="nav-item login">
+                    <a href="/login" title="Log In">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14z"/>
+                        </svg>
+                        <span class="nav-text">Log In</span>
+                    </a>
+                </div>
+                
+                <div class="nav-item register">
+                    <a href="/register" title="Register">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                        <span class="nav-text">Register</span>
+                    </a>
+                </div>
+            {/if}
+        </div>
+    </aside>
 
-	<div class="search-container">
-		<Search placeholder="Search for a movie or person..." />
-	</div>
+    <!-- Překrytí při otevřeném menu na mobilních zařízeních -->
+    {#if menuOpen}
+        <div class="overlay" on:click={closeMenu}></div>
+    {/if}
 
-	<div class="nav-links">
-		{#if currentUser}
-			<!-- Notifications Bell Icon (placed to the left of the profile icon) -->
-			<div class="notifications-container" on:click={toggleNotifications}>
-				<img
-					src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAABc0lEQVR4nO3ZP0oDQRSA8RdFQStF64jp9AZpgwiCinVsRPEOKRS2EPuUdnoFUSxErAQLDxE9gX8KRZBPRlOIJpus2XmzE94PBgKThHxMZjdMRIwxQQAlYBu4bA/3uCSxAfb5a09iAowCLx1Cnt2cxAIo011ZYgFUU0KqUmTACLAJ3NKbe069cJsfWATuyM69ZkGKANjosrH75S4A66EjloA3BvcOrISKqAy4Er+595oPcde+Jn9X2iHL+FPTDDnzGHKqFTGZ0wbv5hWY0LpS+VbTCNlVCNnRCGkohDQ0QhKFkMRC+mUrkk0ivtmKZJPYivTLvlrZJOLbMK1Ipf3D0eeoeA8xJkfu3AloAkfKowms5RXhjjZDq+cRchK6AjjOI2RrKFbkx/lulj3SSvlQrYx7ZFVCAMaBp5SQR2BMio7vO38vume8/wFMAx8pEW5uSmIAXKSEnEssgDngoUPEfVR/hjrALHAI3LTHATDzNWmMEW2fnD0mYsu13JQAAAAASUVORK5CYII="
-					alt="bell"
-				/>
-				{#if unreadCount > 0}
-					<span class="badge">{unreadCount}</span>
-				{/if}
-			</div>
-
-			<!-- Profile Icon -->
-			<div class="profile-container">
-				<a href={`/profile/${currentUser.user_metadata.display_name}`}>
-					{#if currentUser.user_metadata && currentUser.user_metadata.avatar_url}
-						<img
-							src={currentUser.user_metadata.avatar_url}
-							alt="Profile Picture"
-							class="profile-picture"
-						/>
-					{:else}
-						<span class="placeholder-icon">👤</span>
-					{/if}
-				</a>
-			</div>
-		{:else}
-			<div class="signup-container">
-				<a href="/register" class="signup-link">Sign up</a>
-			</div>
-		{/if}
-	</div>
-
-	<div class="nav-menu" style="transform: translateX({menuOpen ? '0%' : '-100%'});">
-		{#if currentUser}
-			<div class="nav-items">
-				<div class="left-nav-menu-items">
-					<h2>Movieground</h2>
-					<a href="/games" on:click={closeMenu}>Games</a>
-					<hr />
-					<a href="/games/daily" on:click={closeMenu}>Daily Challenge</a>
-				</div>
-				<div class="center-nav-menu-items">
-					<h2>Explore</h2>
-					<a href="/library" on:click={closeMenu}>Library</a>
-					<hr />
-					<a href={`/profile/${currentUser.user_metadata.display_name}`} on:click={closeMenu}
-						>Profile</a
-					>
-					<hr />
-					<a href="/random" on:click={closeMenu}>Random-Movie</a>
-				</div>
-				<div class="center-nav-menu-items">
-					<h2>Settings</h2>
-					<a href="/settings/changelog" on:click={closeMenu}>Changelog</a>
-					<hr />
-					<a href="/settings/account" on:click={closeMenu}>Account</a>
-				</div>
-			</div>
-			<div class="logout-container">
-				<div class="profile-logout-container">
-					<a href={`/profile/${currentUser.user_metadata.display_name}`} on:click={closeMenu}>
-						{#if currentUser.user_metadata && currentUser.user_metadata.avatar_url}
-							<img
-								src={currentUser.user_metadata.avatar_url}
-								alt="Profile Picture"
-								class="profile-picture"
-							/>
-						{:else}
-							<span class="placeholder-icon">👤</span>
-						{/if}
-					</a>
-				</div>
-				<button class="Btn" on:click={signOut} on:click={closeMenu}>
-					<div class="sign">
-						<svg viewBox="0 0 512 512">
-							<path
-								d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"
-							/>
-						</svg>
-					</div>
-				</button>
-			</div>
-		{:else}
-			<div class="nav-items">
-				<div class="left-nav-menu-items">
-					<h2>Movieground</h2>
-					<a href="/games" on:click={closeMenu}>Games</a>
-					<hr />
-					<a href="/games/daily" on:click={closeMenu}>Daily Challenge</a>
-				</div>
-				<div class="center-nav-menu-items">
-					<h2>Explore</h2>
-					<a href="/library" on:click={closeMenu}>Library</a>
-					<hr />
-					<a href="/random" on:click={closeMenu}>Random-Movie</a>
-					<hr />
-					<a href="/login" on:click={closeMenu}>Login</a>
-					<hr />
-					<a href="/register" on:click={closeMenu}>Register</a>
-				</div>
-				<div class="center-nav-menu-items">
-					<h2>Settings</h2>
-					<a href="/settings/changelog" on:click={closeMenu}>Changelog</a>
-					<hr />
-					<a href="/settings/account" on:click={closeMenu}>Account</a>
-				</div>
-			</div>
-		{/if}
-	</div>
-
-	{#if showNotificationsModal}
-		<div class="notification-overlay" on:click={() => (showNotificationsModal = false)}>
-			<div class="notifications-modal" on:click|stopPropagation>
-				<div class="arrow" />
-				<div class="notifications-header">
-					<h3>Notifications</h3>
-					<button class="mark-all" on:click={markAllAsRead}>Mark all as read</button>
-				</div>
-				{#if notifications.length > 0}
-					<ul>
-						{#each notifications as notif (notif.id)}
-							<li class="notification-item">
-								<a
-									class="notification-link"
-									href={notif.type === 'global'
-										? '#'
-										: `/profile/${notif.follower?.user_metadata?.display_name}`}
-								>
-									{#if notif.type !== 'global'}
-										{#if notif.follower?.user_metadata?.avatar_url}
-											<img
-												src={notif.follower.user_metadata.avatar_url}
-												alt="Avatar"
-												class="notification-avatar"
-											/>
-										{:else}
-											<span class="notification-placeholder">👤</span>
-										{/if}
-									{/if}
-									<div class="notification-info">
-										<span class="notification-text">{notif.message}</span>
-										<span class="notification-time">{formatTime(notif.created_at)}</span>
-									</div>
-								</a>
-								{#if !notif.read}
-									<button class="mark-btn" on:click={() => markAsRead(notif.id)}
-										>Mark as read</button
-									>
-								{/if}
-							</li>
-						{/each}
-					</ul>
-				{:else}
-					<p class="notification-empty">Nothing here</p>
-				{/if}
-			</div>
-		</div>
-	{/if}
-</nav>
+    <!-- Modální okno notifikací -->
+    {#if showNotificationsModal}
+        <div class="notification-overlay" on:click={() => (showNotificationsModal = false)}>
+            <div class="notifications-modal" on:click|stopPropagation>
+                <div class="arrow" />
+                <div class="notifications-header">
+                    <h3>Notifications</h3>
+                    <button class="mark-all" on:click={markAllAsRead}>Mark all as read</button>
+                </div>
+                
+                {#if notifications.length > 0}
+                    <ul class="notifications-list">
+                        {#each notifications as notif (notif.id)}
+                            <li class="notification-item">
+                                <a
+                                    class="notification-link"
+                                    href={notif.type === 'global'
+                                        ? '#'
+                                        : `/profile/${notif.follower?.user_metadata?.display_name}`}
+                                >
+                                    {#if notif.type !== 'global'}
+                                        {#if notif.follower?.user_metadata?.avatar_url}
+                                            <img
+                                                src={notif.follower.user_metadata.avatar_url}
+                                                alt="Avatar"
+                                                class="notification-avatar"
+                                            />
+                                        {:else}
+                                            <span class="notification-placeholder">👤</span>
+                                        {/if}
+                                    {/if}
+                                    <div class="notification-info">
+                                        <span class="notification-text">{notif.message}</span>
+                                        <span class="notification-time">{formatTime(notif.created_at)}</span>
+                                    </div>
+                                </a>
+                                {#if !notif.read}
+                                    <button class="mark-btn" on:click={() => markAsRead(notif.id)}
+                                        >Mark as read</button
+                                    >
+                                {/if}
+                            </li>
+                        {/each}
+                    </ul>
+                {:else}
+                    <p class="notification-empty">No notifications</p>
+                {/if}
+            </div>
+        </div>
+    {/if}
+</div>
 
 <style>
-	@import url('https://fonts.googleapis.com/css2?family=Shadows+Into+Light&display=swap');
+    /* === ZÁKLADNÍ NASTAVENÍ === */
+    :global(body) {
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden; /* Zabránit horizontálnímu scrollování */
+    }
+    
+    :global(.app-content) {
+        margin-left: 70px; /* Výchozí stav - stejná šířka jako navigační panel */
+        width: calc(100% - 70px); /* Obsah zabírá zbytek šířky */
+        transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1); /* Plynulý přechod */
+        box-sizing: border-box;
+    }
+    
+    :global(body.nav-expanded .app-content) {
+        margin-left: 240px; /* Rozšířený stav */
+        width: calc(100% - 240px);
+    }
+    
+    :global(main), :global(.main-content) {
 
-	nav {
-		z-index: 999;
-	}
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    /* === NAVIGAČNÍ PANEL === */
+    .sidenav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 70px;
+        background: linear-gradient(180deg, #0f1025 0%, #161e3c 100%); /* Tmavší, luxusnější gradient */
+        display: flex;
+        flex-direction: column;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* Vylepšená animace */
+        z-index: 1000;
+        overflow: hidden;
+        box-shadow: 2px 0 20px rgba(0, 0, 0, 0.25); /* Jemnější stín */
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .sidenav.expanded {
+        width: 240px;
+    }
+    
+    /* Hamburger tlačítko */
+    .hamburger-container {
+        margin: 18px 0 20px; /* Více prostoru kolem */
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .hamburger {
+        background: transparent; /* Bez pozadí */
+        border: none;
+        width: 42px;
+        height: 42px;
+        cursor: pointer;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px; /* Zachovat zaoblené rohy */
+        transition: all 0.3s ease;
+    }
 
-	h2 {
-		padding-bottom: 0.5rem;
-	}
+    .hamburger:hover {
+        transform: scale(1.1); /* Mírné zvětšení místo změny pozadí */
+    }
+    
+    .hamburger:active {
+        transform: scale(0.95); /* Zmenšení při kliknutí */
+    }
+    
+    .hamburger-icon, .hamburger-icon:before, .hamburger-icon:after {
+        width: 24px;
+        height: 2px;
+        background-color: #dcdcf0; /* Světlejší barva čárek */
+        position: absolute;
+        transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Pružnější animace */
+        border-radius: 4px; /* Zaoblené konce */
+    }
+    
+    .hamburger-icon:before, .hamburger-icon:after {
+        content: '';
+    }
+    
+    .hamburger-icon:before {
+        top: -8px;
+        width: 16px; /* Kratší horní čára */
+        left: 4px; /* Vycentrování */
+        opacity: 0.9;
+    }
+    
+    .hamburger-icon:after {
+        top: 8px;
+        width: 16px; /* Stejná délka spodní čáry */
+        left: 4px; /* Vycentrování */
+        opacity: 0.9;
+    }
+    
+    .expanded .hamburger-icon {
+        background: transparent;
+    }
+    
+    .expanded .hamburger-icon:before {
+        transform: rotate(45deg) translate(5px, 5px);
+        width: 24px; /* Plná šířka */
+        opacity: 1;
+        left: 0;
+    }
+    
+    .expanded .hamburger-icon:after {
+        transform: rotate(-45deg) translate(5px, -5px);
+        width: 24px; /* Plná šířka */
+        opacity: 1;
+        left: 0;
+    }
+    
+    /* Logo */
+    .logo-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 5px 0 20px;
+        position: relative;
+        width: 100%;
+    }
+    
+    .logo {
+        width: 42px;
+        max-height: 42px;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
+        opacity: 0.9;
+    }
+    
+    .expanded .logo {
+        width: 120px;
+        opacity: 1;
+    }
+    
+    .logo:hover {
+        filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.6));
+        opacity: 1;
+    }
+    
+    /* Navigační položky */
+    .nav-item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 13px 0; /* Odstranit horizontální padding v minimalizovaném stavu */
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s ease;
+        border-radius: 0;
+        margin: 3px 0; /* Odstranit odsazení v minimalizovaném stavu */
+        width: 100%; /* Plná šířka pro lepší vycentrování */
+    }
+    
+    .expanded .nav-item {
+        justify-content: flex-start;
+        padding: 13px 20px; /* Vrátit padding v rozšířeném stavu */
+        border-radius: 0 8px 8px 0;
+        margin: 3px 10px 3px 0; /* Vrátit odsazení v rozšířeném stavu */
+    }
+    
+    .nav-item:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+    
+    .nav-item:active {
+        background: rgba(255, 255, 255, 0.12);
+    }
+    
+    .nav-item a, .nav-item svg {
+        color: #b0b0d0;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        width: 100%;
+        justify-content: center; /* Vycentrování v minimalizovaném stavu */
+    }
+    
+    .expanded .nav-item a, .expanded .nav-item svg {
+        justify-content: flex-start; /* Zarovnat vlevo v rozšířeném stavu */
+    }
+    
+    .nav-item:hover a, .nav-item:hover svg {
+        color: #ffffff;
+        transform: translateX(0); /* Žádné posunutí v minimalizovaném stavu */
+    }
+    
+    .expanded .nav-item:hover a, .expanded .nav-item:hover svg {
+        transform: translateX(2px); /* Posunutí jen v rozšířeném stavu */
+    }
+    
+    .nav-item svg {
+        width: 24px;
+        height: 24px;
+        min-width: 24px;
+        filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
+    }
+    
+    .nav-text {
+        margin-left: 16px;
+        font-size: 14px;
+        white-space: nowrap;
+        opacity: 0;
+        transform: translateX(5px);
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        font-weight: 500;
+        letter-spacing: 0.3px;
+        display: none; /* Skrýt v minimalizovaném stavu */
+    }
+    
+    .expanded .nav-text {
+        opacity: 1;
+        transform: translateX(0);
+        display: block; /* Zobrazit v rozšířeném stavu */
+    }
+    
+    /* Hlavní navigace */
+    .nav-menu {
+        margin-top: 15px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        width: 100%; /* Plná šířka pro lepší vycentrování */
+    }
+    
+    /* Aktivní položka */
+    .nav-item.active {
+        background: linear-gradient(90deg, rgba(138, 43, 226, 0.25) 0%, rgba(138, 43, 226, 0.1) 100%);
+        border-left: 3px solid #a660d4;
+        padding-left: 0; /* Přizpůsobit padding v minimalizovaném stavu */
+    }
+    
+    .expanded .nav-item.active {
+        padding-left: 17px; /* Vrátit padding v rozšířeném stavu */
+    }
+    
+    .nav-item.active a, .nav-item.active svg {
+        color: #ffffff;
+    }
+    
+    /* Vyhledávání */
+    .search-container {
+        padding: 0 15px;
+        margin: 20px 0;
+        width: 100%;
+        height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .expanded .search-container {
+        height: 40px;
+        opacity: 1;
+    }
+    
+    /* Patička navigace */
+    .nav-footer {
+        margin-top: auto;
+        padding: 20px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        background: linear-gradient(0deg, rgba(10, 10, 25, 0.6) 0%, transparent 100%); /* Gradient pozadí patičky */
+        width: 100%; /* Plná šířka pro lepší vycentrování */
+    }
+    
+    /* Notifikace */
+    .notifications-icon {
+        position: relative;
+    }
+    
+    .badge {
+        position: absolute;
+        top: 3px;
+        right: 8px;
+        background: linear-gradient(135deg, #ff4757 0%, #e0115f 100%);
+        color: white;
+        border-radius: 10px;
+        min-width: 18px;
+        height: 18px;
+        font-size: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(255, 0, 0, 0.3);
+        transform: scale(1);
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); /* Pružný efekt */
+    }
+    
+    .badge:hover {
+        transform: scale(1.15);
+    }
+    
+    .expanded .badge {
+        right: auto;
+        left: 30px;
+    }
+    
+    /* Profilový obrázek */
+    .avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+        transition: all 0.3s ease;
+    }
+    
+    .avatar:hover {
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: scale(1.05);
+    }
+    
+    /* === NOTIFIKAČNÍ MODÁLNÍ OKNO === */
+    .notification-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(4px);
+        z-index: 1002;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    .notifications-modal {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 14px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 0 1px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        width: 350px;
+        z-index: 1003;
+        max-height: 80vh;
+        overflow-y: auto;
+        animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    @keyframes slideIn {
+        from { 
+            opacity: 0;
+            transform: translateY(-25px); 
+        }
+        to { 
+            opacity: 1;
+            transform: translateY(0); 
+        }
+    }
+    
+    .arrow {
+        position: absolute;
+        top: -10px;
+        right: 20px;
+        width: 0;
+        height: 0;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-bottom: 10px solid rgba(255, 255, 255, 0.98);
+        filter: drop-shadow(0 -3px 3px rgba(0, 0, 0, 0.1));
+    }
+    
+    .notifications-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+    }
+    
+    .notifications-header h3 {
+        margin: 0;
+        font-size: 17px;
+        color: #303030;
+        font-weight: 600;
+    }
+    
+    .mark-all {
+        background: none;
+        border: none;
+        color: #a05cd5;
+        font-size: 12px;
+        cursor: pointer;
+        padding: 5px 10px;
+        border-radius: 5px;
+        transition: all 0.2s ease;
+    }
+    
+    .mark-all:hover {
+        background: rgba(160, 92, 213, 0.1);
+        transform: translateY(-1px);
+    }
+    
+    .mark-all:active {
+        transform: translateY(0);
+    }
+    
+    .notifications-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .notification-item {
+        display: flex;
+        align-items: center;
+        padding: 14px 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.2s ease;
+    }
+    
+    .notification-item:hover {
+        background: rgba(0, 0, 0, 0.02);
+        transform: translateX(2px);
+    }
+    
+    .notification-item:last-child {
+        border-bottom: none;
+    }
+    
+    .notification-link {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: inherit;
+        flex-grow: 1;
+    }
+    
+    .notification-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 14px;
+        border: 2px solid #f0f0f0;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .notification-placeholder {
+        font-size: 24px;
+        margin-right: 14px;
+    }
+    
+    .notification-info {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .notification-text {
+        font-size: 14px;
+        color: #333;
+        line-height: 1.4;
+    }
+    
+    .notification-time {
+        font-size: 12px;
+        color: #777;
+        margin-top: 4px;
+    }
+    
+    .mark-btn {
+        background: none;
+        border: none;
+        color: #a05cd5;
+        font-size: 12px;
+        cursor: pointer;
+        margin-left: 10px;
+        padding: 3px 8px;
+        border-radius: 5px;
+        transition: all 0.2s ease;
+    }
+    
+    .mark-btn:hover {
+        background: rgba(160, 92, 213, 0.1);
+        transform: translateY(-1px);
+    }
+    
+    .mark-btn:active {
+        transform: translateY(0);
+    }
+    
+    .notification-empty {
+        text-align: center;
+        color: #777;
+        font-size: 14px;
+        padding: 35px 0;
+        font-style: italic;
+    }
+    
+    /* Překrytí při otevřeném menu na mobilních zařízeních */
+    .overlay {
+        display: none;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    /* === MOBILNÍ HORNÍ NAVIGACE === */
+    .mobile-topnav {
+        display: none; /* Skrýt ve výchozím stavu */
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: linear-gradient(90deg, #0f1025 0%, #161e3c 100%);
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.25);
+        z-index: 1001;
+        padding: 0 15px;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .mobile-logo {
+        display: flex;
+        align-items: center;
+    }
+    
+    .mobile-logo-img {
+        height: 30px;
+        max-width: 160px;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+    }
+    
+    .mobile-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .mobile-btn {
+        background: transparent;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #dcdcf0;
+        position: relative;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .mobile-btn:hover, .mobile-btn:active {
+        background-color: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .mobile-btn svg {
+        width: 24px;
+        height: 24px;
+        filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3));
+    }
+    
+    .mobile-badge {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: linear-gradient(135deg, #ff4757 0%, #e0115f 100%);
+        color: white;
+        border-radius: 10px;
+        min-width: 18px;
+        height: 18px;
+        font-size: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(255, 0, 0, 0.3);
+    }
+    
+    .mobile-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+    
+    .mobile-menu-btn {
+        background: transparent;
+        border: none;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        position: relative;
+    }
+    
+    .mobile-menu-icon, .mobile-menu-icon:before, .mobile-menu-icon:after {
+        width: 24px;
+        height: 2px;
+        background-color: #dcdcf0;
+        position: absolute;
+        border-radius: 4px;
+        transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    }
+    
+    .mobile-menu-icon:before, .mobile-menu-icon:after {
+        content: '';
+    }
+    
+    .mobile-menu-icon:before {
+        top: -8px;
+    }
+    
+    .mobile-menu-icon:after {
+        top: 8px;
+    }
+    
+    /* Animace pro otevřený stav */
+    .mobile-menu-btn.expanded .mobile-menu-icon {
+        background: transparent;
+    }
+    
+    .mobile-menu-btn.expanded .mobile-menu-icon:before {
+        transform: rotate(45deg) translate(5px, 5px);
+    }
+    
+    .mobile-menu-btn.expanded .mobile-menu-icon:after {
+        transform: rotate(-45deg) translate(5px, -5px);
+    }
 
-	.nav-items {
-		display: flex;
-		width: 100%;
-		position: absolute;
-		top: 20%;
-	}
+    /* Responzivní design */
+    @media (max-width: 768px) {
+        :global(body) {
+            padding-top: 60px; /* Prostor pro horní navigaci */
+        }
+        
+        :global(.app-content) {
+            margin-left: 0; /* Bez odsazení na mobilu */
+            width: 100%; /* Plná šířka */
+            margin-top: 60px; /* Lepší odsazení obsahu od horní navigační lišty */
+            padding-top: 0; /* Zrušíme padding-top, protože používáme margin-top */
+        }
+        
+        :global(body.nav-expanded .app-content) {
+            margin-left: 0; /* Žádné odsazení ani při rozbalenén menu */
+            width: 100%;
+        }
+        
+        :global(main), :global(.main-content) {
+            padding: 15px; /* Menší padding na mobilu */
+        }
+        
+        /* Zajistit, že mobilní navigace je pevně nahoře */
+        .mobile-topnav {
+            display: flex; /* Zobrazit na mobilu */
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1001;
+        }
+        
+        .hamburger-container {
+            display: none; /* Skrýt hamburger v bočním menu */
+        }
 
-	.signup-container {
-		padding-left: 30px;
-	}
-
-	.nav-items div {
-		padding-left: 100px;
-	}
-
-	.nav-links {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-	}
-
-	/* Notifications Styles */
-	.notifications-container {
-		position: relative;
-		cursor: pointer;
-		padding: 0 0 0 20px;
-	}
-	.notifications-container img {
-		height: 2rem;
-	}
-	.badge {
-		position: absolute;
-		top: -5px;
-		right: -5px;
-		background-color: red;
-		color: white;
-		border-radius: 50%;
-		padding: 2px 6px;
-		font-size: 0.75rem;
-	}
-	/* Overlay that covers the entire viewport */
-	.notification-overlay {
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background: transparent;
-		z-index: 1000;
-	}
-	/* Modal that pops up from the bell */
-	.notifications-modal {
-		position: fixed;
-		top: 7rem; /* adjust as needed to align with the bell */
-		right: 5.8rem; /* adjust to align with the bell */
-		background: rgba(255, 255, 255, 0.9);
-		backdrop-filter: blur(10px);
-		border-radius: 8px;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-		padding: 1rem;
-		width: 300px;
-	}
-	/* Arrow above the modal */
-	.arrow {
-		position: absolute;
-		top: -10px;
-		right: 20px;
-		width: 0;
-		height: 0;
-		border-left: 10px solid transparent;
-		border-right: 10px solid transparent;
-		border-bottom: 10px solid rgba(255, 255, 255, 0.9);
-	}
-	.notifications-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 0.5rem;
-	}
-	.notifications-header h3 {
-		margin: 0;
-		font-size: 1.1rem;
-		color: #333;
-	}
-	.mark-all {
-		background: none;
-		border: none;
-		color: #007bff;
-		font-size: 0.9rem;
-		cursor: pointer;
-	}
-	.notification-item {
-		display: flex;
-		align-items: center;
-		padding: 0.5rem 0;
-		border-bottom: 1px solid #eee;
-	}
-	.notification-item:last-child {
-		border-bottom: none;
-	}
-	.notification-link {
-		display: flex;
-		align-items: center;
-		text-decoration: none;
-		color: inherit;
-		flex-grow: 1;
-	}
-	.notification-avatar {
-		width: 32px;
-		height: 32px;
-		border-radius: 50%;
-		object-fit: cover;
-		margin-right: 1rem;
-	}
-	.notification-placeholder {
-		font-size: 1.5rem;
-		padding-right: 2rem;
-	}
-	.notification-info {
-		display: flex;
-		flex-direction: column;
-	}
-	.notification-text {
-		font-size: 0.9rem;
-		color: #333;
-	}
-	.notification-time {
-		font-size: 0.75rem;
-		color: #666;
-	}
-	.mark-btn {
-		background: none;
-		border: none;
-		color: #007bff;
-		font-size: 0.8rem;
-		cursor: pointer;
-		margin-left: 0.5rem;
-	}
-	.notification-empty {
-		text-align: center;
-		color: #666;
-		font-size: 0.9rem;
-	}
-
-	.profile-container {
-		margin-left: auto;
-	}
-
-	@media (max-width: 965px) {
-		.nav-items {
-			display: grid;
-			justify-content: center;
-		}
-		.nav-items div {
-			padding-left: 0;
-			padding-bottom: 50px;
-		}
-	}
-
-	@media (max-width: 768px) {
-		.signup-container {
-			padding-left: 0;
-		}
-
-		.nav-links {
-			align-items: center;
-		}
-
-		.search-container {
-			position: absolute;
-			top: 12%;
-			width: 100%;
-		}
-	}
-
-	.navbar-container {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 20px;
-	}
-
-	.header-container {
-		flex-grow: 1;
-		display: flex;
-		justify-content: center;
-	}
-
-	.logo {
-		width: 30rem;
-		max-width: 30rem;
-	}
-
-	.hamburger {
-		cursor: pointer;
-		height: 70px !important;
-		width: 70px !important;
-		z-index: 999;
-		padding-left: 20px;
-	}
-
-	.hamburger input {
-		display: none;
-	}
-
-	.hamburger svg {
-		height: 4em;
-		transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
-	}
-
-	.line {
-		fill: none;
-		stroke: white;
-		stroke-linecap: round;
-		stroke-linejoin: round;
-		stroke-width: 3;
-		transition: stroke-dasharray 600ms cubic-bezier(0.4, 0, 0.2, 1),
-			stroke-dashoffset 600ms cubic-bezier(0.4, 0, 0.2, 1);
-	}
-
-	.line-top-bottom {
-		stroke-dasharray: 12 63;
-	}
-
-	.hamburger input:checked + svg {
-		transform: rotate(-45deg);
-	}
-
-	.hamburger input:checked + svg .line-top-bottom {
-		stroke-dasharray: 20 300;
-		stroke-dashoffset: -32.42;
-	}
-
-	.nav-menu {
-		position: fixed;
-		top: 0;
-		left: 0%;
-		height: 100%;
-		width: 100%;
-		opacity: 1;
-		background-color: #333;
-		box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		transition: transform 0.3s ease-in-out;
-		z-index: 998;
-	}
-
-	.nav-menu a {
-		font-size: 3rem;
-	}
-
-	.nav-menu a:hover {
-		text-decoration: underline;
-		color: #a05cd5;
-	}
-
-	a,
-	button {
-		color: white;
-		text-decoration: none;
-		margin: 10px;
-	}
-
-	.hamburger {
-		display: flex;
-		flex-direction: column;
-		justify-content: space-between;
-		width: 30px;
-		height: 25px;
-		cursor: pointer;
-	}
-
-	a {
-		text-decoration: none;
-		color: white;
-		font-size: 1.2rem;
-	}
-
-	/* logout button */
-	.logout-container {
-		position: absolute;
-		bottom: 1%;
-		right: 0;
-		display: flex;
-		align-items: center;
-	}
-
-	.logout-container .profile-picture {
-		width: 40px;
-		height: 40px;
-	}
-
-	.logout-container a {
-		font-size: 0;
-	}
-
-	ul {
-		padding: 0;
-	}
-
-	.Btn {
-		display: flex;
-		align-items: center;
-		justify-content: flex-start;
-		width: 45px;
-		height: 45px;
-		border: none;
-		border-radius: 50%;
-		cursor: pointer;
-		position: relative;
-		overflow: hidden;
-		transition-duration: 0.3s;
-		background-color: transparent;
-	}
-
-	.sign {
-		width: 100%;
-		transition-duration: 0.3s;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.sign svg {
-		width: 25px;
-	}
-
-	.sign svg path {
-		fill: white;
-	}
-
-	.Btn:active {
-		transform: translate(2px, 2px);
-	}
-
-	.profile-picture {
-		width: 50px;
-		height: 50px;
-		border-radius: 50%;
-	}
-
-	.placeholder-icon {
-		font-size: 2rem;
-	}
-
-	@media (max-width: 768px) {
-		.logo {
-			width: 150px;
-			max-width: 150px;
-		}
-		.nav-menu a {
-			font-size: 2.5rem;
-		}	
-		.nav-items {
-			top: 8%;
-		}
-		.notifications-container {
-			padding: 10px 0 0 20px;
-		}
-		.notifications-modal {
-			top: 5rem; /* adjust as needed to align with the bell */
-			right: 3em; /* adjust to align with the bell */
-		}
-	}
+        .logo-container {
+            display: none; /* Skrýt logo v bočním menu na mobilu */
+        }
+        
+        .search-container {
+            display: none; /* Skrýt vyhledávání v mobilním menu */
+        }
+        
+        .overlay {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(3px);
+            z-index: 999;
+        }
+        
+        .sidenav {
+            transform: translateX(-100%);
+            width: 240px;
+            box-shadow: 5px 0 25px rgba(0, 0, 0, 0.3);
+            top: 60px; /* Posunout pod horní lištu */
+            height: calc(100vh - 60px); /* Snížit výšku o výšku horní lišty */
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .sidenav.expanded {
+            transform: translateX(0);
+            overflow-y: auto; /* Povolit scrollování při větším obsahu */
+        }
+        
+        /* Zajistit, že obsah stránky je posunut doprava při otevřeném menu */
+        :global(body.nav-expanded .app-content) {
+            margin-left: 0; /* Nepřidávat margin při otevřeném menu na mobilu */
+        }
+        
+        .notifications-modal {
+            top: 70px; /* Posunout pod horní lištu */
+            width: calc(100% - 40px);
+            max-width: 350px;
+        }
+    }
+    
+    /* Malé obrazovky (< 992px) - tablet */
+    @media (min-width: 769px) and (max-width: 991px) {
+        .sidenav {
+            width: 60px;
+        }
+        
+        :global(.app-content) {
+            margin-left: 60px;
+            width: calc(100% - 60px);
+        }
+        
+        .nav-item svg {
+            width: 22px;
+            height: 22px;
+        }
+    }
+    
+    /* Extra velké obrazovky (> 1400px) */
+    @media (min-width: 1400px) {
+        .sidenav {
+            width: 80px;
+        }
+        
+        :global(.app-content) {
+            margin-left: 80px;
+            width: calc(100% - 80px);
+        }
+        
+        :global(body.nav-expanded .app-content) {
+            margin-left: 260px;
+            width: calc(100% - 260px);
+        }
+        
+        .sidenav.expanded {
+            width: 260px;
+        }
+        
+        .nav-item svg {
+            width: 26px;
+            height: 26px;
+        }
+        
+        .logo {
+            width: 48px;
+            max-height: 48px;
+        }
+        
+        .expanded .logo {
+            width: 140px;
+        }
+    }
 </style>

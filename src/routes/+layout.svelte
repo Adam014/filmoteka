@@ -41,7 +41,7 @@
 	<Navbar {session} />
 {/if}
 
-<main class="main-content">
+<main class="app-content main-content">
 	<Toaster position="bottom-right" />
 	<slot />
 </main>
@@ -77,12 +77,7 @@
 
 	.main-content {
 		min-height: 100vh;
-	}
-
-	@media (max-width: 768px) {
-		.main-content {
-			padding-top: 60px;
-		}
+		width: 100%;
 	}
 
 	/* Toast styling overrides */
