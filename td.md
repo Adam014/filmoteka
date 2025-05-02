@@ -1,5 +1,3 @@
-/profile
-TODO: Add personalized movies you might like, based on favorite movies (probably with AI picking the personalized movies)
 TODO: Add that you can add reviews of each movies, on the /profile page in the Favorite movies grid you will have green/red combination as in Daily challenges, so other users can instantly see which movie you reviewed
 
 /spotlight || feed
