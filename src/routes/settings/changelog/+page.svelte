@@ -132,10 +132,6 @@
 						<div class="status-icon completed">✓</div>
 						<span>Implement top movies to root</span>
 					</div>
-					<div class="upcoming-card">
-						<div class="status-icon pending">⦾</div>
-						<span>Sync everything with TMDB, try to use everything from tmdb</span>
-					</div>
 					<div class="completed-card">
 						<div class="status-icon completed">✓</div>
 						<span>Add localization so on root the region changes with the localization of the user</span>
@@ -151,10 +147,6 @@
 					<div class="completed-card">
 						<div class="status-icon completed">✓</div>
 						<span>Implementing unfollow button to Following</span>
-					</div>
-					<div class="upcoming-card">
-						<div class="status-icon pending">⦾</div>
-						<span>Implement series into library</span>
 					</div>
 					<div class="upcoming-card">
 						<div class="status-icon pending">⦾</div>
