@@ -10,7 +10,7 @@
 
 <div class="card-grid">
 	{#each data as item}
-		<a href={isMovie ? `/movie/${item.id}` : `/tv/${item.id}`} class="card">
+		<a href={isMovie ? `/movie/${item.id}` : `/series/${item.id}`} class="card">
 			<div class="card-inner">
 				<div class="card-front">
 					<img src={'https://image.tmdb.org/t/p/w300' + item?.poster_path} alt="{item.title || item.name} Cover" loading="lazy" />

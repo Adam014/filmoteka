@@ -12,7 +12,7 @@ export async function load({ params }) {
             };
         }
     } catch (error) {
-        console.error('Error loading movie data:', error);
+        console.error('Error loading series data:', error);
         return {
             details: null,
             credits: null,
