@@ -6,6 +6,8 @@
 	import toast from 'svelte-french-toast';
 	import { user } from '../../../stores/user';
 	import PersonCard from '../../../components/PersonCard.svelte';
+	import { fade, fly, scale } from 'svelte/transition';
+	import { cubicOut } from 'svelte/easing';
 
 	export let data;
 
@@ -19,6 +21,10 @@
 	let isFavorite = false;
 	let finalTrailer = null;
 	let isLoading = true;
+	let isPlaying = false;
+	let shouldShowContent = true;
+	let heroElement;
+	let videoLoaded = false;
 
 	// Initialize variables with default values
 	let id = 'N/A';
@@ -40,17 +46,18 @@
 	let popularity = 0;
 	let formattedBudget;
 	let formattedRevenue;
-    let created_by;
-    let episode_run_time;
-    let first_air_date;
-    let last_air_date;
-    let last_episode_to_air;
-    let networks;
-    let next_episodes_to_air;
-    let number_episodes;
-    let number_seasons;
-    let season;
-    let type;
+	// Seriálové specifické proměnné
+	let created_by;
+	let episode_run_time;
+	let first_air_date;
+	let last_air_date;
+	let last_episode_to_air;
+	let networks;
+	let next_episodes_to_air;
+	let number_episodes;
+	let number_seasons;
+	let season;
+	let type;
 
 	const unsubscribe = user.subscribe((value) => {
 		currentUser = value;
@@ -73,10 +80,10 @@
 
 		// Update destructured variables
 		id = movieDetails.id || 'N/A';
-		original_title = movieDetails.original_title || 'N/A';
+		original_title = movieDetails.original_title || movieDetails.name || 'N/A';
 		original_language = movieDetails.original_language || 'N/A';
 		status = movieDetails.status || 'N/A';
-		release_date = movieDetails.release_date || 'N/A';
+		release_date = movieDetails.release_date || movieDetails.first_air_date || 'N/A';
 		tagline = movieDetails.tagline || '';
 		revenue = movieDetails.revenue;
 		genres = movieDetails.genres || [];
@@ -89,17 +96,17 @@
 		homepage = movieDetails.homepage || '';
 		poster_path = movieDetails.poster_path || '';
 		popularity = movieDetails.popularity || 0;
-        created_by = movieDetails.created_by || null;
-        episode_run_time = movieDetails.episode_run_time || null;
-        first_air_date = movieDetails.first_air_date || null;
-        last_air_date = movieDetails.last_air_date || null;
-        last_episode_to_air = movieDetails.last_episode_to_air || null;
-        networks = movieDetails.networks || null;
-        next_episodes_to_air = movieDetails.next_episodes_to_air || null;
-        number_episodes = movieDetails.number_episodes || null;
-        number_seasons = movieDetails.number_seasons || null;
-        season = movieDetails.season || null;
-        type = movieDetails.type || null;
+		created_by = movieDetails.created_by || null;
+		episode_run_time = movieDetails.episode_run_time || null;
+		first_air_date = movieDetails.first_air_date || null;
+		last_air_date = movieDetails.last_air_date || null;
+		last_episode_to_air = movieDetails.last_episode_to_air || null;
+		networks = movieDetails.networks || null;
+		next_episodes_to_air = movieDetails.next_episodes_to_air || null;
+		number_episodes = movieDetails.number_episodes || null;
+		number_seasons = movieDetails.number_seasons || null;
+		season = movieDetails.season || null;
+		type = movieDetails.type || null;
 
 		formattedBudget = formatCurrency(budget);
 		formattedRevenue = formatCurrency(revenue);
@@ -107,6 +114,23 @@
 		// Fetch the best available video and check if the movie is a favorite
 		fetchBestAvailableVideo();
 		checkIfFavorite();
+	}
+
+	function togglePlayVideo() {
+		if (!finalTrailer) return;
+
+		isPlaying = true;
+		shouldShowContent = false;
+
+		// Scroll to top smoothly when play is clicked
+		window.scrollTo({ top: 0, behavior: 'smooth' });
+	}
+
+	function handleVideoClose() {
+		isPlaying = false;
+		setTimeout(() => {
+			shouldShowContent = true;
+		}, 300); // Short delay to allow the exit animation to play
 	}
 
 	async function fetchBestAvailableVideo() {
@@ -162,7 +186,7 @@
 				const { error } = await supabase.storage.from('favorites').remove([path]);
 				if (error) throw error;
 				isFavorite = false;
-				toast.success(`${movieDetails.original_title} removed from favorites.`);
+				toast.success(`${original_title} removed from favorites.`);
 			} else {
 				const { data: filmData, error: fetchError } = await supabase
 					.from('films')
@@ -186,7 +210,7 @@
 				if (uploadError) throw uploadError;
 
 				isFavorite = true;
-				toast.success(`${movieDetails.original_title} added to favorites.`);
+				toast.success(`${original_title} added to favorites.`);
 			}
 		} catch (err) {
 			console.error('Error toggling favorite:', err.message);
@@ -206,273 +230,682 @@
 	<title>{original_title} | Filmoteka</title>
 </svelte:head>
 
-<section class="movie-details">
-	<div class="title">
-		<h1>{original_title}</h1>
-		<div class="favorite-icon" on:click={toggleFavorite} class:isFavorite>
-			{isFavorite ? '★' : '☆'}
-		</div>
+<div class="movie-page">
+	<!-- Hero Section with Trailer Background -->
+	<div class="hero-section" bind:this={heroElement}>
+		{#if finalTrailer && isPlaying}
+			<div
+				class="fullscreen-video-container"
+				transition:scale={{ duration: 600, easing: cubicOut }}
+			>
+				<button class="close-video-btn" on:click={handleVideoClose}>
+					<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path
+							d="M18 6L6 18M6 6L18 18"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						/>
+					</svg>
+				</button>
+
+				<iframe
+					title="youtube-video-player"
+					src={`https://www.youtube.com/embed/${finalTrailer.key}?autoplay=1&mute=0&controls=1&rel=0&modestbranding=1`}
+					frameborder="0"
+					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+					allowfullscreen
+				/>
+			</div>
+		{:else}
+			<!-- Background Video (Muted, Looping) or Poster Fallback -->
+			<div class="background-media">
+				{#if finalTrailer}
+					<div class="background-video-container">
+						<iframe
+							title="background-trailer"
+							class="background-video"
+							on:load={() => (videoLoaded = true)}
+							src={`https://www.youtube.com/embed/${finalTrailer.key}?autoplay=1&mute=1&loop=1&controls=0&disablekb=1&playlist=${finalTrailer.key}`}
+							frameborder="0"
+							allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+						/>
+					</div>
+				{/if}
+
+				<!-- Gradient Overlay -->
+				<div class="hero-overlay" />
+
+				<!-- Poster Fallback (visible while video loads or if no video) -->
+				<div
+					class="poster-fallback"
+					style={poster_path
+						? `background-image: url(https://image.tmdb.org/t/p/original${poster_path})`
+						: ''}
+					class:fade-out={finalTrailer && videoLoaded}
+				/>
+			</div>
+		{/if}
+
+		<!-- Hero Content -->
+		{#if shouldShowContent}
+			<div class="hero-content" in:fade={{ duration: 400, delay: isPlaying ? 300 : 0 }}>
+				<h1 class="movie-title">{original_title}</h1>
+				{#if tagline}
+					<p class="movie-tagline">"{tagline}"</p>
+				{/if}
+
+				<div class="movie-meta">
+					{#if first_air_date !== 'N/A' && first_air_date !== null}
+						<span class="meta-item year">{first_air_date.split('-')[0]}</span>
+					{:else if release_date !== 'N/A'}
+						<span class="meta-item year">{release_date.split('-')[0]}</span>
+					{/if}
+
+					{#if genres.length > 0}
+						<span class="meta-item dot-separator">•</span>
+						<span class="meta-item genres">
+							{genres.map((g) => g.name).join(', ')}
+						</span>
+					{/if}
+
+					{#if adult}
+						<span class="meta-item dot-separator">•</span>
+						<span class="meta-item adult-badge">18+</span>
+					{/if}
+				</div>
+
+				<div class="action-buttons">
+					{#if finalTrailer}
+						<button class="btn btn-primary pulse" on:click={togglePlayVideo}>
+							<span class="icon">▶</span> Watch Trailer
+						</button>
+					{/if}
+					<button class="btn btn-secondary" on:click={toggleFavorite}>
+						<span class="icon">{isFavorite ? '★' : '+'}</span>
+						{isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+					</button>
+				</div>
+			</div>
+		{/if}
 	</div>
 
-	{#if isLoading}
-		<Loader />
-	{:else if finalTrailer}
-		<div class="video-container">
-			<iframe
-				title="youtube-video"
-				src={`https://www.youtube.com/embed/${finalTrailer.key}`}
-				frameborder="0"
-				allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-				allowfullscreen
-			/>
+	<!-- Main Content (Only show when not playing fullscreen video) -->
+	{#if shouldShowContent}
+		<div class="content-container" in:fade={{ duration: 400, delay: 200 }}>
+			{#if isLoading}
+				<div class="loader-container">
+					<Loader />
+				</div>
+			{:else}
+				<!-- Overview Section -->
+				<section class="section overview-section">
+					<div class="section-header">
+						<h2 class="section-title">About the Series</h2>
+						<div class="title-underline" />
+					</div>
+					<div class="section-grid">
+						<div class="main-content">
+							<p class="overview-text">{overview}</p>
+
+							{#if created_by?.length > 0}
+								<div class="creators">
+									<span class="creator-label">Created by:</span>
+									<span class="creator-names">{created_by.map((d) => d.name).join(', ')}</span>
+								</div>
+							{:else if directors?.length > 0}
+								<div class="creators">
+									<span class="creator-label">Director:</span>
+									<span class="creator-names">{directors.map((d) => d.name).join(', ')}</span>
+								</div>
+							{/if}
+						</div>
+
+						<div class="movie-details-sidebar">
+							{#if imdb_id !== 'N/A'}
+								<div class="detail-item">
+									<span class="detail-label">IMDB</span>
+									<span class="detail-value">
+										<a
+											href={`https://www.imdb.com/title/${imdb_id}`}
+											target="_blank"
+											rel="noopener noreferrer"
+										>
+											{imdb_id}
+										</a>
+									</span>
+								</div>
+							{/if}
+
+							{#if original_language !== 'N/A'}
+								<div class="detail-item">
+									<span class="detail-label">Original Language</span>
+									<span class="detail-value">{original_language.toUpperCase()}</span>
+								</div>
+							{/if}
+
+							{#if number_seasons > 0}
+								<div class="detail-item">
+									<span class="detail-label">Seasons</span>
+									<span class="detail-value highlight">{number_seasons}</span>
+								</div>
+							{/if}
+
+							{#if number_episodes > 0}
+								<div class="detail-item">
+									<span class="detail-label">Episodes</span>
+									<span class="detail-value highlight">{number_episodes}</span>
+								</div>
+							{/if}
+
+							{#if episode_run_time && episode_run_time.length > 0}
+								<div class="detail-item">
+									<span class="detail-label">Episode Runtime</span>
+									<span class="detail-value">{episode_run_time[0]} min</span>
+								</div>
+							{/if}
+
+							{#if first_air_date}
+								<div class="detail-item">
+									<span class="detail-label">First Air Date</span>
+									<span class="detail-value">{first_air_date}</span>
+								</div>
+							{/if}
+
+							{#if last_air_date}
+								<div class="detail-item">
+									<span class="detail-label">Last Air Date</span>
+									<span class="detail-value">{last_air_date}</span>
+								</div>
+							{/if}
+
+							{#if status !== 'N/A'}
+								<div class="detail-item">
+									<span class="detail-label">Status</span>
+									<span class="detail-value">{status}</span>
+								</div>
+							{/if}
+
+							{#if networks && networks.length > 0}
+								<div class="detail-item">
+									<span class="detail-label">Networks</span>
+									<span class="detail-value">{networks.map((n) => n.name).join(', ')}</span>
+								</div>
+							{/if}
+
+							{#if type}
+								<div class="detail-item">
+									<span class="detail-label">Type</span>
+									<span class="detail-value">{type}</span>
+								</div>
+							{/if}
+						</div>
+					</div>
+				</section>
+
+				<!-- Cast Section -->
+				{#if topActors.length > 0}
+					<section class="section cast-section">
+						<div class="section-header">
+							<h2 class="section-title">Cast</h2>
+							<div class="title-underline" />
+						</div>
+
+						<div class="cards-container">
+							{#each topActors as actor}
+								<PersonCard person={actor} />
+							{/each}
+						</div>
+					</section>
+				{/if}
+
+				<!-- Production Info Section -->
+				<section class="section production-section">
+					<div class="section-header">
+						<h2 class="section-title">Production Information</h2>
+						<div class="title-underline" />
+					</div>
+
+					<div class="production-grid">
+						{#if production_companies?.length > 0}
+							<div class="production-column">
+								<h3 class="subsection-title">Production Companies</h3>
+								<ul class="production-list">
+									{#each production_companies as company}
+										<li class="production-item">
+											{company.name}
+											{company.origin_country ? `(${company.origin_country})` : ''}
+										</li>
+									{/each}
+								</ul>
+							</div>
+						{/if}
+
+						{#if production_countries?.length > 0}
+							<div class="production-column">
+								<h3 class="subsection-title">Production Countries</h3>
+								<ul class="production-list">
+									{#each production_countries as country}
+										<li class="production-item">
+											{country.name} ({country.iso_3166_1})
+										</li>
+									{/each}
+								</ul>
+							</div>
+						{/if}
+					</div>
+				</section>
+			{/if}
 		</div>
-	{:else if poster_path}
-		<!-- Display a thumbnail when no trailer is available -->
-		<div class="thumbnail-container">
-			<img
-				src={`https://image.tmdb.org/t/p/w500${poster_path}`}
-				alt="{original_title} Thumbnail"
-				class="thumbnail-image"
-			/>
-		</div>
-	{:else}
-		<p class="no-trailer">No trailer or thumbnail available.</p>
 	{/if}
-
-	<!-- Add images right under the trailer, lets say 5-6 images -->
-
-	<div>
-		<div class="movie-title-container">
-			{#if id}
-				<h3>ID: {imdb_id && id}</h3>
-			{/if}
-
-			{#if original_language}
-				<h3>Lang: {original_language}</h3>
-			{/if}
-
-			{#if status}
-				<h3>{status} {status === 'Released' && release_date ? release_date : ''}</h3>
-			{/if}
-
-			{#if adult !== null && adult !== undefined}
-				<h3>Adult: {adult ? 'Yes' : 'No'}</h3>
-			{/if}
-
-			{#if homepage}
-				<h3><a href={homepage}>HomePage</a></h3>
-			{/if}
-		</div>
-
-		<p class="overview">{overview}</p>
-
-		<p class="tagline">{tagline !== '' ? '"' + tagline + '"' : ''}</p>
-
-		<hr />
-		<h2>Actors:</h2>
-		<div class="actors-container">
-			{#each topActors as actor}
-				<PersonCard person={actor} />
-			{/each}
-		</div>
-
-		{#if directors?.length > 1}
-			<h2>Directors:</h2>
-			<div class="directors-container">
-				{#each directors as director}
-					<PersonCard person={director} />
-				{/each}
-			</div>
-		{:else if directors?.length === 1}
-			<h2>Director:</h2>
-			<div class="directors-container">
-				<PersonCard person={directors[0]} />
-			</div>
-		{/if}
-
-		<hr />
-
-        {#if (budget && revenue)}
-            <p>{budget === 0 ? '' : 'movie budget -> ' + formattedBudget}</p>
-            <p>{revenue === 0 ? '' : 'movie revenue -> ' + formattedRevenue}</p>
-        {/if}
-	</div>
-
-	<!-- reviews from people, make it a grid, left side stats and right side reviews underthemselve, on mobile everything underthemsekves, api reference /reviews -->
-
-	<div class="stats-container">
-		<div class="idk">
-			<p class="idk-p">genres:</p>
-			<ul>
-				{#each genres as genre}
-					<li>id: {genre.id} & {genre.name}</li>
-				{/each}
-			</ul>
-		</div>
-		{#if production_companies?.length > 0}
-			<div class="loneliness">
-				<p class="loneliness-p">production-companies</p>
-				<ul>
-					{#each production_companies as company}
-						<li>id: {company.id} | {company.name} | {company.origin_country}</li>
-					{/each}
-				</ul>
-			</div>
-		{/if}
-
-		{#if production_countries?.length > 0}
-			<div class="loneliness">
-				<p class="loneliness-p">production-countries</p>
-				<ul>
-					{#each production_countries as country}
-						<li>{country.iso_3166_1} {country.name}</li>
-					{/each}
-				</ul>
-			</div>
-		{/if}
-	</div>
-</section>
+</div>
 
 <style>
-	@import url('https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap');
+	/* Global Styles */
+	.movie-page {
+		width: 100%;
+		min-height: 100vh;
+		background-color: #0f0f0f;
+		color: #f5f5f5;
+	}
 
-	.similar-movies {
+	/* Hero Section Styles */
+	.hero-section {
+		position: relative;
+		height: 90vh;
+		width: 100%;
+		overflow: hidden;
+	}
+
+	.background-media {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		z-index: 1;
+	}
+
+	.background-video-container {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+	}
+
+	.background-video {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 100%;
+		height: 100%;
+		transform: translate(-50%, -50%);
+		object-fit: cover;
+		pointer-events: none;
+	}
+
+	.poster-fallback {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background-size: cover;
+		background-position: center;
+		background-repeat: no-repeat;
+		transition: opacity 1s ease;
+		z-index: 1;
+	}
+
+	.poster-fallback.fade-out {
+		opacity: 0;
+	}
+
+	.hero-overlay {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(
+			0deg,
+			#0f0f0f 0%,
+			rgba(15, 15, 15, 0.7) 50%,
+			rgba(15, 15, 15, 0.3) 100%
+		);
+		z-index: 2;
+	}
+
+	.hero-content {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding-bottom: 4rem;
+		padding: 0 1.5rem;
+		height: 100%;
+		z-index: 3;
+		text-align: center;
+	}
+
+	.movie-title {
+		font-size: 3.5rem;
+		font-weight: 700;
+		margin-bottom: 1rem;
+		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+	}
+
+	.movie-tagline {
+		font-size: 1.5rem;
+		font-style: italic;
+		opacity: 0.9;
+		margin-bottom: 1.5rem;
+		text-shadow: 0 2px 3px rgba(0, 0, 0, 0.5);
+	}
+
+	.movie-meta {
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: center;
+		gap: 0.5rem;
+		margin-bottom: 2rem;
+		font-size: 1.1rem;
 	}
 
-	.title {
-		display: flex;
-		align-items: center;
+	.dot-separator {
+		color: rgba(255, 255, 255, 0.7);
 	}
 
-	.no-trailer {
-		padding: 50px 2.5rem 50px 2.5rem;
+	.adult-badge {
+		background-color: #ff006e;
+		padding: 0.1rem 0.5rem;
+		border-radius: 4px;
+		font-size: 0.9rem;
 	}
 
-	hr {
-		margin: 15px 40px 15px 40px;
-	}
-
-	.thumbnail-container {
-		padding: 40px;
-		height: auto;
-	}
-
-	.thumbnail-container img {
-		height: 30rem;
-		object-fit: contain;
-	}
-
-	.favorite-icon {
-		font-size: 3rem;
-		width: auto;
-		cursor: pointer;
-		color: rgba(255, 215, 0, 0.8);
-		text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.6);
-		transition: color 0.3s ease, transform 0.3s ease;
-		padding: 0rem 2.5rem 0rem 2.5rem;
-	}
-
-	.favorite-icon.isFavorite {
-		color: gold;
-	}
-
-	.favorite-icon:hover {
-		color: gold;
-	}
-
-	.actors-container,
-	.similar-movies,
-	.directors-container {
+	.action-buttons {
 		display: flex;
 		gap: 1rem;
-		flex-wrap: wrap;
-		justify-content: left;
-		padding: 20px 0px 20px 40px;
-		width: 90%;
+		margin-top: 1rem;
 	}
 
-	h3,
-	h2,
-	h1,
-	p {
-		padding: 0rem 2.5rem 0rem 2.5rem;
-	}
-	.idk,
-	.idk-p,
-	.loneliness,
-	.loneliness-p {
-		padding: 1rem 1.5rem 0rem 1.5rem !important;
-	}
-
-	h3,
-	p {
-		font-weight: 400;
-	}
-	h3 {
-		font-size: 1rem;
-	}
-	h1 {
-		font-size: 2.3rem;
-	}
-	.overview,
-	.idk ul li,
-	.loneliness ul li {
-		color: #a0a0a0;
-	}
-	.overview {
-		padding: 20px 40px 20px 40px;
-		font-size: 1.3rem;
-	}
-
-	.movie-title-container {
+	.btn {
 		display: flex;
 		align-items: center;
+		justify-content: center;
+		padding: 0.75rem 1.5rem;
+		border-radius: 30px;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		border: none;
+		font-size: 1rem;
 	}
-	.tagline {
-		font-family: 'Indie Flower', cursive;
-		padding: 10px 40px 10px 40px;
-		font-size: 1.7rem;
+
+	.btn-primary {
+		background: linear-gradient(135deg, #3a86ff, #8338ec);
+		color: white;
 	}
-	.movie-details {
-		display: grid;
+
+	.btn-primary:hover {
+		background: linear-gradient(135deg, #2176ff, #722ddb);
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(51, 51, 51, 0.3);
+	}
+
+	.btn-secondary {
+		background: rgba(255, 255, 255, 0.1);
+		backdrop-filter: blur(10px);
+		color: white;
+		border: 1px solid rgba(255, 255, 255, 0.2);
+	}
+
+	.btn-secondary:hover {
+		background: rgba(255, 255, 255, 0.2);
+		transform: translateY(-2px);
+	}
+
+	.icon {
+		margin-right: 0.5rem;
+	}
+
+	/* Fullscreen Video */
+	.fullscreen-video-container {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background-color: rgba(0, 0, 0, 0.95);
+		z-index: 1000;
+		display: flex;
+		align-items: center;
 		justify-content: center;
 	}
 
-	.stats-container {
-		padding-bottom: 40px;
+	.fullscreen-video-container iframe {
+		width: 90%;
+		height: 80%;
+		max-width: 1200px;
+		max-height: 675px;
 	}
 
-	/* Video container styles to ensure width matches description */
-	.video-container {
-		padding: 20px;
+	.close-video-btn {
+		position: absolute;
+		top: 1.5rem;
+		right: 1.5rem;
+		background: rgba(0, 0, 0, 0.7);
+		border: none;
+		border-radius: 50%;
+		width: 3rem;
+		height: 3rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		z-index: 1001;
+		color: white;
+		transition: all 0.3s ease;
 	}
 
-	iframe {
-		width: 100%;
-		max-width: 100%;
-		height: 550px;
-		border-radius: 30px;
+	.close-video-btn:hover {
+		background: rgba(255, 255, 255, 0.2);
+		transform: scale(1.1);
 	}
 
-	@media screen and (max-width: 768px) {
-		.movie-title-container {
-			display: grid;
-			grid-template-columns: repeat(2, 1fr);
-			text-align: center;
+	.close-video-btn svg {
+		width: 1.5rem;
+		height: 1.5rem;
+	}
+
+	/* Main Content Styles */
+	.content-container {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 3rem 1.5rem;
+	}
+
+	.loader-container {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		min-height: 300px;
+	}
+
+	.section {
+		margin-bottom: 4rem;
+	}
+
+	.section-header {
+		margin-bottom: 2rem;
+		position: relative;
+	}
+
+	.section-title {
+		font-size: 2rem;
+		font-weight: 700;
+		margin-bottom: 0.5rem;
+	}
+
+	.title-underline {
+		height: 3px;
+		width: 60px;
+		background: linear-gradient(90deg, #3a86ff, #8338ec);
+		border-radius: 3px;
+	}
+
+	.section-grid {
+		display: grid;
+		grid-template-columns: 2fr 1fr;
+		gap: 2rem;
+	}
+
+	.pulse {
+		animation: pulse 2s infinite;
+	}
+
+	@keyframes pulse {
+		0% {
+			box-shadow: 0 0 0 0 rgba(51, 153, 255, 0.7);
 		}
-		h3 {
-			padding: 1rem 0;
+		70% {
+			box-shadow: 0 0 0 10px rgba(51, 153, 255, 0);
 		}
-		h1 {
-			font-size: 1.5rem;
-			padding: 0;
+		100% {
+			box-shadow: 0 0 0 0 rgba(51, 153, 255, 0);
+		}
+	}
+
+	.overview-text {
+		font-size: 1.1rem;
+		line-height: 1.6;
+		margin-bottom: 1.5rem;
+	}
+
+	.creators {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		font-size: 1.1rem;
+	}
+
+	.creator-label {
+		font-weight: 600;
+		opacity: 0.8;
+	}
+
+	.movie-details-sidebar {
+		background-color: rgba(255, 255, 255, 0.05);
+		border-radius: 8px;
+		padding: 1.5rem;
+	}
+
+	.detail-item {
+		margin-bottom: 1rem;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.detail-label {
+		font-size: 0.9rem;
+		opacity: 0.7;
+		margin-bottom: 0.3rem;
+	}
+
+	.detail-value {
+		font-size: 1.1rem;
+	}
+
+	.detail-value a {
+		color: #3a86ff;
+		text-decoration: none;
+		transition: color 0.3s ease;
+	}
+
+	.detail-value a:hover {
+		color: #ff006e;
+		text-decoration: underline;
+	}
+
+	.highlight {
+		color: #ff006e;
+		font-weight: 600;
+	}
+
+	/* Cast Section */
+	.cards-container {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+		gap: 1.5rem;
+	}
+
+	/* Production Section */
+	.production-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+		gap: 2rem;
+	}
+
+	.subsection-title {
+		font-size: 1.4rem;
+		margin-bottom: 1rem;
+		opacity: 0.9;
+	}
+
+	.production-list {
+		list-style: none;
+		padding: 0;
+	}
+
+	.production-item {
+		padding: 0.5rem 0;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+	}
+
+	.production-item:last-child {
+		border-bottom: none;
+	}
+
+	/* Responsive */
+	@media (max-width: 768px) {
+		.movie-title {
+			font-size: 2.5rem;
 		}
 
-		.title {
-			padding-left: 1.5rem;
+		.section-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.hero-content {
+			padding: 0 1rem;
+		}
+
+		.action-buttons {
+			flex-direction: column;
+			width: 100%;
+			max-width: 300px;
+		}
+
+		.btn {
+			width: 100%;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.movie-title {
+			font-size: 2rem;
+		}
+
+		.movie-tagline {
+			font-size: 1.2rem;
+		}
+
+		.cards-container {
+			grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
 		}
 	}
 </style>

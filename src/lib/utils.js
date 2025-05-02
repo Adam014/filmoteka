@@ -68,7 +68,9 @@ function selectBestMatch(movies, searchQuery) {
  * @returns {Promise<object|null>} - The best available video object.
  */
 export async function getBestAvailableVideoWithCheck(movieId, isMovie) {
-	const url = isMovie ? `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${TMDB_API_KEY}` : `https://api.themoviedb.org/3/tv/${movieId}/videos?api_key=${TMDB_API_KEY}`;
+	const url = isMovie
+		? `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${TMDB_API_KEY}`
+		: `https://api.themoviedb.org/3/tv/${movieId}/videos?api_key=${TMDB_API_KEY}`;
 
 	try {
 		const response = await fetch(url);
@@ -109,7 +111,7 @@ export async function getCommits() {
 		if (!data || !Array.isArray(data) || data.length === 0) {
 			throw new Error('No commit data available');
 		}
-		
+
 		return data;
 	} catch (error) {
 		console.error('Error fetching Filmoteka commits:', error);
@@ -190,7 +192,7 @@ export async function getAllMovies(page) {
 }
 
 async function fetchDetailed(id, isMovie) {
-	const url = isMovie ? `${TMDB_BASE_URL}/${id}` : `https://api.themoviedb.org/3/tv/${id}`
+	const url = isMovie ? `${TMDB_BASE_URL}/${id}` : `https://api.themoviedb.org/3/tv/${id}`;
 	try {
 		const response = await fetch(url, {
 			headers: {
@@ -214,7 +216,9 @@ async function fetchDetailed(id, isMovie) {
 }
 
 async function fetchCredits(id, isMovie) {
-	const url = isMovie ? `${TMDB_BASE_URL}/${id}/credits` : `https://api.themoviedb.org/3/tv/${id}/credits`
+	const url = isMovie
+		? `${TMDB_BASE_URL}/${id}/credits`
+		: `https://api.themoviedb.org/3/tv/${id}/credits`;
 	try {
 		const response = await fetch(url, {
 			headers: {
@@ -245,11 +249,11 @@ export async function getDetailedMovie(id, isMovie) {
 			const apiData = await fetchDetailed(id, false);
 			console.log(apiData);
 			const credits = await fetchCredits(id, false);
-			
+
 			if (!apiData) {
 				throw new Error('Could not fetch TV show details from TMDB');
 			}
-			
+
 			return {
 				created_by: apiData.created_by,
 				episode_run_time: apiData.episode_run_time,
@@ -334,7 +338,6 @@ export async function getDetailedMovie(id, isMovie) {
 		return null;
 	}
 }
-
 
 // Format date function
 export function formatDate(dateString) {

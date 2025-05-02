@@ -290,7 +290,7 @@
 							<span class="stat-value">{followersCount}</span>
 							<span class="stat-label">Followers</span>
 						</div>
-						<div class="stat-divider"></div>
+						<div class="stat-divider" />
 						<div class="stat-item clickable" on:click={openFollowingModal}>
 							<span class="stat-value">{followingCount}</span>
 							<span class="stat-label">Following</span>
@@ -299,7 +299,7 @@
 							<div class="follow-action">
 								<button class="follow-button" on:click={toggleFollow} disabled={followLoading}>
 									{#if followLoading}
-										<div class="loading-spinner"></div>
+										<div class="loading-spinner" />
 									{:else}
 										{isFollowing ? 'Unfollow' : 'Follow'}
 									{/if}
@@ -315,7 +315,7 @@
 			<div class="profile-details-card">
 				<div class="card-header">
 					<h2>User Details</h2>
-					<div class="title-underline"></div>
+					<div class="title-underline" />
 				</div>
 				<div class="card-content">
 					<div class="info-item">
@@ -342,9 +342,9 @@
 			<div class="favorites-container">
 				<div class="section-header">
 					<h2 class="section-title">Favorite Movies</h2>
-					<div class="title-underline"></div>
+					<div class="title-underline" />
 				</div>
-				
+
 				{#if favoriteMovies.length > 0}
 					<div class="favorite-movies">
 						{#each favoriteMovies as movie (movie.id)}
@@ -380,7 +380,7 @@
 				<h2>Followers</h2>
 				<button class="close-button" on:click={() => (showFollowersModal = false)}>✕</button>
 			</div>
-			
+
 			{#if followersList.length > 0}
 				<ul class="user-list">
 					{#each followersList as user (user.id)}
@@ -415,7 +415,7 @@
 				<h2>Following</h2>
 				<button class="close-button" on:click={() => (showFollowingModal = false)}>✕</button>
 			</div>
-			
+
 			{#if followingList.length > 0}
 				<ul class="user-list">
 					{#each followingList as user (user.id)}
@@ -430,8 +430,11 @@
 								{/if}
 								<span class="user-name">{user.user_metadata?.display_name || 'Unknown'}</span>
 							</a>
-							
-							<button class="unfollow-button" on:click|stopPropagation={() => unfollowUser(user.id)}>
+
+							<button
+								class="unfollow-button"
+								on:click|stopPropagation={() => unfollowUser(user.id)}
+							>
 								Unfollow
 							</button>
 						</li>
@@ -452,7 +455,7 @@
 		max-width: 100%;
 		overflow-x: hidden;
 	}
-	
+
 	/* Profile Hero Section */
 	.profile-hero {
 		position: relative;
@@ -464,7 +467,7 @@
 		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 		backdrop-filter: blur(5px);
 	}
-	
+
 	.profile-header {
 		max-width: 1200px;
 		margin: 0 auto;
@@ -472,7 +475,7 @@
 		align-items: center;
 		gap: 2.5rem;
 	}
-	
+
 	/* Avatar */
 	.profile-avatar {
 		width: 180px;
@@ -483,12 +486,12 @@
 		box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 		transition: transform 0.3s ease, box-shadow 0.3s ease;
 	}
-	
+
 	.profile-avatar:hover {
 		transform: scale(1.05);
 		box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
 	}
-	
+
 	.profile-avatar-placeholder {
 		width: 180px;
 		height: 180px;
@@ -502,12 +505,12 @@
 		font-weight: bold;
 		box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 	}
-	
+
 	/* Profile Info */
 	.profile-info {
 		flex: 1;
 	}
-	
+
 	.profile-info h1 {
 		font-size: 3rem;
 		font-weight: 800;
@@ -518,7 +521,7 @@
 		color: transparent;
 		text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 	}
-	
+
 	/* Stats */
 	.profile-stats {
 		display: flex;
@@ -526,45 +529,45 @@
 		gap: 1.5rem;
 		margin-top: 1.5rem;
 	}
-	
+
 	.stat-item {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 	}
-	
+
 	.stat-value {
 		font-size: 1.8rem;
 		font-weight: 700;
 		color: var(--light-text);
 	}
-	
+
 	.stat-label {
 		font-size: 0.9rem;
 		color: var(--gray-text);
 		margin-top: 0.25rem;
 	}
-	
+
 	.stat-divider {
 		height: 40px;
 		width: 1px;
 		background-color: rgba(255, 255, 255, 0.2);
 	}
-	
+
 	.clickable {
 		cursor: pointer;
 		transition: transform 0.2s ease;
 	}
-	
+
 	.clickable:hover {
 		transform: translateY(-3px);
 	}
-	
+
 	/* Follow Button */
 	.follow-action {
 		margin-left: auto;
 	}
-	
+
 	.follow-button {
 		background: var(--gradient-bg);
 		color: white;
@@ -581,17 +584,17 @@
 		justify-content: center;
 		min-width: 120px;
 	}
-	
+
 	.follow-button:hover:not(:disabled) {
 		transform: translateY(-3px);
 		box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 	}
-	
+
 	.follow-button:disabled {
 		opacity: 0.7;
 		cursor: not-allowed;
 	}
-	
+
 	.loading-spinner {
 		width: 20px;
 		height: 20px;
@@ -600,12 +603,16 @@
 		border-radius: 50%;
 		animation: spin 1s linear infinite;
 	}
-	
+
 	@keyframes spin {
-		0% { transform: rotate(0deg); }
-		100% { transform: rotate(360deg); }
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(360deg);
+		}
 	}
-	
+
 	/* Main Content */
 	.profile-content {
 		max-width: 1400px;
@@ -615,7 +622,7 @@
 		grid-template-columns: 350px 1fr;
 		gap: 2.5rem;
 	}
-	
+
 	/* Profile Details Card */
 	.profile-details-card {
 		background: rgba(20, 20, 20, 0.4);
@@ -627,18 +634,18 @@
 		backdrop-filter: blur(5px);
 		border: 1px solid rgba(255, 255, 255, 0.05);
 	}
-	
+
 	.card-header {
 		padding: 1.5rem;
 		border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 	}
-	
+
 	.card-header h2 {
 		font-size: 1.5rem;
 		font-weight: 700;
 		margin: 0 0 0.7rem 0;
 	}
-	
+
 	.title-underline {
 		height: 4px;
 		width: 6rem;
@@ -647,9 +654,9 @@
 		position: relative;
 		overflow: hidden;
 	}
-	
+
 	.title-underline::after {
-		content: "";
+		content: '';
 		position: absolute;
 		top: 0;
 		left: -100%;
@@ -658,56 +665,62 @@
 		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
 		animation: shine 3s infinite;
 	}
-	
+
 	@keyframes shine {
-		0% { left: -100%; }
-		50% { left: 100%; }
-		100% { left: 100%; }
+		0% {
+			left: -100%;
+		}
+		50% {
+			left: 100%;
+		}
+		100% {
+			left: 100%;
+		}
 	}
-	
+
 	.card-content {
 		padding: 1.5rem;
 	}
-	
+
 	.info-item {
 		display: flex;
 		flex-direction: column;
 		margin-bottom: 1.2rem;
 	}
-	
+
 	.info-label {
 		font-size: 0.9rem;
 		color: var(--gray-text);
 		margin-bottom: 0.3rem;
 	}
-	
+
 	.info-value {
 		font-size: 1.1rem;
 		color: var(--light-text);
 		font-weight: 500;
 	}
-	
+
 	/* Favorites Section */
 	.favorites-container {
 		width: 100%;
 	}
-	
+
 	.section-header {
 		margin-bottom: 1.5rem;
 	}
-	
+
 	.section-title {
 		font-size: 2rem;
 		font-weight: 700;
 		margin: 0 0 0.7rem 0;
 	}
-	
+
 	.favorite-movies {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 		gap: 1.8rem;
 	}
-	
+
 	/* Enhanced Movie Cards */
 	.favorite-movies :global(.movie-card) {
 		margin: 0;
@@ -720,12 +733,12 @@
 		box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
 		border: 1px solid rgba(255, 255, 255, 0.05);
 	}
-	
+
 	.favorite-movies :global(.movie-card:hover) {
 		transform: translateY(-10px);
 		box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
 	}
-	
+
 	.favorite-movies :global(.movie-card::before) {
 		content: '';
 		position: absolute;
@@ -733,20 +746,21 @@
 		left: 0;
 		width: 100%;
 		height: 100%;
-		background: linear-gradient(to bottom, 
-			rgba(0, 0, 0, 0) 0%, 
-			rgba(0, 0, 0, 0) 40%, 
+		background: linear-gradient(
+			to bottom,
+			rgba(0, 0, 0, 0) 0%,
+			rgba(0, 0, 0, 0) 40%,
 			rgba(0, 0, 0, 0.8) 100%
 		);
 		z-index: 1;
 		opacity: 0;
 		transition: opacity 0.3s ease;
 	}
-	
+
 	.favorite-movies :global(.movie-card:hover::before) {
 		opacity: 1;
 	}
-	
+
 	.favorite-movies :global(.movie-card a) {
 		display: block;
 		width: 100%;
@@ -754,7 +768,7 @@
 		position: relative;
 		z-index: 1;
 	}
-	
+
 	.favorite-movies :global(.movie-card a::after) {
 		content: attr(data-title);
 		position: absolute;
@@ -769,22 +783,22 @@
 		transition: transform 0.3s ease;
 		z-index: 2;
 	}
-	
+
 	.favorite-movies :global(.movie-card:hover a::after) {
 		transform: translateY(0);
 	}
-	
+
 	.favorite-movies :global(.movie-image) {
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
 		transition: transform 0.5s ease;
 	}
-	
+
 	.favorite-movies :global(.movie-card:hover .movie-image) {
 		transform: scale(1.08);
 	}
-	
+
 	.favorite-movies :global(.favorite-icon) {
 		position: absolute;
 		top: 12px;
@@ -797,61 +811,61 @@
 		z-index: 3;
 		-webkit-text-stroke: 1px rgba(0, 0, 0, 0.5);
 	}
-	
+
 	.favorite-movies :global(.favorite-icon.isFavorite) {
 		color: gold;
 		transform: scale(1.1);
 		text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
 	}
-	
+
 	.favorite-movies :global(.favorite-icon:hover) {
 		transform: scale(1.2) rotate(10deg);
 		color: gold;
 	}
-	
+
 	/* Media query adjustments for movie cards */
 	@media (max-width: 768px) {
 		.favorite-movies {
 			grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
 			gap: 1.2rem;
 		}
-		
+
 		.favorite-movies :global(.movie-card) {
 			height: 250px;
 		}
-		
+
 		.favorite-movies :global(.favorite-icon) {
 			font-size: 2rem;
 		}
-		
+
 		.favorite-movies :global(.movie-card a::after) {
 			padding: 0.8rem;
 			font-size: 0.9rem;
 		}
 	}
-	
+
 	@media (max-width: 576px) {
 		.favorite-movies {
 			grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
 			gap: 1rem;
 		}
-		
+
 		.favorite-movies :global(.movie-card) {
 			height: 220px;
 		}
-		
+
 		.favorite-movies :global(.favorite-icon) {
 			font-size: 1.8rem;
 			top: 8px;
 			right: 10px;
 		}
-		
+
 		.favorite-movies :global(.movie-card a::after) {
 			padding: 0.7rem;
 			font-size: 0.8rem;
 		}
 	}
-	
+
 	/* Empty States */
 	.empty-state {
 		min-height: 300px;
@@ -867,19 +881,19 @@
 		backdrop-filter: blur(5px);
 		border: 1px solid rgba(255, 255, 255, 0.05);
 	}
-	
+
 	.empty-icon {
 		font-size: 4rem;
 		margin-bottom: 1rem;
 		opacity: 0.7;
 	}
-	
+
 	.empty-state p {
 		color: var(--gray-text);
 		font-size: 1.2rem;
 		margin-bottom: 1.5rem;
 	}
-	
+
 	.browse-button {
 		background: var(--gradient-bg);
 		color: white;
@@ -889,12 +903,12 @@
 		font-weight: 600;
 		transition: all 0.3s ease;
 	}
-	
+
 	.browse-button:hover {
 		transform: translateY(-3px);
 		box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 	}
-	
+
 	.user-not-found {
 		display: flex;
 		flex-direction: column;
@@ -904,13 +918,13 @@
 		text-align: center;
 		padding: 2rem;
 	}
-	
+
 	.error-icon {
 		font-size: 5rem;
 		margin-bottom: 1rem;
 		opacity: 0.7;
 	}
-	
+
 	.home-button {
 		background: var(--gradient-bg);
 		color: white;
@@ -921,12 +935,12 @@
 		margin-top: 1.5rem;
 		transition: all 0.3s ease;
 	}
-	
+
 	.home-button:hover {
 		transform: translateY(-3px);
 		box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 	}
-	
+
 	/* Modal Styles */
 	.modal-overlay {
 		position: fixed;
@@ -942,7 +956,7 @@
 		z-index: 1000;
 		padding: 1rem;
 	}
-	
+
 	.modal-content {
 		background: rgba(20, 20, 20, 0.8);
 		background-image: linear-gradient(135deg, rgba(58, 134, 255, 0.1), rgba(131, 56, 236, 0.1));
@@ -954,7 +968,7 @@
 		box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
 		border: 1px solid rgba(255, 255, 255, 0.05);
 	}
-	
+
 	.modal-header {
 		display: flex;
 		align-items: center;
@@ -962,12 +976,12 @@
 		padding: 1.5rem;
 		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 	}
-	
+
 	.modal-header h2 {
 		font-size: 1.5rem;
 		margin: 0;
 	}
-	
+
 	.close-button {
 		background: transparent;
 		border: none;
@@ -981,17 +995,17 @@
 		width: 32px;
 		height: 32px;
 	}
-	
+
 	.close-button:hover {
 		color: var(--light-text);
 	}
-	
+
 	.user-list {
 		list-style: none;
 		margin: 0;
 		padding: 0;
 	}
-	
+
 	.user-item {
 		display: flex;
 		align-items: center;
@@ -1000,11 +1014,11 @@
 		border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 		transition: background-color 0.2s ease;
 	}
-	
+
 	.user-item:hover {
 		background-color: rgba(255, 255, 255, 0.05);
 	}
-	
+
 	.user-link {
 		display: flex;
 		align-items: center;
@@ -1013,14 +1027,14 @@
 		color: var(--light-text);
 		flex: 1;
 	}
-	
+
 	.user-avatar {
 		width: 45px;
 		height: 45px;
 		border-radius: 50%;
 		object-fit: cover;
 	}
-	
+
 	.user-avatar-placeholder {
 		width: 45px;
 		height: 45px;
@@ -1033,12 +1047,12 @@
 		font-weight: bold;
 		font-size: 1.2rem;
 	}
-	
+
 	.user-name {
 		font-size: 1rem;
 		font-weight: 500;
 	}
-	
+
 	.unfollow-button {
 		background: var(--gradient-bg);
 		color: white;
@@ -1049,12 +1063,12 @@
 		cursor: pointer;
 		transition: all 0.2s ease;
 	}
-	
+
 	.unfollow-button:hover {
 		transform: translateY(-2px);
 		box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 	}
-	
+
 	.empty-list {
 		display: flex;
 		align-items: center;
@@ -1062,124 +1076,127 @@
 		padding: 3rem 1.5rem;
 		color: var(--gray-text);
 	}
-	
+
 	/* Responsive Styles */
 	@media (max-width: 1200px) {
 		.profile-content {
 			grid-template-columns: 300px 1fr;
 			gap: 2rem;
 		}
-		
+
 		.profile-header {
 			gap: 2rem;
 		}
-		
+
 		.profile-info h1 {
 			font-size: 2.5rem;
 		}
-		
-		.profile-avatar, .profile-avatar-placeholder {
+
+		.profile-avatar,
+		.profile-avatar-placeholder {
 			width: 150px;
 			height: 150px;
 		}
-		
+
 		.favorite-movies {
 			grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 		}
 	}
-	
+
 	@media (max-width: 992px) {
 		.profile-content {
 			grid-template-columns: 1fr;
 		}
-		
+
 		.profile-details-card {
 			max-width: 100%;
 		}
-		
+
 		.card-content {
 			display: grid;
 			grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 			gap: 1rem;
 		}
 	}
-	
+
 	@media (max-width: 768px) {
 		.profile-hero {
 			padding: 2rem 1.5rem;
 		}
-		
+
 		.profile-header {
 			flex-direction: column;
 			text-align: center;
 			gap: 1.5rem;
 		}
-		
+
 		.profile-info h1 {
 			font-size: 2.2rem;
 		}
-		
+
 		.profile-stats {
 			justify-content: center;
 		}
-		
+
 		.card-content {
 			grid-template-columns: 1fr;
 		}
-		
+
 		.follow-action {
 			margin: 1.5rem 0 0;
 		}
 	}
-	
+
 	@media (max-width: 576px) {
 		.profile-hero {
 			padding: 1.5rem 1rem;
 		}
-		
+
 		.profile-content {
 			padding: 0 1rem;
 			margin: 2rem auto;
 		}
-		
+
 		.profile-info h1 {
 			font-size: 1.8rem;
 		}
-		
-		.profile-avatar, .profile-avatar-placeholder {
+
+		.profile-avatar,
+		.profile-avatar-placeholder {
 			width: 120px;
 			height: 120px;
 		}
-		
+
 		.profile-avatar-placeholder {
 			font-size: 2.5rem;
 		}
-		
+
 		.stat-value {
 			font-size: 1.5rem;
 		}
-		
+
 		.section-title {
 			font-size: 1.5rem;
 		}
-		
+
 		.modal-content {
 			max-width: 100%;
 		}
-		
+
 		.user-item {
 			padding: 0.8rem 1rem;
 		}
-		
-		.user-avatar, .user-avatar-placeholder {
+
+		.user-avatar,
+		.user-avatar-placeholder {
 			width: 35px;
 			height: 35px;
 		}
-		
+
 		.user-avatar-placeholder {
 			font-size: 1rem;
 		}
-		
+
 		.unfollow-button {
 			padding: 0.3rem 0.8rem;
 			font-size: 0.8rem;

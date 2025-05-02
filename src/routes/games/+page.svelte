@@ -14,7 +14,7 @@
 			stats: {
 				players: '4'
 			}
-		},
+		}
 	];
 
 	let selectedGame = null;
@@ -24,9 +24,9 @@
 		try {
 			const { data, error } = await supabase.storage.list('games/daily-challenge');
 			if (error) throw error;
-			
+
 			// Count unique folders (each folder represents one player)
-			const uniquePlayers = new Set(data.map(item => item.name.split('/')[0]));
+			const uniquePlayers = new Set(data.map((item) => item.name.split('/')[0]));
 			games[0].stats.players = uniquePlayers.size.toString();
 		} catch (error) {
 			console.error('Error fetching daily players count:', error);
@@ -64,8 +64,8 @@
 
 	<div class="games-grid">
 		{#each games as game, i}
-			<div 
-				class="game-card" 
+			<div
+				class="game-card"
 				style="background: {game.color}"
 				on:click={() => goto(game.link)}
 				in:fly={{ y: 50, duration: 400, delay: i * 100 }}
@@ -77,7 +77,9 @@
 					<div class="game-stats">
 						<span class="stat">
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-								<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+								<path
+									d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"
+								/>
 							</svg>
 							{game.stats.players} players
 						</span>
@@ -104,7 +106,9 @@
 				<div class="modal-stats">
 					<div class="stat-item">
 						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-							<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+							<path
+								d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"
+							/>
 						</svg>
 						<span>Active players: {selectedGame.stats.players}</span>
 					</div>

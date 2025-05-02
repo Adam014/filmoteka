@@ -86,7 +86,7 @@
 
 	$: movieId = /^\d+$/.test(movie?.id) ? movie.id : movie?.media?.id;
 	let isMovieType = movie?.media_type === 'movie';
-	
+
 	// Get movie title for display
 	$: movieTitle = movie?.title || movie?.media?.title || 'Unknown';
 </script>
@@ -120,9 +120,9 @@
 					<span>{movieTitle}</span>
 				</div>
 			{/if}
-			
-			<div class="gradient-overlay"></div>
-			
+
+			<div class="gradient-overlay" />
+
 			<div class="movie-title-overlay">
 				<h3>{movieTitle}</h3>
 				<div class="movie-details">
@@ -130,7 +130,7 @@
 				</div>
 			</div>
 		</a>
-		
+
 		<div class="favorite-icon" on:click={toggleFavorite} class:isFavorite>
 			{isFavorite ? '★' : '☆'}
 		</div>
@@ -152,7 +152,7 @@
 		background: linear-gradient(135deg, rgba(58, 134, 255, 0.2), rgba(131, 56, 236, 0.2));
 		border: 1px solid rgba(255, 255, 255, 0.05);
 	}
-	
+
 	.movie-card:hover {
 		transform: translateY(-10px) scale(1.02);
 		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
@@ -193,12 +193,12 @@
 		left: 0;
 		transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
 	}
-	
+
 	.movie-card:hover img {
 		transform: scale(1.1);
 		filter: brightness(1.1);
 	}
-	
+
 	.gradient-overlay {
 		position: absolute;
 		bottom: 0;
@@ -216,11 +216,11 @@
 		transition: opacity 0.4s ease;
 		z-index: 1;
 	}
-	
+
 	.movie-card:hover .gradient-overlay {
 		opacity: 1;
 	}
-	
+
 	.movie-title-overlay {
 		position: absolute;
 		bottom: 0;
@@ -232,12 +232,12 @@
 		opacity: 0;
 		z-index: 2;
 	}
-	
+
 	.movie-card:hover .movie-title-overlay {
 		transform: translateY(0);
 		opacity: 1;
 	}
-	
+
 	.movie-title-overlay h3 {
 		margin: 0 0 0.8rem 0;
 		font-size: 1.4rem;
@@ -246,13 +246,13 @@
 		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 		line-height: 1.3;
 	}
-	
+
 	.movie-details {
 		display: flex;
 		align-items: center;
 		margin-top: 0.5rem;
 	}
-	
+
 	.watch-now {
 		display: inline-block;
 		color: white;
@@ -265,7 +265,7 @@
 		transform: translateY(10px);
 		transition: opacity 0.4s ease 0.1s, transform 0.4s ease 0.1s;
 	}
-	
+
 	.movie-card:hover .watch-now {
 		opacity: 1;
 		transform: translateY(0);
@@ -318,47 +318,47 @@
 			height: 15rem;
 			width: 10rem;
 		}
-		
+
 		.movie-title-overlay {
 			padding: 1rem;
 		}
-		
+
 		.movie-title-overlay h3 {
 			font-size: 1.1rem;
 			margin-bottom: 0.5rem;
 		}
-		
+
 		.watch-now {
 			font-size: 0.8rem;
 			padding: 0.4rem 0.8rem;
 		}
-		
+
 		.favorite-icon {
 			font-size: 1.8rem;
 		}
 	}
-	
+
 	@media screen and (max-width: 576px) {
 		.movie-card {
 			height: 12rem;
 			width: 8rem;
 			margin: 5px;
 		}
-		
+
 		.movie-title-overlay {
 			padding: 0.7rem;
 		}
-		
+
 		.movie-title-overlay h3 {
 			font-size: 0.9rem;
 			margin-bottom: 0.3rem;
 		}
-		
+
 		.watch-now {
 			font-size: 0.7rem;
 			padding: 0.3rem 0.6rem;
 		}
-		
+
 		.favorite-icon {
 			font-size: 1.6rem;
 			top: 10px;

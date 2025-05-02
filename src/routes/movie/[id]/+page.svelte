@@ -68,7 +68,7 @@
 
 		// Update destructured variables
 		id = movieDetails.id || 'N/A';
-		original_title = movieDetails.original_title || 'N/A';
+		original_title = movieDetails.original_title || movieDetails.name || 'N/A';
 		original_language = movieDetails.original_language || 'N/A';
 		status = movieDetails.status || 'N/A';
 		release_date = movieDetails.release_date || 'N/A';
@@ -163,7 +163,7 @@
 				const { error } = await supabase.storage.from('favorites').remove([path]);
 				if (error) throw error;
 				isFavorite = false;
-				toast.success(`${movieDetails.original_title} removed from favorites.`);
+				toast.success(`${original_title} removed from favorites.`);
 			} else {
 				const { data: filmData, error: fetchError } = await supabase
 					.from('films')
@@ -187,7 +187,7 @@
 				if (uploadError) throw uploadError;
 
 				isFavorite = true;
-				toast.success(`${movieDetails.original_title} added to favorites.`);
+				toast.success(`${original_title} added to favorites.`);
 			}
 		} catch (err) {
 			console.error('Error toggling favorite:', err.message);
@@ -360,6 +360,13 @@
 									</span>
 								</div>
 							{/if}
+							
+							{#if status !== 'N/A'}
+								<div class="detail-item">
+									<span class="detail-label">Status</span>
+									<span class="detail-value">{status}</span>
+								</div>
+							{/if}
 						</div>
 					</div>
 				</section>
@@ -371,88 +378,72 @@
 							<h2 class="section-title">Cast</h2>
 							<div class="title-underline"></div>
 						</div>
-						<div class="cast-grid">
+						
+						<div class="cards-container">
 							{#each topActors as actor}
-								<div in:fly={{y: 20, duration: 300, delay: 100 + topActors.indexOf(actor) * 50}}>
-									<PersonCard person={actor} />
-								</div>
+								<PersonCard person={actor} />
 							{/each}
 						</div>
 					</section>
 				{/if}
 				
 				<!-- Production Info Section -->
-				{#if production_companies.length > 0 || production_countries.length > 0}
-					<section class="section production-section">
-						<div class="section-header">
-							<h2 class="section-title">Production</h2>
-							<div class="title-underline"></div>
-						</div>
-						<div class="production-grid">
-							{#if production_companies.length > 0}
-								<div class="production-companies">
-									<h3 class="subsection-title">Production Companies</h3>
-									<ul class="production-list">
-										{#each production_companies as company, i}
-											<li class="production-item" in:fly={{x: -20, duration: 300, delay: 100 + i * 50}}>
-												{company.name}
-												{#if company.origin_country}
-													<span class="country-code">({company.origin_country})</span>
-												{/if}
-											</li>
-										{/each}
-									</ul>
-								</div>
-							{/if}
-							
-							{#if production_countries.length > 0}
-								<div class="production-countries">
-									<h3 class="subsection-title">Countries of Origin</h3>
-									<ul class="production-list">
-										{#each production_countries as country, i}
-											<li class="production-item" in:fly={{x: -20, duration: 300, delay: 100 + i * 50}}>
-												{country.name}
-											</li>
-										{/each}
-									</ul>
-								</div>
-							{/if}
-						</div>
-					</section>
-				{/if}
+				<section class="section production-section">
+					<div class="section-header">
+						<h2 class="section-title">Production Information</h2>
+						<div class="title-underline"></div>
+					</div>
+					
+					<div class="production-grid">
+						{#if production_companies?.length > 0}
+							<div class="production-column">
+								<h3 class="subsection-title">Production Companies</h3>
+								<ul class="production-list">
+									{#each production_companies as company}
+										<li class="production-item">
+											{company.name} {company.origin_country ? `(${company.origin_country})` : ''}
+										</li>
+									{/each}
+								</ul>
+							</div>
+						{/if}
+						
+						{#if production_countries?.length > 0}
+							<div class="production-column">
+								<h3 class="subsection-title">Production Countries</h3>
+								<ul class="production-list">
+									{#each production_countries as country}
+										<li class="production-item">
+											{country.name} ({country.iso_3166_1})
+										</li>
+									{/each}
+								</ul>
+							</div>
+						{/if}
+					</div>
+				</section>
 			{/if}
 		</div>
 	{/if}
 </div>
 
 <style>
-	@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
-	
 	/* Global Styles */
-	:global(body) {
-		background-color: var(--bg, #1a1a1a);
-		color: var(--text-color, #e5e5e5);
-		font-family: 'Sarabun', sans-serif;
-		margin: 0;
-		padding: 0;
-		overflow-x: hidden;
-	}
-	
-	/* Movie Page Styles */
 	.movie-page {
 		width: 100%;
-		background-color: transparent;
-		color: var(--text-color, #e5e5e5);
+		min-height: 100vh;
+		background-color: #0f0f0f;
+		color: #f5f5f5;
 	}
-	
-	/* Hero Section with Background Video/Poster */
+
+	/* Hero Section Styles */
 	.hero-section {
 		position: relative;
-		height: 100vh;
+		height: 90vh;
 		width: 100%;
 		overflow: hidden;
 	}
-	
+
 	.background-media {
 		position: absolute;
 		top: 0;
@@ -461,7 +452,27 @@
 		height: 100%;
 		z-index: 1;
 	}
-	
+
+	.background-video-container {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+	}
+
+	.background-video {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 100%;
+		height: 100%;
+		transform: translate(-50%, -50%);
+		object-fit: cover;
+		pointer-events: none;
+	}
+
 	.poster-fallback {
 		position: absolute;
 		top: 0;
@@ -469,211 +480,120 @@
 		width: 100%;
 		height: 100%;
 		background-size: cover;
-		background-position: center 15%;
+		background-position: center;
 		background-repeat: no-repeat;
-		transition: opacity 1.5s ease;
-		z-index: 2;
+		transition: opacity 1s ease;
+		z-index: 1;
 	}
-	
+
 	.poster-fallback.fade-out {
 		opacity: 0;
 	}
-	
-	.background-video-container {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		width: 100%;
-		height: 100%;
-		z-index: 1;
-		pointer-events: none;
-		overflow: hidden;
-	}
-	
-	.background-video {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		width: 100vw;
-		height: 100vh;
-		object-fit: cover;
-	}
-	
+
 	.hero-overlay {
 		position: absolute;
 		top: 0;
 		left: 0;
 		width: 100%;
 		height: 100%;
-		background: linear-gradient(
-			135deg,
-			rgba(58, 134, 255, 0.5) 0%,
-			rgba(131, 56, 236, 0.5) 50%,
-			rgba(26, 26, 26, 0.6) 100%
-		), 
-		linear-gradient(
-			to bottom,
-			rgba(26, 26, 26, 0.5) 0%,
-			rgba(26, 26, 26, 0.7) 80%,
-			var(--dark-bg, #121212) 100%
-		);
-		z-index: 3;
+		background: linear-gradient(0deg, #0f0f0f 0%, rgba(15, 15, 15, 0.7) 50%, rgba(15, 15, 15, 0.3) 100%);
+		z-index: 2;
 	}
-	
+
 	.hero-content {
 		position: relative;
-		width: 90%;
-		max-width: 1200px;
-		margin: 0 auto;
-		padding: 0 2rem;
-		z-index: 4;
-		height: 100%;
 		display: flex;
 		flex-direction: column;
+		align-items: center;
 		justify-content: center;
+		padding-bottom: 4rem;
+		padding: 0 1.5rem;
+		height: 100%;
+		z-index: 3;
+		text-align: center;
 	}
-	
+
 	.movie-title {
-		font-size: 5rem;
+		font-size: 3.5rem;
 		font-weight: 700;
-		margin: 0;
-		line-height: 1.1;
-		background: var(--gradient-bg, linear-gradient(135deg, #3a86ff 0%, #8338ec 100%));
-		-webkit-background-clip: text;
-		background-clip: text;
-		color: transparent;
-		text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-		animation: textFadeIn 1s ease-out forwards;
+		margin-bottom: 1rem;
+		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 	}
-	
-	@keyframes textFadeIn {
-		0% {
-			opacity: 0;
-			transform: translateY(20px);
-		}
-		100% {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-	
+
 	.movie-tagline {
-		font-size: 1.8rem;
-		font-weight: 300;
+		font-size: 1.5rem;
 		font-style: italic;
-		margin: 1rem 0 2rem;
-		opacity: 0;
-		text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
-		animation: textFadeIn 1s ease-out 0.2s forwards;
+		opacity: 0.9;
+		margin-bottom: 1.5rem;
+		text-shadow: 0 2px 3px rgba(0, 0, 0, 0.5);
 	}
-	
+
 	.movie-meta {
 		display: flex;
-		align-items: center;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 0.5rem;
 		margin-bottom: 2rem;
-		font-size: 1.2rem;
-		opacity: 0;
-		animation: textFadeIn 1s ease-out 0.4s forwards;
+		font-size: 1.1rem;
 	}
-	
-	.meta-item {
-		color: #ddd;
-	}
-	
-	.meta-item.year {
-		color: var(--secondary-color, #ff006e);
-		font-weight: 600;
-	}
-	
+
 	.dot-separator {
-		margin: 0 0.6rem;
-		color: #ddd;
+		color: rgba(255, 255, 255, 0.7);
 	}
-	
+
 	.adult-badge {
-		background-color: var(--secondary-color, #ff006e);
-		padding: 0.2rem 0.5rem;
-		border-radius: 3px;
+		background-color: #ff006e;
+		padding: 0.1rem 0.5rem;
+		border-radius: 4px;
 		font-size: 0.9rem;
-		font-weight: 600;
 	}
-	
+
 	.action-buttons {
 		display: flex;
-		gap: 1.2rem;
-		opacity: 0;
-		animation: textFadeIn 1s ease-out 0.6s forwards;
+		gap: 1rem;
+		margin-top: 1rem;
 	}
-	
+
 	.btn {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding: 1rem 2rem;
-		border-radius: 4px;
+		padding: 0.75rem 1.5rem;
+		border-radius: 30px;
 		font-weight: 600;
-		font-size: 1.1rem;
 		cursor: pointer;
 		transition: all 0.3s ease;
 		border: none;
-		letter-spacing: 0.5px;
+		font-size: 1rem;
 	}
-	
+
 	.btn-primary {
-		background: var(--gradient-bg, linear-gradient(135deg, #3a86ff 0%, #8338ec 100%));
+		background: linear-gradient(135deg, #3a86ff, #8338ec);
 		color: white;
-		text-decoration: none;
-		position: relative;
-		overflow: hidden;
 	}
-	
+
 	.btn-primary:hover {
-		transform: translateY(-3px) scale(1.05);
-		box-shadow: 0 15px 25px rgba(131, 56, 236, 0.4);
+		background: linear-gradient(135deg, #2176ff, #722ddb);
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(51, 51, 51, 0.3);
 	}
-	
-	.btn-primary.pulse::after {
-		content: '';
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		width: 150%;
-		height: 150%;
-		background: radial-gradient(circle, rgba(131, 56, 236, 0.4) 0%, transparent 70%);
-		transform: translate(-50%, -50%);
-		opacity: 0;
-		animation: pulse 2s infinite;
-	}
-	
-	@keyframes pulse {
-		0% {
-			transform: translate(-50%, -50%) scale(0.8);
-			opacity: 0.5;
-		}
-		100% {
-			transform: translate(-50%, -50%) scale(1.5);
-			opacity: 0;
-		}
-	}
-	
+
 	.btn-secondary {
-		background-color: rgba(255, 255, 255, 0.1);
-		color: white;
-		border: 1px solid var(--accent-color, #8338ec);
+		background: rgba(255, 255, 255, 0.1);
 		backdrop-filter: blur(10px);
+		color: white;
+		border: 1px solid rgba(255, 255, 255, 0.2);
 	}
-	
+
 	.btn-secondary:hover {
-		background-color: rgba(131, 56, 236, 0.2);
-		transform: translateY(-3px);
+		background: rgba(255, 255, 255, 0.2);
+		transform: translateY(-2px);
 	}
-	
+
 	.icon {
 		margin-right: 0.5rem;
 	}
-	
+
 	/* Fullscreen Video */
 	.fullscreen-video-container {
 		position: fixed;
@@ -687,573 +607,227 @@
 		align-items: center;
 		justify-content: center;
 	}
-	
+
 	.fullscreen-video-container iframe {
 		width: 90%;
 		height: 80%;
-		max-width: 1280px;
-		max-height: 720px;
-		border: none;
-		box-shadow: 0 0 30px rgba(131, 56, 236, 0.3);
-		border-radius: 8px;
+		max-width: 1200px;
+		max-height: 675px;
 	}
-	
+
 	.close-video-btn {
 		position: absolute;
-		top: 2rem;
-		right: 2rem;
-		background: transparent;
+		top: 1.5rem;
+		right: 1.5rem;
+		background: rgba(0, 0, 0, 0.7);
 		border: none;
-		color: white;
-		font-size: 2rem;
-		cursor: pointer;
-		z-index: 1001;
+		border-radius: 50%;
 		width: 3rem;
 		height: 3rem;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		border-radius: 50%;
+		cursor: pointer;
+		z-index: 1001;
+		color: white;
 		transition: all 0.3s ease;
 	}
-	
+
 	.close-video-btn:hover {
-		background-color: rgba(255, 255, 255, 0.1);
-		transform: rotate(90deg);
+		background: rgba(255, 255, 255, 0.2);
+		transform: scale(1.1);
 	}
-	
+
 	.close-video-btn svg {
 		width: 1.5rem;
 		height: 1.5rem;
-		stroke: white;
 	}
-	
-	/* Content Container */
+
+	/* Main Content Styles */
 	.content-container {
-		width: 90%;
 		max-width: 1200px;
 		margin: 0 auto;
-		padding: 4rem 2rem;
-		position: relative;
+		padding: 3rem 1.5rem;
 	}
-	
-	.content-container::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: 50%;
-		transform: translateX(-50%);
-		width: 100vw;
-		height: 100%;
-		background: radial-gradient(circle at 20% 50%, 
-			rgba(51, 16, 117, 0.3) 0%, 
-			rgba(13, 13, 13, 0.2) 100%
-		);
-		z-index: -1;
-	}
-	
+
 	.loader-container {
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		min-height: 400px;
+		min-height: 300px;
 	}
-	
-	/* Sections */
+
 	.section {
-		margin-bottom: 6rem;
-		opacity: 0;
-		animation: sectionFadeIn 1.2s ease-out forwards;
+		margin-bottom: 4rem;
 	}
-	
-	@keyframes sectionFadeIn {
-		0% {
-			opacity: 0;
-			transform: translateY(30px);
-		}
-		100% {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-	
+
 	.section-header {
-		display: flex;
-		flex-direction: column;
-		margin-bottom: 2.5rem;
+		margin-bottom: 2rem;
+		position: relative;
 	}
-	
+
 	.section-title {
-		font-size: 2.2rem;
+		font-size: 2rem;
 		font-weight: 700;
-		margin-bottom: 0.7rem;
-		position: relative;
-		background: var(--gradient-bg, linear-gradient(135deg, #3a86ff 0%, #8338ec 100%));
-		-webkit-background-clip: text;
-		background-clip: text;
-		color: transparent;
+		margin-bottom: 0.5rem;
 	}
-	
+
 	.title-underline {
-		height: 4px;
-		width: 8rem;
-		border-radius: 2px;
-		background: var(--gradient-bg, linear-gradient(135deg, #3a86ff 0%, #8338ec 100%));
-		margin-bottom: 1rem;
-		position: relative;
-		overflow: hidden;
+		height: 3px;
+		width: 60px;
+		background: linear-gradient(90deg, #3a86ff, #8338ec);
+		border-radius: 3px;
 	}
-	
-	.title-underline::after {
-		content: "";
-		position: absolute;
-		top: 0;
-		left: -100%;
-		width: 100%;
-		height: 100%;
-		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-		animation: shine 3s infinite;
-	}
-	
-	@keyframes shine {
-		0% { left: -100%; }
-		50% { left: 100%; }
-		100% { left: 100%; }
-	}
-	
+
 	.section-grid {
 		display: grid;
 		grid-template-columns: 2fr 1fr;
-		gap: 3rem;
+		gap: 2rem;
 	}
-	
-	/* Overview Section */
+
+	.pulse {
+		animation: pulse 2s infinite;
+	}
+
+	@keyframes pulse {
+		0% {
+			box-shadow: 0 0 0 0 rgba(51, 153, 255, 0.7);
+		}
+		70% {
+			box-shadow: 0 0 0 10px rgba(51, 153, 255, 0);
+		}
+		100% {
+			box-shadow: 0 0 0 0 rgba(51, 153, 255, 0);
+		}
+	}
+
 	.overview-text {
-		font-size: 1.2rem;
-		line-height: 1.8;
-		color: #ddd;
-		margin-bottom: 2rem;
-		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+		font-size: 1.1rem;
+		line-height: 1.6;
+		margin-bottom: 1.5rem;
 	}
-	
+
 	.creators {
-		margin-top: 2rem;
-		padding: 1.5rem;
-		background-color: rgba(131, 56, 236, 0.1);
-		border-radius: 8px;
-		border-left: 3px solid var(--accent-color, #8338ec);
-		backdrop-filter: blur(5px);
-		box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-		transition: all 0.3s ease;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		font-size: 1.1rem;
 	}
-	
-	.creators:hover {
-		transform: translateY(-5px);
-		box-shadow: 0 8px 25px rgba(131, 56, 236, 0.2);
-	}
-	
+
 	.creator-label {
 		font-weight: 600;
-		margin-right: 0.5rem;
-		color: var(--accent-color, #8338ec);
+		opacity: 0.8;
 	}
-	
-	.creator-names {
-		color: #ddd;
-	}
-	
-	/* Movie Details Sidebar */
+
 	.movie-details-sidebar {
-		padding: 2rem;
-		background-color: rgba(18, 18, 18, 0.7);
-		border-radius: 12px;
-		height: fit-content;
-		border: 1px solid rgba(131, 56, 236, 0.2);
-		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-		backdrop-filter: blur(10px);
-		transition: all 0.3s ease;
+		background-color: rgba(255, 255, 255, 0.05);
+		border-radius: 8px;
+		padding: 1.5rem;
 	}
-	
-	.movie-details-sidebar:hover {
-		box-shadow: 0 15px 40px rgba(131, 56, 236, 0.15);
-		border-color: rgba(131, 56, 236, 0.3);
-	}
-	
+
 	.detail-item {
-		margin-bottom: 1.8rem;
+		margin-bottom: 1rem;
 		display: flex;
 		flex-direction: column;
 	}
-	
-	.detail-item:last-child {
-		margin-bottom: 0;
-	}
-	
+
 	.detail-label {
-		color: #aaa;
 		font-size: 0.9rem;
-		margin-bottom: 0.5rem;
-		text-transform: uppercase;
-		letter-spacing: 1px;
+		opacity: 0.7;
+		margin-bottom: 0.3rem;
 	}
-	
+
 	.detail-value {
 		font-size: 1.1rem;
 	}
-	
-	.detail-value.highlight {
-		color: var(--secondary-color, #ff006e);
-		font-weight: 500;
-	}
-	
+
 	.detail-value a {
-		color: var(--primary-color, #3a86ff);
+		color: #3a86ff;
 		text-decoration: none;
+		transition: color 0.3s ease;
 	}
-	
+
 	.detail-value a:hover {
+		color: #ff006e;
 		text-decoration: underline;
 	}
-	
-	.link-button {
-		display: inline-flex;
-		align-items: center;
-		padding: 0.7rem 1.2rem;
-		background-color: rgba(131, 56, 236, 0.1);
-		border-radius: 4px;
-		transition: all 0.3s ease;
+
+	.highlight {
+		color: #ff006e;
+		font-weight: 600;
 	}
-	
-	.link-button:hover {
-		background-color: rgba(131, 56, 236, 0.2);
-		text-decoration: none !important;
-		transform: translateY(-3px);
-	}
-	
-	.link-icon {
-		margin-left: 0.5rem;
-		font-size: 0.9rem;
-	}
-	
+
 	/* Cast Section */
-	.cast-grid {
+	.cards-container {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-		gap: 2rem;
+		grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+		gap: 1.5rem;
 	}
-	
+
 	/* Production Section */
 	.production-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-		gap: 3rem;
+		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+		gap: 2rem;
 	}
-	
+
 	.subsection-title {
 		font-size: 1.4rem;
-		margin-bottom: 1.5rem;
-		color: var(--accent-color, #8338ec);
-		font-weight: 600;
+		margin-bottom: 1rem;
+		opacity: 0.9;
 	}
-	
+
 	.production-list {
 		list-style: none;
 		padding: 0;
-		margin: 0;
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-		gap: 1rem;
 	}
-	
+
 	.production-item {
-		margin-bottom: 0.8rem;
-		color: #bbb;
-		padding: 1rem 1.5rem;
-		background-color: rgba(18, 18, 18, 0.7);
-		border-radius: 8px;
-		transition: all 0.3s ease;
-		backdrop-filter: blur(5px);
-		border: 1px solid transparent;
+		padding: 0.5rem 0;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 	}
-	
-	.production-item:hover {
-		background-color: rgba(131, 56, 236, 0.1);
-		transform: translateY(-5px);
-		border-color: rgba(131, 56, 236, 0.2);
-		box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+
+	.production-item:last-child {
+		border-bottom: none;
 	}
-	
-	.country-code {
-		color: #999;
-		font-size: 0.9rem;
-		margin-left: 0.5rem;
-	}
-	
-	/* Responsive Styles */
-	@media (max-width: 1280px) {
-		.movie-title {
-			font-size: 4rem;
-		}
-		
-		.cast-grid {
-			grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-		}
-	}
-	
-	@media (max-width: 1024px) {
-		.movie-title {
-			font-size: 3.5rem;
-		}
-		
-		.section-grid {
-			grid-template-columns: 1fr;
-			gap: 2.5rem;
-		}
-		
-		.movie-details-sidebar {
-			order: -1;
-		}
-	}
-	
+
+	/* Responsive */
 	@media (max-width: 768px) {
-		.hero-section {
-			height: 85vh;
-		}
-		
-		.hero-content {
-			padding: 0 1.5rem;
-			justify-content: center;
-			padding-bottom: 4rem;
-		}
-		
 		.movie-title {
 			font-size: 2.5rem;
 		}
 		
-		.movie-tagline {
-			font-size: 1.3rem;
-			margin: 0.7rem 0 1.5rem;
-		}
-		
-		.action-buttons {
-			flex-direction: column;
-			gap: 1rem;
-			width: 100%;
-			max-width: 350px;
-		}
-		
-		.btn {
-			width: 100%;
-			padding: 0.9rem 1.5rem;
-		}
-		
-		.content-container {
-			padding: 3rem 1.5rem;
-			width: 95%;
-		}
-		
-		.cast-grid {
-			grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-			gap: 1.5rem;
-		}
-		
-		.production-grid {
+		.section-grid {
 			grid-template-columns: 1fr;
-			gap: 2rem;
 		}
-		
-		.section-title {
-			font-size: 1.8rem;
-		}
-		
-		.section {
-			margin-bottom: 4rem;
-		}
-		
-		.fullscreen-video-container iframe {
-			width: 95%;
-			height: 40%;
-		}
-		
-		.overview-text {
-			font-size: 1.1rem;
-			line-height: 1.6;
-		}
-	}
-	
-	@media (max-width: 480px) {
-		.hero-section {
-			height: 80vh;
-		}
-		
+
 		.hero-content {
 			padding: 0 1rem;
-			padding-bottom: 3.5rem;
 		}
-		
-		.movie-title {
-			font-size: 2.2rem;
-		}
-		
-		.movie-tagline {
-			font-size: 1.1rem;
-			margin: 0.5rem 0 1.2rem;
-		}
-		
-		.movie-meta {
-			flex-wrap: wrap;
-			gap: 0.5rem;
-			font-size: 0.9rem;
-			margin-bottom: 1.5rem;
-		}
-		
-		.dot-separator {
-			display: none;
-		}
-		
-		.meta-item {
-			margin-right: 0.7rem;
-		}
-		
-		.meta-item.genres {
+
+		.action-buttons {
+			flex-direction: column;
 			width: 100%;
-			margin-top: 0.3rem;
+			max-width: 300px;
 		}
-		
+
 		.btn {
-			font-size: 0.95rem;
-			padding: 0.8rem 1.2rem;
-		}
-		
-		.section-title {
-			font-size: 1.6rem;
-		}
-		
-		.title-underline {
-			width: 5rem;
-			height: 3px;
-		}
-		
-		.overview-text {
-			font-size: 1rem;
-			line-height: 1.5;
-		}
-		
-		.cast-grid {
-			grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-			gap: 1rem;
-		}
-		
-		.production-list {
-			grid-template-columns: 1fr;
-			gap: 0.7rem;
-		}
-		
-		.production-item {
-			padding: 0.8rem 1rem;
-			margin-bottom: 0.5rem;
-			font-size: 0.9rem;
-		}
-		
-		.subsection-title {
-			font-size: 1.2rem;
-			margin-bottom: 1rem;
-		}
-		
-		.close-video-btn {
-			top: 1rem;
-			right: 1rem;
-			width: 2.2rem;
-			height: 2.2rem;
-		}
-		
-		.close-video-btn svg {
-			width: 1.2rem;
-			height: 1.2rem;
-		}
-		
-		.movie-details-sidebar {
-			padding: 1.5rem;
-			border-radius: 8px;
-		}
-		
-		.detail-item {
-			margin-bottom: 1.3rem;
-		}
-		
-		.detail-label {
-			font-size: 0.8rem;
-		}
-		
-		.detail-value {
-			font-size: 1rem;
-		}
-		
-		.content-container {
-			padding: 2.5rem 1rem;
-		}
-		
-		.section {
-			margin-bottom: 3rem;
-		}
-		
-		.section-header {
-			margin-bottom: 1.8rem;
-		}
-		
-		.fullscreen-video-container iframe {
-			width: 95%;
-			height: 35%;
-		}
-		
-		.creators {
-			padding: 1rem;
-			margin-top: 1.5rem;
-		}
-		
-		.creator-names {
-			font-size: 0.95rem;
-		}
-		
-		.section-grid {
-			gap: 2rem;
+			width: 100%;
 		}
 	}
-	
-	/* Pro extra malé obrazovky (iPhone SE apod.) */
-	@media (max-width: 375px) {
+
+	@media (max-width: 480px) {
 		.movie-title {
-			font-size: 1.8rem;
+			font-size: 2rem;
 		}
-		
+
 		.movie-tagline {
-			font-size: 1rem;
+			font-size: 1.2rem;
 		}
-		
-		.hero-content {
-			padding-bottom: 3rem;
-		}
-		
-		.cast-grid {
-			grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-			gap: 0.8rem;
-		}
-		
-		.btn {
-			padding: 0.7rem 1rem;
-			font-size: 0.9rem;
-		}
-		
-		.icon {
-			font-size: 0.9rem;
-		}
-		
-		.overview-text {
-			font-size: 0.95rem;
-		}
-		
-		.fullscreen-video-container iframe {
-			height: 30%;
+
+		.cards-container {
+			grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
 		}
 	}
 </style>
+

@@ -40,7 +40,7 @@
 						class="poster-image"
 						loading="eager"
 					/>
-					<div class="gradient-overlay"></div>
+					<div class="gradient-overlay" />
 					<div class="featured-content">
 						<h2 class="featured-title">{topMovie.title}</h2>
 						<div class="featured-meta">
@@ -49,7 +49,7 @@
 						</div>
 						<button class="watch-button">
 							<svg viewBox="0 0 24 24" fill="none" class="play-icon">
-								<path d="M8 5v14l11-7z" fill="currentColor"/>
+								<path d="M8 5v14l11-7z" fill="currentColor" />
 							</svg>
 							Watch
 						</button>
@@ -65,19 +65,22 @@
 			</a>
 		</div>
 	{/if}
-	
+
 	<div class="movie-gallery">
 		{#each otherMovies as movie}
-			<div class="gallery-item" on:click={() => swapMovies(movie)} on:keydown={(e) => e.key === 'Enter' && swapMovies(movie)}>
+			<div
+				class="gallery-item"
+				on:click={() => swapMovies(movie)}
+				on:keydown={(e) => e.key === 'Enter' && swapMovies(movie)}
+			>
 				<div class="gallery-poster">
-					<img
-						src={movie.image}
-						alt="{movie.original_title} Poster"
-						loading="eager"
-					/>
+					<img src={movie.image} alt="{movie.original_title} Poster" loading="eager" />
 					<div class="poster-overlay">
 						<h3 class="movie-title">{movie.title}</h3>
-						<button class="gallery-button" on:click|stopPropagation={() => (window.location.href = `/movie/${movie.id}`)}>
+						<button
+							class="gallery-button"
+							on:click|stopPropagation={() => (window.location.href = `/movie/${movie.id}`)}
+						>
 							Watch
 						</button>
 					</div>
@@ -219,7 +222,8 @@
 		gap: 1rem;
 	}
 
-	.library-button, .details-button {
+	.library-button,
+	.details-button {
 		flex: 1;
 		padding: 0.8rem 1rem;
 		text-align: center;
@@ -238,7 +242,8 @@
 		color: white;
 	}
 
-	.library-button:hover, .details-button:hover {
+	.library-button:hover,
+	.details-button:hover {
 		transform: translateY(-2px);
 	}
 

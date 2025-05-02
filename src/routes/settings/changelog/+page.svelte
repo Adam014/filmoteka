@@ -17,26 +17,29 @@
 </svelte:head>
 
 {#if error}
-	<ErrorPage error={error} code={errorStatus} retryFn={retryLoad} />
+	<ErrorPage {error} code={errorStatus} retryFn={retryLoad} />
 {:else}
 	<div class="changelog-container">
 		<div class="changelog-header">
 			<h2>Filmoteka Changelog</h2>
-			<div class="header-decoration"></div>
+			<div class="header-decoration" />
 		</div>
 
 		<div class="changelog">
 			<section class="released">
 				<div class="section-header">
 					<h3>Released Changes</h3>
-					<div class="section-divider"></div>
+					<div class="section-divider" />
 				</div>
 				<div class="commits-list">
 					{#each commits as commit, index}
 						<a href={commit.html_url} target="_blank" rel="noopener noreferrer">
 							<div class="commit-card" key={index}>
 								<div class="commit-image">
-									<img src={commit.committer.avatar_url} alt={`${commit.commit.author.name}'s avatar`} />
+									<img
+										src={commit.committer.avatar_url}
+										alt={`${commit.commit.author.name}'s avatar`}
+									/>
 								</div>
 								<div class="commit-content">
 									<div class="commit-title">
@@ -49,20 +52,44 @@
 									{/if}
 									<div class="commit-meta">
 										<span class="commit-author">
-											<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" class="icon">
-												<path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16zm.847-8.145a2.502 2.502 0 1 0-1.694 0C5.471 8.261 4 9.775 4 11c0 .395.145.995 1 .995h6c.855 0 1-.6 1-.995 0-1.225-1.471-2.74-3.153-3.145z" />
+											<svg
+												viewBox="0 0 16 16"
+												width="16"
+												height="16"
+												fill="currentColor"
+												class="icon"
+											>
+												<path
+													d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16zm.847-8.145a2.502 2.502 0 1 0-1.694 0C5.471 8.261 4 9.775 4 11c0 .395.145.995 1 .995h6c.855 0 1-.6 1-.995 0-1.225-1.471-2.74-3.153-3.145z"
+												/>
 											</svg>
 											{commit.commit.author.name}
 										</span>
 										<span class="commit-date">
-											<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" class="icon">
-												<path d="M4.5 0a.5.5 0 0 0-.5.5v.5h-2A1.5 1.5 0 0 0 .5 2.5v12A1.5 1.5 0 0 0 2 16h12a1.5 1.5 0 0 0 1.5-1.5v-12A1.5 1.5 0 0 0 14 1h-2V.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5V1h-4V.5a.5.5 0 0 0-.5-.5h-1zM2 2h12v1.5H2V2zm0 3h12v9H2V5z" />
+											<svg
+												viewBox="0 0 16 16"
+												width="16"
+												height="16"
+												fill="currentColor"
+												class="icon"
+											>
+												<path
+													d="M4.5 0a.5.5 0 0 0-.5.5v.5h-2A1.5 1.5 0 0 0 .5 2.5v12A1.5 1.5 0 0 0 2 16h12a1.5 1.5 0 0 0 1.5-1.5v-12A1.5 1.5 0 0 0 14 1h-2V.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5V1h-4V.5a.5.5 0 0 0-.5-.5h-1zM2 2h12v1.5H2V2zm0 3h12v9H2V5z"
+												/>
 											</svg>
 											{formatDate(commit.commit.committer.date)}
 										</span>
 										<span class="commit-sha">
-											<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" class="icon">
-												<path d="M7.5 5.5a2 2 0 0 0-4 0V7H2a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-1.5V5.5a2 2 0 0 0-4 0V7h-1V5.5zm2.5 1.5v-1.5a.5.5 0 0 0-1 0V7h1zm-5-1.5A.5.5 0 0 1 6 5V7H5V5.5z" />
+											<svg
+												viewBox="0 0 16 16"
+												width="16"
+												height="16"
+												fill="currentColor"
+												class="icon"
+											>
+												<path
+													d="M7.5 5.5a2 2 0 0 0-4 0V7H2a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-1.5V5.5a2 2 0 0 0-4 0V7h-1V5.5zm2.5 1.5v-1.5a.5.5 0 0 0-1 0V7h1zm-5-1.5A.5.5 0 0 1 6 5V7H5V5.5z"
+												/>
 											</svg>
 											{commit.sha.slice(0, 7)}
 										</span>
@@ -77,7 +104,7 @@
 			<section class="upcoming">
 				<div class="section-header">
 					<h3>Upcoming Features</h3>
-					<div class="section-divider"></div>
+					<div class="section-divider" />
 				</div>
 				<div class="upcoming-card-container">
 					<div class="completed-card">
@@ -122,7 +149,9 @@
 					</div>
 					<div class="completed-card">
 						<div class="status-icon completed">✓</div>
-						<span>Bring back when we dont have the film in db, fetch the data, dont save it anywhere</span>
+						<span
+							>Bring back when we dont have the film in db, fetch the data, dont save it anywhere</span
+						>
 					</div>
 					<div class="completed-card">
 						<div class="status-icon completed">✓</div>
@@ -134,7 +163,9 @@
 					</div>
 					<div class="completed-card">
 						<div class="status-icon completed">✓</div>
-						<span>Add localization so on root the region changes with the localization of the user</span>
+						<span
+							>Add localization so on root the region changes with the localization of the user</span
+						>
 					</div>
 					<div class="completed-card">
 						<div class="status-icon completed">✓</div>
@@ -223,7 +254,8 @@
 		gap: 2.5rem;
 	}
 
-	.released, .upcoming {
+	.released,
+	.upcoming {
 		width: 100%;
 	}
 
@@ -293,7 +325,9 @@
 		color: #8b949e;
 	}
 
-	.commit-author, .commit-date, .commit-sha {
+	.commit-author,
+	.commit-date,
+	.commit-sha {
 		display: flex;
 		align-items: center;
 	}
@@ -309,7 +343,8 @@
 		gap: 1rem;
 	}
 
-	.upcoming-card, .completed-card {
+	.upcoming-card,
+	.completed-card {
 		background-color: #1e1e2e;
 		border: 1px solid #30363d;
 		border-radius: 6px;
@@ -321,7 +356,8 @@
 		box-sizing: border-box;
 	}
 
-	.upcoming-card:hover, .completed-card:hover {
+	.upcoming-card:hover,
+	.completed-card:hover {
 		background-color: #252537;
 		transform: translateY(-2px);
 		box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
@@ -387,7 +423,7 @@
 		.upcoming-card-container {
 			grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 		}
-		
+
 		.changelog-container {
 			padding: 2rem 1.5rem 3rem;
 		}
@@ -405,7 +441,7 @@
 		.section-header h3 {
 			font-size: 1.5rem;
 		}
-		
+
 		.changelog-container {
 			padding: 1.5rem 1rem 2.5rem;
 		}
@@ -424,15 +460,15 @@
 			flex-direction: column;
 			gap: 0.5rem;
 		}
-		
+
 		.commit-card {
 			padding: 1rem;
 		}
-		
+
 		.changelog-header h2 {
 			font-size: 1.75rem;
 		}
-		
+
 		.header-decoration {
 			width: 80px;
 		}

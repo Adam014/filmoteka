@@ -285,7 +285,7 @@
 	}
 
 	@media (max-width: 1200px) {
-		.search-input{
+		.search-input {
 			width: 90%;
 		}
 	}

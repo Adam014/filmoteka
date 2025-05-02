@@ -12,18 +12,23 @@
 		<a href={`/person/${person.id}`} class="person-card">
 			<div class="card-inner">
 				<div class="image-container">
-					<img 
-						src={person.profile_path ? `https://image.tmdb.org/t/p/w300${person.profile_path}` : '/placeholder-person.jpg'} 
-						alt="{person.name}" 
-						loading="lazy" 
+					<img
+						src={person.profile_path
+							? `https://image.tmdb.org/t/p/w300${person.profile_path}`
+							: '/placeholder-person.jpg'}
+						alt={person.name}
+						loading="lazy"
 					/>
-					<div class="image-overlay"></div>
+					<div class="image-overlay" />
 				</div>
 				<div class="person-info">
 					<h3 class="person-name">{person.name}</h3>
 					<p class="person-roles">
 						{#if person.known_for && person.known_for.length > 0}
-							Known for: {person.known_for.map(work => work.title || work.name).slice(0, 2).join(', ')}
+							Known for: {person.known_for
+								.map((work) => work.title || work.name)
+								.slice(0, 2)
+								.join(', ')}
 							{#if person.known_for.length > 2}...{/if}
 						{:else}
 							Actor
@@ -177,7 +182,7 @@
 			grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
 			gap: 1.2rem;
 		}
-		
+
 		.person-name {
 			font-size: 1rem;
 		}
@@ -187,33 +192,33 @@
 		.headline {
 			font-size: 1.5rem;
 		}
-		
+
 		.people-grid {
 			grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
 			gap: 1rem;
 		}
-		
+
 		.person-info {
 			padding: 0.8rem;
 		}
-		
+
 		.person-name {
 			font-size: 0.95rem;
 			margin-bottom: 0.3rem;
 		}
-		
+
 		.person-roles {
 			font-size: 0.8rem;
 		}
-		
+
 		.popularity {
 			padding: 0.25rem 0.4rem;
 		}
-		
+
 		.popularity-score {
 			font-size: 0.85rem;
 		}
-		
+
 		.popularity-label {
 			font-size: 0.6rem;
 		}
@@ -224,11 +229,11 @@
 			grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
 			gap: 0.8rem;
 		}
-		
+
 		.person-info {
 			padding: 0.6rem;
 		}
-		
+
 		.person-name {
 			font-size: 0.9rem;
 		}

@@ -51,7 +51,8 @@
 		margin: 0;
 		padding: 0;
 		box-sizing: border-box;
-		font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+		font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+			Cantarell, 'Open Sans', sans-serif;
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
 		overflow-x: hidden;
@@ -64,9 +65,13 @@
 		--gray-text: #adb5bd;
 		--card-bg: #1e1e1e;
 		--gradient-bg: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
-		
+
 		background-color: var(--dark-bg);
-		background-image: radial-gradient(circle at 20% 50%, rgba(51, 16, 117, 0.4) 0%, rgba(13, 13, 13, 0.95) 100%);
+		background-image: radial-gradient(
+			circle at 20% 50%,
+			rgba(51, 16, 117, 0.4) 0%,
+			rgba(13, 13, 13, 0.95) 100%
+		);
 		background-attachment: fixed;
 		color: var(--light-text);
 	}

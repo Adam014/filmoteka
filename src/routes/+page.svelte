@@ -7,7 +7,7 @@
 	import MovieGrid from '../components/MovieGrid.svelte';
 	import PeopleGrid from '../components/PeopleGrid.svelte';
 	import { goto } from '$app/navigation';
-	import { countryToAlpha2 } from "country-to-iso";
+	import { countryToAlpha2 } from 'country-to-iso';
 
 	export let data;
 
@@ -111,7 +111,13 @@
 					<span class="challenge-text">Daily Challenge</span>
 					<div class="challenge-icon">
 						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<path d="M7 17L17 7M17 7H10M17 7V14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+							<path
+								d="M7 17L17 7M17 7H10M17 7V14"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/>
 						</svg>
 					</div>
 				</div>
@@ -123,7 +129,7 @@
 		<section class="content-section">
 			<div class="section-header">
 				<h2 class="section-title">Trending Movies</h2>
-				<div class="title-underline"></div>
+				<div class="title-underline" />
 			</div>
 			<MovieGrid data={trendingMovies} headline={''} isMovie={true} />
 		</section>
@@ -131,7 +137,7 @@
 		<section class="content-section alt-section full-width">
 			<div class="section-header">
 				<h2 class="section-title">In Theaters in {country}</h2>
-				<div class="title-underline light"></div>
+				<div class="title-underline light" />
 			</div>
 			<MovieGrid data={nowPlayingMovies} headline={''} isMovie={true} />
 		</section>
@@ -139,7 +145,7 @@
 		<section class="content-section">
 			<div class="section-header">
 				<h2 class="section-title">Top Rated Actors</h2>
-				<div class="title-underline"></div>
+				<div class="title-underline" />
 			</div>
 			<PeopleGrid data={actors} headline={''} />
 		</section>
@@ -147,7 +153,7 @@
 		<section class="content-section alt-section full-width">
 			<div class="section-header">
 				<h2 class="section-title">Top Rated Series</h2>
-				<div class="title-underline light"></div>
+				<div class="title-underline light" />
 			</div>
 			<MovieGrid data={topRatedSeries} headline={''} isMovie={false} />
 		</section>
@@ -155,7 +161,7 @@
 		<section class="content-section">
 			<div class="section-header">
 				<h2 class="section-title">Top Rated Movies</h2>
-				<div class="title-underline"></div>
+				<div class="title-underline" />
 			</div>
 			<MovieGrid data={topRatedMovies} headline={''} isMovie={true} />
 		</section>
@@ -163,7 +169,7 @@
 		<section class="content-section alt-section full-width">
 			<div class="section-header">
 				<h2 class="section-title">Community Users</h2>
-				<div class="title-underline light"></div>
+				<div class="title-underline light" />
 			</div>
 			<Users {users} />
 		</section>
@@ -171,7 +177,7 @@
 		<section class="content-section">
 			<div class="section-header">
 				<h2 class="section-title">Upcoming Movies in {country}</h2>
-				<div class="title-underline"></div>
+				<div class="title-underline" />
 			</div>
 			<MovieGrid data={upcomingMovies} headline={''} isMovie={true} />
 		</section>
@@ -302,7 +308,7 @@
 	}
 
 	.title-underline::after {
-		content: "";
+		content: '';
 		position: absolute;
 		top: 0;
 		left: -100%;
@@ -414,16 +420,16 @@
 		.hero h1 {
 			font-size: 3rem;
 		}
-		
+
 		.section-title {
 			font-size: 1.8rem;
 		}
-		
+
 		.content-grid {
 			padding: 2rem 1.5rem 0;
 			gap: 3rem;
 		}
-		
+
 		.featured-section {
 			padding: 0 1.5rem 2rem;
 		}
@@ -433,27 +439,27 @@
 		.hero {
 			padding: 2.5rem 1.5rem 1rem;
 		}
-		
+
 		.hero h1 {
 			font-size: 2.5rem;
 		}
-		
+
 		.hero-subtitle {
 			font-size: 1.2rem;
 		}
-		
+
 		.featured-section {
 			padding: 0 1.5rem 1.5rem;
 		}
-		
+
 		.full-width {
 			padding: 2.5rem 1.5rem;
 		}
-		
+
 		.content-grid {
 			gap: 2.5rem;
 		}
-		
+
 		.section-title {
 			font-size: 1.6rem;
 		}
@@ -463,47 +469,47 @@
 		.hero {
 			padding: 2rem 1rem 0.5rem;
 		}
-		
+
 		.hero h1 {
 			font-size: 2rem;
 		}
-		
+
 		.hero-subtitle {
 			font-size: 1rem;
 		}
-		
+
 		.featured-section {
 			padding: 0 1rem 1.5rem;
 		}
-		
+
 		.content-grid {
 			padding: 2rem 1rem 0;
 			gap: 2rem;
 		}
-		
+
 		.full-width {
 			padding: 2rem 1rem;
 		}
-		
+
 		.section-title {
 			font-size: 1.4rem;
 		}
-		
+
 		.title-underline {
 			width: 6rem;
 			height: 3px;
 		}
-		
+
 		.daily-challenge {
 			padding: 0.8rem 1.2rem;
 			font-size: 0.9rem;
 		}
-		
+
 		.challenge-icon {
 			width: 1.8rem;
 			height: 1.8rem;
 		}
-		
+
 		.floating-button {
 			bottom: 1.5rem;
 			right: 1.5rem;

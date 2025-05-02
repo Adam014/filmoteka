@@ -13,8 +13,12 @@
 		<a href={isMovie ? `/movie/${item.id}` : `/series/${item.id}`} class="card">
 			<div class="card-inner">
 				<div class="card-front">
-					<img src={'https://image.tmdb.org/t/p/w300' + item?.poster_path} alt="{item.title || item.name} Cover" loading="lazy" />
-					<div class="card-gradient"></div>
+					<img
+						src={'https://image.tmdb.org/t/p/w300' + item?.poster_path}
+						alt="{item.title || item.name} Cover"
+						loading="lazy"
+					/>
+					<div class="card-gradient" />
 					{#if item.vote_average > 0}
 						<div class="card-rating">{item.vote_average.toFixed(1)}</div>
 					{/if}
@@ -69,7 +73,7 @@
 	.card:hover .card-inner {
 		box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
 	}
-	
+
 	.card-front {
 		position: relative;
 		overflow: hidden;
@@ -167,21 +171,21 @@
 		.headline {
 			font-size: 1.5rem;
 		}
-		
+
 		.card-grid {
 			grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
 			gap: 1rem;
 		}
-		
+
 		.info {
 			padding: 0.8rem;
 		}
-		
+
 		.title {
 			font-size: 0.9rem;
 			margin-bottom: 0.3rem;
 		}
-		
+
 		.date {
 			font-size: 0.8rem;
 		}
@@ -192,17 +196,17 @@
 			grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
 			gap: 0.8rem;
 		}
-		
+
 		.info {
 			padding: 0.6rem;
 		}
-		
+
 		.card-rating {
 			width: 30px;
 			height: 30px;
 			font-size: 0.8rem;
 		}
-		
+
 		.title {
 			font-size: 0.85rem;
 		}

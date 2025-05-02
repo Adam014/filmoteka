@@ -15,17 +15,14 @@ async function fetchMovieImage(movieId) {
 	return null; // Return null if no image found
 }
 
-async function fetchData(page_num, url, key, number, region){
+async function fetchData(page_num, url, key, number, region) {
 	try {
-		const response = await fetch(
-			`${url}&page=${page_num}&region=${region}`,
-			{
-				headers: {
-					accept: 'application/json',
-					Authorization: `Bearer ${key}`
-				}
+		const response = await fetch(`${url}&page=${page_num}&region=${region}`, {
+			headers: {
+				accept: 'application/json',
+				Authorization: `Bearer ${key}`
 			}
-		);
+		});
 
 		const data = await response.json();
 
@@ -36,7 +33,7 @@ async function fetchData(page_num, url, key, number, region){
 		return data?.results?.slice(0, number);
 	} catch (error) {
 		console.error(error);
-	}	
+	}
 }
 
 export async function load({ url }) {
@@ -64,7 +61,7 @@ export async function load({ url }) {
 		console.error('Error fetching users:', error);
 	} else {
 		// Assign to the outer variable
-		authenticatedUsers = data.users.filter(user => user.confirmed_at);
+		authenticatedUsers = data.users.filter((user) => user.confirmed_at);
 	}
 
 	if (moviesError || actorsError) {
@@ -95,11 +92,39 @@ export async function load({ url }) {
 		})
 	);
 
-	const topRatedMovies = await fetchData(1, "https://api.themoviedb.org/3/movie/top_rated?language=en-US", TMDB_FETCH_API_KEY, 10, region)
-	const upcomingMovies = await fetchData(1, "https://api.themoviedb.org/3/movie/upcoming?language=en-US", TMDB_FETCH_API_KEY, 10, region)
-	const nowPlayingMovies = await fetchData(1, "https://api.themoviedb.org/3/movie/now_playing?language=en-US", TMDB_FETCH_API_KEY, 10, region)
-	const trendingMovies = await fetchData(1, "https://api.themoviedb.org/3/trending/movie/week?language=en-US", TMDB_FETCH_API_KEY, 10)
-	const topRatedSeries = await fetchData(1, "https://api.themoviedb.org/3/tv/top_rated?language=en-US", TMDB_FETCH_API_KEY, 10)
+	const topRatedMovies = await fetchData(
+		1,
+		'https://api.themoviedb.org/3/movie/top_rated?language=en-US',
+		TMDB_FETCH_API_KEY,
+		10,
+		region
+	);
+	const upcomingMovies = await fetchData(
+		1,
+		'https://api.themoviedb.org/3/movie/upcoming?language=en-US',
+		TMDB_FETCH_API_KEY,
+		10,
+		region
+	);
+	const nowPlayingMovies = await fetchData(
+		1,
+		'https://api.themoviedb.org/3/movie/now_playing?language=en-US',
+		TMDB_FETCH_API_KEY,
+		10,
+		region
+	);
+	const trendingMovies = await fetchData(
+		1,
+		'https://api.themoviedb.org/3/trending/movie/week?language=en-US',
+		TMDB_FETCH_API_KEY,
+		10
+	);
+	const topRatedSeries = await fetchData(
+		1,
+		'https://api.themoviedb.org/3/tv/top_rated?language=en-US',
+		TMDB_FETCH_API_KEY,
+		10
+	);
 
 	return {
 		movies: moviesWithImages,
@@ -110,6 +135,6 @@ export async function load({ url }) {
 		detailed_movies: detailedMovies,
 		actors: actors,
 		users: authenticatedUsers,
-		topRatedSeries: topRatedSeries,
+		topRatedSeries: topRatedSeries
 	};
 }

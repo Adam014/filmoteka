@@ -34,11 +34,12 @@
 				const guessedCorrectly = await checkGuessStatus(challenge.day);
 				return {
 					...challenge,
-					color: guessedCorrectly === true 
-						? 'linear-gradient(135deg, #43E97B 0%, #38F9D7 100%)'
-						: guessedCorrectly === false
-						? 'linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%)'
-						: 'linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%)',
+					color:
+						guessedCorrectly === true
+							? 'linear-gradient(135deg, #43E97B 0%, #38F9D7 100%)'
+							: guessedCorrectly === false
+							? 'linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%)'
+							: 'linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%)',
 					guessedCorrectly
 				};
 			})
@@ -88,30 +89,32 @@
 <div class="daily-container" in:fade={{ duration: 300 }}>
 	<div class="daily-header">
 		<h1>🎬 Daily Challenge</h1>
-		<p>Test your movie knowledge with daily challenges! Each day brings a new pixelated movie poster to guess.</p>
+		<p>
+			Test your movie knowledge with daily challenges! Each day brings a new pixelated movie poster
+			to guess.
+		</p>
 	</div>
 
 	<div class="daily-grid">
 		{#each dailyChallenges as challenge, i}
-			<a 
+			<a
 				href={`/games/daily/day-${challenge.day}`}
 				in:fly={{ y: 50, duration: 400, delay: i * 100 }}
 			>
-				<div
-					class="daily-card"
-					style="background: {challenge.color}"
-				>
+				<div class="daily-card" style="background: {challenge.color}">
 					<div class="card-content">
 						<span class="day-number">Day {challenge.day}</span>
 						{#if challenge.guessedCorrectly !== null}
 							<div class="status-icon">
 								{#if challenge.guessedCorrectly}
 									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-										<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+										<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
 									</svg>
 								{:else}
 									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-										<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
+										<path
+											d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+										/>
 									</svg>
 								{/if}
 							</div>
