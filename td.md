@@ -5,9 +5,6 @@ TODO: Add that you can add reviews of each movies, on the /profile page in the F
 /spotlight || feed
 TODO: Add users feed, where users can write posts, like posts, or even when they like movie it will appear there
 
-/contact
-TODO: Create a contact page
-
 ////////////////
 
 TODO: Add everything about games to filmoteka -> rename it to something like Mediarena or Enterverse
