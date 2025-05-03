@@ -91,13 +91,13 @@
 
 <div class="root-container">
 	<div class="hero-and-featured">
-		<header class="hero">
+		<!-- <header class="hero">
 			<div class="hero-content">
 				<h1>Welcome, <span class="username">{username ? username : 'user'}</span>!</h1>
 				<p class="hero-subtitle">Discover your next favorite movie with Filmoteka</p>
 				<p class="update-info">Last updated: {repoUpdatedDate}</p>
 			</div>
-		</header>
+		</header> -->
 
 		<section class="featured-section">
 			<RootMovies {movies} {detailed_movies} />
@@ -201,6 +201,7 @@
 		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 		border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 		backdrop-filter: blur(5px);
+		padding-top: 30px;
 	}
 
 	/* Hero section */
