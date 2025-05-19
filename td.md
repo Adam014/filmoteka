@@ -3,7 +3,7 @@ TODO: Add that you can add reviews of each movies, on the /profile page in the F
 TODO: Create new UI for person page, it must be in the same style as other pages
 TODO: synchronize all movies to each actor and director
 TODO: Add series to library
-TODO: Profile - add the movies filtered from the top as added as last and add total number
+TODO: Add profile movie filters
 
 /spotlight || feed
 TODO: Add users feed, where users can write posts, like posts, or even when they like movie it will appear there
