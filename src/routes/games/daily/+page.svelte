@@ -99,7 +99,7 @@
 		{#each dailyChallenges as challenge, i}
 			<a
 				href={`/games/daily/day-${challenge.day}`}
-				in:fly={{ y: 50, duration: 400, delay: i * 100 }}
+				in:fly={{ y: 50, duration: 400, delay: i * 10 }}
 			>
 				<div class="daily-card" style="background: {challenge.color}">
 					<div class="card-content">
