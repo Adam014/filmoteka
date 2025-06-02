@@ -1,6 +1,5 @@
 TODO: Add that you can add reviews of each movies, on the /profile page in the Favorite movies grid you will have green/red combination as in Daily challenges, so other users can instantly see which movie you reviewed
 
-TODO: Create new UI for person page, it must be in the same style as other pages
 TODO: synchronize all movies to each actor and director
 TODO: Add series to library
 TODO: Add profile movie filters
