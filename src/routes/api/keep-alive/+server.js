@@ -1,19 +1,21 @@
 import { createClient } from '@supabase/supabase-js';
-import { NextResponse } from 'next/server';
-
-export const dynamic = 'force-dynamic';
+import { json } from '@sveltejs/kit';
+import { env } from '$env/static/private'; 
+import { PUBLIC_SUPABASE_URL } from '$env/static/public'; 
 
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  PUBLIC_SUPABASE_URL,
+  env.SUPABASE_SERVICE_ROLE_KEY 
 );
 
+export const prerender = false; 
+
 export async function GET() {
-  console.log('Spouštím Supabase keep-alive ping...');
+  console.log('Spouštím Supabase keep-alive ping (SvelteKit)...');
 
   try {
     const { data, error } = await supabase
-      .from('films')
+      .from('films') 
       .select('id, original_title') 
       .limit(1);
 
@@ -24,14 +26,15 @@ export async function GET() {
     console.log('Supabase keep-alive: Ping úspěšný.');
     console.log('Načtená ukázková data:', data);
 
-    return NextResponse.json({
+    return json({
       message: 'Supabase databáze úspěšně pingnuta.',
-      data: data 
+      data: data
     });
 
   } catch (error) {
     console.error('Chyba při Supabase keep-alive pingu:', error.message);
-    return NextResponse.json(
+
+    return json(
       { message: 'Chyba při pingu Supabase.', error: error.message },
       { status: 500 }
     );
