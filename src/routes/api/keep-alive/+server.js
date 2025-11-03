@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { json } from '@sveltejs/kit';
-import { env } from '$env/static/private'; 
+import { env } from '$env/dynamic/private'; 
 import { PUBLIC_SUPABASE_URL } from '$env/static/public'; 
 
 const supabase = createClient(
