@@ -160,7 +160,7 @@ export function buzz(ms = 10) {
 	navigator.vibrate?.(ms);
 }
 
-const CONFETTI = ['#ffc53d', '#4cc38a', '#7cc0ff', '#cdb1ff', '#f5f5f6'];
+const CONFETTI = ['#d6ff3f', '#ffc53d', '#4cc38a', '#7cc0ff', '#cdb1ff', '#f5f5f6'];
 
 /** A quick burst from the middle of the screen for the moment you win. */
 export function celebrate(count = 44) {

@@ -467,7 +467,7 @@
 	}
 
 	.level-0 {
-		background: var(--accent);
+		background: #ffc53d;
 	}
 
 	.level-1 {

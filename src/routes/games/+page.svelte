@@ -1,4 +1,5 @@
 <script>
+	import Countdown from '#lib/components/Countdown.svelte';
 	import GameTiles from '#lib/components/GameTiles.svelte';
 
 	let { data } = $props();
@@ -13,8 +14,10 @@
 </svelte:head>
 
 <div class="container page">
-	<h1 class="page-title">Games</h1>
-	<p class="page-lede">New puzzles every day. No sign-up needed.</p>
+	<div class="head">
+		<h1 class="page-title">Games</h1>
+		<Countdown />
+	</div>
 
 	<div class="games">
 		<GameTiles games={data.games} />
@@ -22,7 +25,15 @@
 </div>
 
 <style>
+	.head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 4px 24px;
+	}
+
 	.games {
-		margin-top: clamp(20px, 4vw, 36px);
+		margin-top: clamp(16px, 3vw, 28px);
 	}
 </style>

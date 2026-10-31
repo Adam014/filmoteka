@@ -1,20 +1,23 @@
 :root {
 	color-scheme: dark;
 
-	--bg: #0a0a0b;
-	--surface: #141416;
-	--surface-raised: #1c1c1f;
-	--line: rgb(255 255 255 / 0.09);
-	--line-strong: rgb(255 255 255 / 0.2);
-	--text: #f5f5f6;
-	--text-muted: #a9a9b1;
-	--text-faint: #8b8b94;
-	--accent: #ffc53d;
+	--bg: #08090b;
+	--surface: #121317;
+	--surface-raised: #1b1c21;
+	--line: rgb(255 255 255 / 0.08);
+	--line-strong: rgb(255 255 255 / 0.18);
+	--text: #f6f7f8;
+	--text-muted: #a9acb4;
+	--text-faint: #8b8e97;
+	--accent: #d6ff3f;
+	--on-accent: #0b0d04;
 	--success: #4cc38a;
 	--danger: #ff7a6b;
 
-	--radius-sm: 6px;
-	--radius-md: 10px;
+	--radius-sm: 10px;
+	--radius-md: 14px;
+	--radius-lg: 22px;
+	--sticky-top: calc(var(--header-height) + 6px);
 	--gutter: clamp(16px, 4vw, 48px);
 	--content-max: 1520px;
 	--header-height: 64px;
@@ -53,6 +56,21 @@
 *::before,
 *::after {
 	box-sizing: border-box;
+}
+
+:root.header-hidden {
+	--sticky-top: 8px;
+}
+
+/* A whisper of film grain over the whole site. */
+body::before {
+	content: '';
+	position: fixed;
+	z-index: 100;
+	inset: 0;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+	opacity: 0.035;
+	pointer-events: none;
 }
 
 html {
@@ -146,14 +164,14 @@ input:disabled {
 }
 
 :focus-visible {
-	outline: 2px solid var(--text);
+	outline: 2px solid var(--accent);
 	outline-offset: 2px;
 	border-radius: 2px;
 }
 
 ::selection {
 	background: var(--accent);
-	color: #000;
+	color: var(--on-accent);
 }
 
 /* Page transitions. The poster of the clicked card morphs into the poster of the detail page. */
@@ -250,7 +268,8 @@ input:disabled {
 
 @supports (animation-timeline: view()) {
 	@media (prefers-reduced-motion: no-preference) {
-		.media-grid > * {
+		.media-grid > *,
+		.reveal {
 			animation: rise linear both;
 			animation-timeline: view();
 			animation-range: entry 0% entry 26%;
@@ -289,8 +308,10 @@ dialog[open]::backdrop {
 }
 
 .page-title {
-	font-size: clamp(2rem, 4.5vw, 3.25rem);
-	letter-spacing: -0.035em;
+	font-size: clamp(2.25rem, 5vw, 4rem);
+	font-weight: 600;
+	letter-spacing: -0.045em;
+	line-height: 1.02;
 }
 
 .page-lede {
@@ -301,7 +322,7 @@ dialog[open]::backdrop {
 }
 
 .section {
-	margin-top: clamp(40px, 6vw, 72px);
+	margin-top: clamp(48px, 7vw, 96px);
 }
 
 .section-head {
@@ -313,7 +334,10 @@ dialog[open]::backdrop {
 }
 
 .section-title {
-	font-size: clamp(1.25rem, 2vw, 1.5rem);
+	font-size: clamp(1.5rem, 2.8vw, 2.25rem);
+	font-weight: 600;
+	letter-spacing: -0.035em;
+	line-height: 1.1;
 }
 
 /* Media grid shared by the library, favorites, filmographies and random results */
@@ -332,9 +356,9 @@ dialog[open]::backdrop {
 	justify-content: center;
 	gap: 8px;
 	min-height: 44px;
-	padding: 0 18px;
+	padding: 0 20px;
 	border: 1px solid var(--line-strong);
-	border-radius: var(--radius-md);
+	border-radius: 999px;
 	font-size: 0.9375rem;
 	font-weight: 500;
 	white-space: nowrap;
@@ -342,6 +366,7 @@ dialog[open]::backdrop {
 		background-color 160ms var(--ease),
 		border-color 160ms var(--ease),
 		opacity 160ms var(--ease),
+		box-shadow 220ms var(--ease),
 		transform 260ms var(--spring);
 }
 
@@ -360,14 +385,16 @@ dialog[open]::backdrop {
 }
 
 .btn-primary {
-	background: var(--text);
-	border-color: var(--text);
-	color: #0a0a0b;
+	background: var(--accent);
+	border-color: var(--accent);
+	color: var(--on-accent);
+	font-weight: 600;
 }
 
 .btn-primary:hover:not(:disabled) {
-	background: #fff;
-	border-color: #fff;
+	background: var(--accent);
+	border-color: var(--accent);
+	box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
 .btn-quiet {
@@ -389,7 +416,7 @@ dialog[open]::backdrop {
 	place-items: center;
 	width: 44px;
 	height: 44px;
-	border-radius: var(--radius-md);
+	border-radius: 50%;
 	color: var(--text-muted);
 	transition:
 		color 160ms var(--ease),
@@ -410,7 +437,7 @@ dialog[open]::backdrop {
 }
 
 .link:hover {
-	text-decoration-color: currentColor;
+	text-decoration-color: var(--accent);
 }
 
 /* Rounded filters used by the mood explorer and the home page */
@@ -418,13 +445,17 @@ dialog[open]::backdrop {
 .chip {
 	display: inline-flex;
 	align-items: center;
-	min-height: 44px;
-	padding: 0 18px;
-	border: 1px solid var(--line-strong);
+	min-height: 40px;
+	padding: 0 16px;
+	border: 1px solid var(--line);
 	border-radius: 999px;
+	background: rgb(255 255 255 / 0.03);
 	color: var(--text-muted);
 	font-size: 0.9375rem;
+	font-weight: 500;
 	white-space: nowrap;
+	user-select: none;
+	-webkit-user-drag: none;
 	transition:
 		color 160ms var(--ease),
 		background-color 200ms var(--ease),
@@ -433,15 +464,21 @@ dialog[open]::backdrop {
 }
 
 .chip:hover {
-	border-color: var(--text);
+	border-color: var(--line-strong);
+	background: rgb(255 255 255 / 0.07);
 	color: var(--text);
-	transform: translateY(-2px);
+	transform: translateY(-1px);
+}
+
+.chip:active {
+	transform: scale(0.95);
 }
 
 .chip[aria-current='true'] {
-	background: var(--text);
-	border-color: var(--text);
-	color: #0a0a0b;
+	background: var(--chip-color, var(--accent));
+	border-color: var(--chip-color, var(--accent));
+	color: var(--on-accent);
+	font-weight: 600;
 }
 
 .field {
@@ -465,7 +502,9 @@ dialog[open]::backdrop {
 	border: 1px solid var(--line);
 	border-radius: var(--radius-md);
 	font-size: 1rem;
-	transition: border-color 160ms var(--ease);
+	transition:
+		border-color 160ms var(--ease),
+		box-shadow 200ms var(--ease);
 }
 
 .input::placeholder {
@@ -480,7 +519,8 @@ dialog[open]::backdrop {
 .input:focus,
 .select:focus {
 	outline: none;
-	border-color: var(--text);
+	border-color: var(--accent);
+	box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent);
 }
 
 .select {

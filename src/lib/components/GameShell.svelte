@@ -22,6 +22,8 @@
 
 <style>
 	.game-shell {
+		/* Cards thrown off the side must not make the whole page scroll sideways. */
+		overflow-x: clip;
 		display: flex;
 		flex: 1;
 		flex-direction: column;

@@ -7,6 +7,10 @@
 			>. This product uses the TMDB API but is not endorsed or certified by TMDB.
 		</p>
 		<nav aria-label="Footer">
+			<a href="/library">Library</a>
+			<a href="/mood">Mood</a>
+			<a href="/swipe">Swipe</a>
+			<a href="/games">Games</a>
 			<a href="/settings/changelog">Changelog</a>
 			<a href="https://github.com/Adam014/filmoteka" rel="noopener noreferrer" target="_blank">
 				GitHub
@@ -17,7 +21,7 @@
 
 <style>
 	footer {
-		margin-top: auto;
+		margin-top: clamp(48px, 7vw, 96px);
 		border-top: 1px solid var(--line);
 		color: var(--text-faint);
 		font-size: 0.875rem;
@@ -38,7 +42,8 @@
 
 	nav {
 		display: flex;
-		gap: 20px;
+		flex-wrap: wrap;
+		gap: 4px 20px;
 	}
 
 	nav a:hover {

@@ -37,19 +37,25 @@
 	.person {
 		display: block;
 		min-width: 0;
+		text-align: center;
 	}
 
 	.photo {
 		display: grid;
 		place-items: center;
-		aspect-ratio: 2 / 3;
+		aspect-ratio: 1;
 		overflow: hidden;
-		border-radius: var(--radius-sm);
+		border-radius: 50%;
 		background: var(--surface);
-		outline: 1px solid var(--line);
-		outline-offset: -1px;
+		outline: 2px solid transparent;
+		outline-offset: 3px;
 		color: var(--text-faint);
 		font-size: 1.5rem;
+		transition: outline-color 200ms var(--ease);
+	}
+
+	.person:hover .photo {
+		outline-color: var(--accent);
 	}
 
 	img {

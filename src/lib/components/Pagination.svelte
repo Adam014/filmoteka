@@ -107,8 +107,9 @@
 	}
 
 	.page.active {
-		background: var(--text);
-		color: #0a0a0b;
+		background: var(--accent);
+		color: var(--on-accent);
+		font-weight: 600;
 	}
 
 	.jump {

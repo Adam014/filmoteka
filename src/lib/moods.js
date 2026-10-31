@@ -2,6 +2,7 @@
 export const MOODS = [
 	{
 		id: 'cozy',
+		color: '#ffb86b',
 		label: 'Cozy',
 		line: 'Warm, gentle and easy to love.',
 		genres: '35|10751|16',
@@ -9,6 +10,7 @@ export const MOODS = [
 	},
 	{
 		id: 'mind-bending',
+		color: '#b9a2ff',
 		label: 'Mind-bending',
 		line: 'Stories that keep you guessing.',
 		genres: '878|9648',
@@ -16,6 +18,7 @@ export const MOODS = [
 	},
 	{
 		id: 'adrenaline',
+		color: '#ff7a50',
 		label: 'Adrenaline',
 		line: 'Fast, loud and impossible to pause.',
 		genres: '28|53',
@@ -23,6 +26,7 @@ export const MOODS = [
 	},
 	{
 		id: 'laugh',
+		color: '#ffdf4d',
 		label: 'Laugh out loud',
 		line: 'Guaranteed to lift the room.',
 		genres: '35',
@@ -30,6 +34,7 @@ export const MOODS = [
 	},
 	{
 		id: 'tearjerker',
+		color: '#7cc0ff',
 		label: 'A good cry',
 		line: 'Bring tissues. You will need them.',
 		genres: '18,10749',
@@ -37,6 +42,7 @@ export const MOODS = [
 	},
 	{
 		id: 'dark',
+		color: '#ff6b7f',
 		label: 'Dark',
 		line: 'Crime, dread and long shadows.',
 		genres: '80|27',
@@ -44,6 +50,7 @@ export const MOODS = [
 	},
 	{
 		id: 'epic',
+		color: '#4fd8c4',
 		label: 'Epic',
 		line: 'Big worlds worth a whole evening.',
 		genres: '12|14|36|10752',
@@ -51,6 +58,7 @@ export const MOODS = [
 	},
 	{
 		id: 'date-night',
+		color: '#ff9ecb',
 		label: 'Date night',
 		line: 'Romance with a smile.',
 		genres: '10749,35',
@@ -59,19 +67,19 @@ export const MOODS = [
 ];
 
 export const LENGTHS = [
-	{ id: 'any', label: 'Any length' },
+	{ id: 'any', label: 'Any' },
 	{ id: 'short', label: 'Under 100 min' },
 	{ id: 'long', label: 'Over 150 min' }
 ];
 
 export const ERAS = [
-	{ id: 'any', label: 'Any era' },
+	{ id: 'any', label: 'Any' },
 	{ id: '2020', label: '2020s' },
 	{ id: '2010', label: '2010s' },
 	{ id: '2000', label: '2000s' },
 	{ id: '1990', label: '1990s' },
 	{ id: '1980', label: '1980s' },
-	{ id: 'classic', label: 'Classics' }
+	{ id: 'classic', label: 'Older' }
 ];
 
 export function discoverParams({ mood, length, era, page }) {

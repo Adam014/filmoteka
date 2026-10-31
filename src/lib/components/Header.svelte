@@ -26,27 +26,32 @@
 	let unread = $derived(unreadCount());
 
 	let nav = $state();
-	let indicator = $state({ x: 0, width: 0, visible: false });
-	let indicatorMoves = $state(false);
+	let sheet = $state();
+	let thumb = $state({ x: 0, width: 0, visible: false });
+	let ghost = $state({ x: 0, width: 0, visible: false, moves: false });
+	let thumbMoves = $state(false);
 	let hidden = $state(false);
 
-	/** Slides the highlight behind the given link, or back to the current page. */
-	function moveIndicator(target) {
-		const link = target ?? nav?.querySelector('[aria-current="page"]');
-		if (!link) {
-			indicator = { ...indicator, visible: false };
-			return;
-		}
-		indicator = { x: link.offsetLeft, width: link.offsetWidth, visible: true };
+	/** The solid pill marks the current page. */
+	function placeThumb() {
+		const link = nav?.querySelector('[aria-current="page"]');
+		thumb = link
+			? { x: link.offsetLeft, width: link.offsetWidth, visible: true }
+			: { ...thumb, visible: false };
+	}
+
+	/** A faint pill glides after the pointer, without ever hiding where you are. */
+	function placeGhost(link) {
+		ghost = { x: link.offsetLeft, width: link.offsetWidth, visible: true, moves: ghost.visible };
 	}
 
 	$effect(() => {
 		void page.url.pathname;
 		// Runs after the aria-current attributes have been updated.
-		queueMicrotask(() => moveIndicator());
+		queueMicrotask(placeThumb);
 		document.fonts?.ready.then(() => {
-			moveIndicator();
-			requestAnimationFrame(() => (indicatorMoves = true));
+			placeThumb();
+			requestAnimationFrame(() => (thumbMoves = true));
 		});
 	});
 
@@ -71,6 +76,10 @@
 		};
 	});
 
+	$effect(() => {
+		document.documentElement.classList.toggle('header-hidden', hidden);
+	});
+
 	const isActive = (href) => page.url.pathname === href || page.url.pathname.startsWith(`${href}/`);
 
 	$effect(() => {
@@ -87,6 +96,10 @@
 			);
 	});
 
+	function closeSheet() {
+		if (sheet?.matches(':popover-open')) sheet.hidePopover();
+	}
+
 	async function logOut() {
 		const { error } = await signOut();
 		if (error) {
@@ -98,7 +111,7 @@
 	}
 </script>
 
-<svelte:window onresize={() => moveIndicator()} />
+<svelte:window onresize={placeThumb} />
 
 <div class="header-root">
 	<a class="skip" href="#content">Skip to content</a>
@@ -108,20 +121,33 @@
 				<img src={logo} alt="" width="122" height="20" />
 			</a>
 
-			<nav class="links" aria-label="Main" bind:this={nav} onpointerleave={() => moveIndicator()}>
+			<nav
+				class="links"
+				aria-label="Main"
+				bind:this={nav}
+				onpointerleave={() => (ghost = { ...ghost, visible: false })}
+			>
 				<span
-					class="indicator"
-					class:visible={indicator.visible}
-					class:moves={indicatorMoves}
-					style:width="{indicator.width}px"
-					style:transform="translateX({indicator.x}px)"
+					class="ghost"
+					class:visible={ghost.visible}
+					class:moves={ghost.moves}
+					style:width="{ghost.width}px"
+					style:transform="translateX({ghost.x}px)"
+					aria-hidden="true"
+				></span>
+				<span
+					class="thumb"
+					class:visible={thumb.visible}
+					class:moves={thumbMoves}
+					style:width="{thumb.width}px"
+					style:transform="translateX({thumb.x}px)"
 					aria-hidden="true"
 				></span>
 				{#each LINKS as link (link.href)}
 					<a
 						href={link.href}
 						aria-current={isActive(link.href) ? 'page' : undefined}
-						onpointerenter={(event) => moveIndicator(event.currentTarget)}
+						onpointerenter={(event) => placeGhost(event.currentTarget)}
 					>
 						{link.label}
 					</a>
@@ -131,7 +157,6 @@
 			<div class="actions">
 				<button class="search-trigger" type="button" onclick={onsearch} aria-label="Search">
 					<Icon name="search" size={18} />
-					<span class="search-label">Search</span>
 					<kbd class="search-key">{shortcut}</kbd>
 				</button>
 
@@ -194,22 +219,40 @@
 		</div>
 	{/if}
 
-	<div id="mobile-menu" popover="auto" class="panel mobile">
+	<div id="mobile-menu" popover="auto" class="sheet" bind:this={sheet}>
+		<div class="sheet-top">
+			<a class="logo" href="/" aria-label="Filmoteka home" onclick={closeSheet}>
+				<img src={logo} alt="" width="122" height="20" />
+			</a>
+			<button
+				class="icon-btn"
+				type="button"
+				popovertarget="mobile-menu"
+				popovertargetaction="hide"
+				aria-label="Close menu"
+			>
+				<Icon name="close" />
+			</button>
+		</div>
 		<nav aria-label="Mobile">
-			{#each LINKS as link (link.href)}
+			{#each LINKS as link, index (link.href)}
 				<a
-					class="panel-item"
+					class="sheet-link"
 					href={link.href}
+					style:--i={index}
 					aria-current={isActive(link.href) ? 'page' : undefined}
+					onclick={closeSheet}
 				>
 					{link.label}
 				</a>
 			{/each}
-			{#if auth.ready && !auth.user}
-				<a class="panel-item" href="/login">Log in</a>
-				<a class="panel-item" href="/register">Sign up</a>
-			{/if}
 		</nav>
+		{#if auth.ready && !auth.user}
+			<div class="sheet-foot">
+				<a class="btn" href="/login" onclick={closeSheet}>Log in</a>
+				<a class="btn btn-primary" href="/register" onclick={closeSheet}>Sign up</a>
+			</div>
+		{/if}
 	</div>
 </div>
 
@@ -221,7 +264,7 @@
 		left: 8px;
 		padding: 10px 16px;
 		background: var(--text);
-		color: #0a0a0b;
+		color: var(--bg);
 		border-radius: var(--radius-sm);
 		transform: translateY(-200%);
 	}
@@ -235,11 +278,22 @@
 		position: sticky;
 		z-index: 40;
 		top: 0;
+		height: var(--header-height);
+		pointer-events: none;
 		transition: transform 360ms var(--ease);
-		background: rgb(10 10 11 / 0.82);
-		border-bottom: 1px solid var(--line);
-		backdrop-filter: blur(16px) saturate(1.4);
-		-webkit-backdrop-filter: blur(16px) saturate(1.4);
+	}
+
+	/* No bar, just a blur that melts away: the logo and links stay readable over any poster. */
+	header::before {
+		content: '';
+		position: absolute;
+		z-index: -1;
+		inset: 0 0 -24px;
+		background: linear-gradient(to bottom, rgb(8 9 11 / 0.8), rgb(8 9 11 / 0.4) 60%, transparent);
+		backdrop-filter: blur(14px);
+		-webkit-backdrop-filter: blur(14px);
+		mask-image: linear-gradient(to bottom, #000 55%, transparent);
+		pointer-events: none;
 	}
 
 	header.hidden {
@@ -250,78 +304,117 @@
 		display: contents;
 	}
 
+	/* Three separate pieces on the page's own grid: the logo and actions line up with the content. */
 	.bar {
-		display: flex;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
 		align-items: center;
-		gap: clamp(16px, 3vw, 40px);
-		height: var(--header-height);
+		gap: 16px;
+		height: 100%;
+	}
+
+	.bar > * {
+		pointer-events: auto;
 	}
 
 	.logo {
-		flex: none;
+		display: block;
+		width: fit-content;
+		transition: opacity 160ms var(--ease);
+	}
+
+	.logo:hover {
+		opacity: 0.75;
 	}
 
 	.logo img {
 		width: auto;
-		height: 18px;
+		height: 20px;
+	}
+
+	.links,
+	.search-trigger,
+	.bell {
+		background: rgb(22 23 28 / 0.62);
+		border: 1px solid var(--line);
+		backdrop-filter: blur(20px) saturate(1.5);
+		-webkit-backdrop-filter: blur(20px) saturate(1.5);
 	}
 
 	.links {
 		position: relative;
 		display: flex;
-		gap: 2px;
+		padding: 4px;
+		border-radius: 999px;
 	}
 
-	.indicator {
+	.thumb,
+	.ghost {
 		position: absolute;
-		top: 0;
-		bottom: 0;
+		top: 4px;
+		bottom: 4px;
 		left: 0;
-		background: rgb(255 255 255 / 0.08);
 		border-radius: 999px;
 		opacity: 0;
+		transition: opacity 200ms var(--ease);
 	}
 
-	.indicator.moves {
+	.thumb {
+		background: var(--text);
+	}
+
+	.ghost {
+		background: rgb(255 255 255 / 0.1);
+	}
+
+	.thumb.moves,
+	.ghost.moves {
 		transition:
 			transform 420ms var(--spring),
 			width 420ms var(--spring),
 			opacity 200ms var(--ease);
 	}
 
-	.indicator.visible {
+	.thumb.visible,
+	.ghost.visible {
 		opacity: 1;
 	}
 
 	.links a {
 		position: relative;
-		padding: 8px 14px;
+		display: flex;
+		align-items: center;
+		height: 36px;
+		padding: 0 16px;
 		border-radius: 999px;
 		color: var(--text-muted);
 		font-size: 0.9375rem;
-		transition: color 160ms var(--ease);
+		font-weight: 500;
+		transition: color 220ms var(--ease);
 	}
 
-	.links a:hover,
-	.links a[aria-current='page'] {
+	.links a:hover {
 		color: var(--text);
+	}
+
+	.links a[aria-current='page'] {
+		color: var(--bg);
 	}
 
 	.actions {
 		display: flex;
 		align-items: center;
+		justify-self: end;
 		gap: 6px;
-		margin-left: auto;
 	}
 
 	.search-trigger {
 		display: flex;
 		align-items: center;
 		gap: 10px;
-		height: 40px;
-		padding: 0 12px;
-		border: 1px solid var(--line);
-		border-radius: var(--radius-md);
+		height: 44px;
+		padding: 0 14px;
+		border-radius: 999px;
 		color: var(--text-muted);
 		font-size: 0.9375rem;
 		transition:
@@ -332,11 +425,6 @@
 	.search-trigger:hover {
 		border-color: var(--line-strong);
 		color: var(--text);
-	}
-
-	.search-label {
-		min-width: 88px;
-		text-align: left;
 	}
 
 	.session-placeholder {
@@ -356,7 +444,7 @@
 		padding: 0 4px;
 		background: var(--accent);
 		border-radius: 9px;
-		color: #000;
+		color: var(--on-accent);
 		font-size: 14px;
 		font-weight: 600;
 		line-height: 18px;
@@ -369,10 +457,20 @@
 		width: 44px;
 		height: 44px;
 		border-radius: 50%;
+		transition: transform 320ms var(--spring);
+	}
+
+	.account:hover {
+		transform: scale(1.06);
 	}
 
 	.auth-link {
-		min-height: 40px;
+		min-height: 44px;
+		color: var(--text);
+	}
+
+	.auth-link.btn-primary {
+		color: var(--on-accent);
 	}
 
 	.menu-trigger {
@@ -403,35 +501,136 @@
 		white-space: nowrap;
 	}
 
-	.mobile {
-		width: min(280px, calc(100vw - 2 * var(--gutter)));
+	/* On phones the menu takes over the whole screen, with big links that are easy to hit. */
+	.sheet {
+		position: fixed;
+		inset: 0;
+		flex-direction: column;
+		width: 100%;
+		max-width: none;
+		height: 100dvh;
+		max-height: none;
+		margin: 0;
+		padding: 0 var(--gutter) max(24px, env(safe-area-inset-bottom));
+		overflow-y: auto;
+		background: rgb(8 9 11 / 0.9);
+		border: 0;
+		color: var(--text);
+		backdrop-filter: blur(28px) saturate(1.4);
+		-webkit-backdrop-filter: blur(28px) saturate(1.4);
+		opacity: 0;
+		transition:
+			opacity 220ms var(--ease),
+			display 220ms allow-discrete,
+			overlay 220ms allow-discrete;
 	}
 
-	.mobile [aria-current='page'] {
+	.sheet:popover-open {
+		display: flex;
+		opacity: 1;
+	}
+
+	@starting-style {
+		.sheet:popover-open {
+			opacity: 0;
+		}
+	}
+
+	:global(html:has(#mobile-menu:popover-open)) {
+		overflow: hidden;
+	}
+
+	.sheet-top {
+		display: flex;
+		flex: none;
+		align-items: center;
+		justify-content: space-between;
+		height: var(--header-height);
+	}
+
+	.sheet nav {
+		display: grid;
+		gap: 4px;
+		margin-block: auto;
+		padding-block: 24px;
+	}
+
+	.sheet-link {
+		color: var(--text);
+		font-size: clamp(2.25rem, 11vw, 3.5rem);
+		font-weight: 600;
+		letter-spacing: -0.04em;
+		line-height: 1.25;
+		transition: color 160ms var(--ease);
+	}
+
+	.sheet:popover-open .sheet-link {
+		animation: rise 520ms var(--ease) both;
+		animation-delay: calc(var(--i) * 45ms);
+	}
+
+	.sheet-link[aria-current='page'] {
 		color: var(--accent);
 	}
 
-	@media (max-width: 960px) {
+	.sheet-foot {
+		display: grid;
+		flex: none;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 8px;
+	}
+
+	@media (max-width: 1023px) {
 		.links,
 		.auth-link {
 			display: none;
+		}
+
+		.bar {
+			grid-template-columns: minmax(0, 1fr) auto;
 		}
 
 		.menu-trigger {
 			display: inline-grid;
 		}
 
+		.search-key {
+			display: none;
+		}
+
+		/* Everything on the right shares one small pill. */
+		.actions {
+			gap: 0;
+			padding: 2px;
+			background: rgb(22 23 28 / 0.62);
+			border: 1px solid var(--line);
+			border-radius: 999px;
+			backdrop-filter: blur(20px) saturate(1.5);
+			-webkit-backdrop-filter: blur(20px) saturate(1.5);
+		}
+
+		.search-trigger,
+		.bell {
+			background: none;
+			border: 0;
+			backdrop-filter: none;
+			-webkit-backdrop-filter: none;
+		}
+
 		.search-trigger {
 			justify-content: center;
 			width: 44px;
-			height: 44px;
 			padding: 0;
-			border: 0;
 		}
 
-		.search-label,
-		.search-key {
+		.session-placeholder {
 			display: none;
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.sheet {
+			display: none !important;
 		}
 	}
 </style>

@@ -190,8 +190,10 @@
 {/if}
 
 <style>
+	/* The picture runs right up behind the floating header. */
 	.detail {
 		position: relative;
+		margin-top: calc(var(--header-height) * -1);
 		isolation: isolate;
 	}
 
@@ -217,8 +219,9 @@
 
 	.backdrop {
 		position: relative;
-		height: clamp(200px, 42vw, 520px);
+		height: calc(clamp(200px, 42vw, 520px) + var(--header-height));
 		overflow: hidden;
+		mask-image: linear-gradient(to bottom, #000 55%, transparent);
 	}
 
 	.backdrop img {
@@ -256,7 +259,7 @@
 		content: '';
 		position: absolute;
 		inset: 0;
-		background: linear-gradient(to top, var(--bg) 2%, rgb(10 10 11 / 0.1) 70%);
+		background: linear-gradient(to top, rgb(8 9 11 / 0.7), rgb(8 9 11 / 0.05) 70%);
 	}
 
 	.head {
@@ -269,7 +272,7 @@
 
 	.head.flush {
 		margin-top: 0;
-		padding-top: 40px;
+		padding-top: calc(var(--header-height) + 40px);
 	}
 
 	.poster {

@@ -37,7 +37,7 @@
 
 <ul class="tiles" use:spotlight>
 	{#each games as game (game.slug)}
-		<li>
+		<li class={game.slug}>
 			<a href={game.href}>
 				{#if game.image}
 					<img src={imageUrl(game.image, 'w780')} alt="" loading="lazy" />
@@ -55,13 +55,23 @@
 <style>
 	.tiles {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
-		gap: 12px;
-		margin-top: 20px;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		grid-auto-rows: minmax(190px, 25vh);
+		gap: 10px;
+	}
+
+	.frames {
+		grid-column: span 2;
+		grid-row: span 2;
+	}
+
+	.connections {
+		grid-column: span 2;
 	}
 
 	li {
 		position: relative;
+		min-width: 0;
 	}
 
 	a {
@@ -69,21 +79,17 @@
 		display: flex;
 		align-items: flex-end;
 		height: 100%;
-		min-height: 260px;
 		overflow: hidden;
 		isolation: isolate;
 		background: var(--surface);
-		border-radius: var(--radius-md);
+		border-radius: var(--radius-lg);
 		outline: 1px solid var(--line);
 		outline-offset: -1px;
-		transition:
-			transform 420ms var(--spring),
-			outline-color 200ms var(--ease);
+		transition: transform 420ms var(--spring);
 	}
 
 	a:hover {
-		transform: translateY(-4px);
-		outline-color: var(--line-strong);
+		transform: scale(0.985);
 	}
 
 	img {
@@ -93,15 +99,15 @@
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
-		opacity: 0.42;
+		opacity: 0.55;
 		transition:
 			opacity 320ms var(--ease),
 			transform 900ms var(--ease);
 	}
 
 	a:hover img {
-		opacity: 0.62;
-		transform: scale(1.05);
+		opacity: 0.8;
+		transform: scale(1.06);
 	}
 
 	/* A soft light that follows the pointer: see the spotlight action. */
@@ -113,31 +119,61 @@
 		background:
 			radial-gradient(
 				420px circle at var(--sx, 50%) var(--sy, 0%),
-				rgb(255 255 255 / 0.13),
+				rgb(255 255 255 / 0.12),
 				transparent 62%
 			),
-			linear-gradient(to top, rgb(10 10 11 / 0.92), rgb(10 10 11 / 0.1) 76%);
+			linear-gradient(to top, rgb(8 9 11 / 0.82), rgb(8 9 11 / 0.05) 72%);
 	}
 
 	.copy {
 		display: grid;
-		gap: 6px;
-		padding: 20px;
+		gap: 4px;
+		padding: clamp(16px, 2vw, 24px);
 	}
 
 	.name {
-		font-size: 1.375rem;
+		font-size: clamp(1.25rem, 2vw, 1.625rem);
 		font-weight: 600;
-		letter-spacing: -0.02em;
+		letter-spacing: -0.03em;
+		line-height: 1.1;
+		transition: color 160ms var(--ease);
+	}
+
+	.frames .name {
+		font-size: clamp(1.75rem, 3.4vw, 3rem);
+		letter-spacing: -0.04em;
+	}
+
+	a:hover .name {
+		color: var(--accent);
 	}
 
 	.blurb {
-		color: rgb(245 245 246 / 0.82);
+		color: rgb(246 247 248 / 0.8);
 		font-size: 0.9375rem;
 	}
 
 	.note {
-		color: var(--text-muted);
+		margin-top: 2px;
+		color: var(--accent);
 		font-size: 0.875rem;
+		font-weight: 500;
+	}
+
+	@media (max-width: 900px) {
+		.tiles {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			grid-auto-rows: 170px;
+		}
+
+		.frames,
+		.connections {
+			grid-column: span 2;
+			grid-row: span 1;
+		}
+
+		.frames {
+			grid-row: span 2;
+		}
 	}
 </style>

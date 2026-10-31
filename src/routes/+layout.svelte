@@ -11,11 +11,11 @@
 	import { auth, initAuth } from '#lib/state/auth.svelte.js';
 	import { syncFavorites } from '#lib/state/favorites.svelte.js';
 	import { syncNotifications } from '#lib/state/notifications.svelte.js';
+	import { palette } from '#lib/state/palette.svelte.js';
 	import { inject } from '@vercel/analytics';
 	import { onMount } from 'svelte';
 
 	let { children } = $props();
-	let searchOpen = $state(false);
 
 	// Games fill exactly one screen, so nothing sits below them.
 	const FULL_SCREEN = new Set([
@@ -55,9 +55,9 @@
 	function onkeydown(event) {
 		const combo = (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k';
 		const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName);
-		if (combo || (event.key === '/' && !typing && !searchOpen)) {
+		if (combo || (event.key === '/' && !typing && !palette.open)) {
 			event.preventDefault();
-			searchOpen = combo ? !searchOpen : true;
+			palette.open = combo ? !palette.open : true;
 		}
 	}
 </script>
@@ -69,14 +69,14 @@
 {/if}
 
 <div class="shell" class:full-screen={fullScreen}>
-	<Header onsearch={() => (searchOpen = true)} />
+	<Header onsearch={() => (palette.open = true)} />
 	<main id="content">
 		{@render children()}
 	</main>
 	{#if !fullScreen}<Footer />{/if}
 </div>
 
-<SearchPalette bind:open={searchOpen} />
+<SearchPalette bind:open={palette.open} />
 <Toaster />
 
 <style>

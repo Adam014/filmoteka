@@ -2,7 +2,7 @@
 	import { dragScroll, stagger } from '../actions/motion.js';
 	import Icon from './Icon.svelte';
 
-	let { title, action = undefined, children, count = 0 } = $props();
+	let { title, head = undefined, action = undefined, children, count = 0 } = $props();
 
 	let scroller = $state();
 	let canPrevious = $state(false);
@@ -21,6 +21,8 @@
 
 	$effect(() => {
 		count;
+		// New contents start from the beginning again.
+		scroller.scrollLeft = 0;
 		measure();
 		const observer = new ResizeObserver(measure);
 		observer.observe(scroller);
@@ -30,7 +32,11 @@
 
 <section class="section">
 	<div class="container section-head">
-		<h2 class="section-title">{title}</h2>
+		{#if head}
+			<div class="custom-head">{@render head()}</div>
+		{:else}
+			<h2 class="section-title">{title}</h2>
+		{/if}
 		<div class="controls">
 			{#if action}{@render action()}{/if}
 			{#if canPrevious || canNext}
@@ -63,7 +69,12 @@
 </section>
 
 <style>
+	.custom-head {
+		min-width: 0;
+	}
+
 	.controls {
+		flex: none;
 		display: flex;
 		align-items: center;
 		gap: 12px;

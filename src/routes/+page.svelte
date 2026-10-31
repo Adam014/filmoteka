@@ -1,25 +1,39 @@
 <script>
 	import { goto } from '$app/navigation';
 	import Avatar from '#lib/components/Avatar.svelte';
+	import Countdown from '#lib/components/Countdown.svelte';
 	import EmptyState from '#lib/components/EmptyState.svelte';
+	import FilterMenu from '#lib/components/FilterMenu.svelte';
 	import GameTiles from '#lib/components/GameTiles.svelte';
-	import Hero from '#lib/components/Hero.svelte';
+	import LandingHero from '#lib/components/LandingHero.svelte';
 	import Marquee from '#lib/components/Marquee.svelte';
 	import MediaCard from '#lib/components/MediaCard.svelte';
 	import PersonCard from '#lib/components/PersonCard.svelte';
 	import Row from '#lib/components/Row.svelte';
+	import Segmented from '#lib/components/Segmented.svelte';
+	import SpotlightPanels from '#lib/components/SpotlightPanels.svelte';
 	import { countryName } from '#lib/format.js';
-	import { MOODS } from '#lib/moods.js';
 	import { REGIONS } from '#lib/region.js';
 	import { profileHref } from '#lib/user.js';
 
 	let { data } = $props();
 
-	let country = $derived(countryName(data.region));
+	let tab = $state('trending');
+
+	let tabs = $derived(
+		[
+			{ id: 'trending', label: 'Trending', items: data.trending },
+			{ id: 'cinemas', label: 'In cinemas', items: data.nowPlaying },
+			{ id: 'movies', label: 'Top films', items: data.topMovies },
+			{ id: 'series', label: 'Top series', items: data.topSeries },
+			{ id: 'soon', label: 'Coming soon', items: data.upcoming }
+		].filter((item) => item.items.length || item.id === 'cinemas')
+	);
+	let current = $derived(tabs.find((item) => item.id === tab) ?? tabs[0]);
 	let regions = $derived(
 		[...new Set([...REGIONS, data.region])]
-			.map((code) => ({ code, name: countryName(code) }))
-			.sort((a, b) => a.name.localeCompare(b.name))
+			.map((code) => ({ id: code, label: countryName(code) }))
+			.sort((a, b) => a.label.localeCompare(b.label))
 	);
 	let isEmpty = $derived(
 		!data.featured.length &&
@@ -28,82 +42,100 @@
 			!data.topSeries.length &&
 			!data.actors.length
 	);
+	let wall = $derived(
+		[
+			...new Set(
+				[...data.topMovies, ...data.trending, ...data.topSeries, ...data.nowPlaying]
+					.map((item) => item.poster_path)
+					.filter(Boolean)
+			)
+		].slice(0, 48)
+	);
 
-	function changeRegion(event) {
-		goto(`/?region=${event.currentTarget.value}`, { reset: false });
+	function changeRegion(code) {
+		goto(`/?region=${code}`, { reset: false });
 	}
 </script>
 
 <svelte:head>
-	<title>Filmoteka: movies, series and the people behind them</title>
+	<title>Filmoteka: what are we watching tonight?</title>
 	<meta
 		name="description"
-		content="Discover movies and series, follow what people love, and guess the daily film."
+		content="Find a film for tonight by mood or search, swipe through picks and play the daily film games."
 	/>
 </svelte:head>
 
 {#if isEmpty}
 	<div class="container">
-		<EmptyState title="The catalogue is taking a break">
+		<EmptyState title="The catalogue is taking a break" heading="h1">
 			<p>We can't reach our film data right now. Your favorites are safe, so check back shortly.</p>
 			<a class="btn" href="/">Try again</a>
 		</EmptyState>
 	</div>
 {:else}
+	<LandingHero posters={wall} />
+
 	{#if data.featured.length}
-		<Hero movies={data.featured} />
+		<section class="section container reveal">
+			<h2 class="section-title lead">Spotlight</h2>
+			<SpotlightPanels movies={data.featured.slice(0, 6)} />
+		</section>
 	{/if}
 
-	<section class="section container">
-		<h2 class="section-title">What are you in the mood for?</h2>
-		<ul class="moods">
-			{#each MOODS as mood (mood.id)}
-				<li><a class="chip" href="/mood?mood={mood.id}">{mood.label}</a></li>
+	<Row
+		title="Browse"
+		head={tabsHead}
+		action={current.id === 'cinemas' ? regionPicker : undefined}
+		count={tabs.indexOf(current) * 1000 + current.items.length}
+	>
+		{#key current.id}
+			{#each current.items as item, index (`${item.type}-${item.id}`)}
+				<div class="rise" style:--i={Math.min(index, 10)}><MediaCard media={item} /></div>
+			{:else}
+				<p class="none">No current listings for {countryName(data.region)}.</p>
 			{/each}
-		</ul>
-	</section>
+		{/key}
+	</Row>
 
-	{#snippet media(items)}
-		{#each items as item (`${item.type}-${item.id}`)}
-			<MediaCard media={item} />
-		{/each}
+	{#snippet tabsHead()}
+		<Segmented options={tabs} value={current.id} label="Browse" onselect={(id) => (tab = id)} />
 	{/snippet}
 
-	{#if data.trending.length}
-		<Row title="Trending this week" count={data.trending.length}>
-			{@render media(data.trending)}
-		</Row>
-	{/if}
+	{#snippet regionPicker()}
+		<FilterMenu
+			id="filter-region"
+			label="In"
+			options={regions}
+			value={data.region}
+			onselect={changeRegion}
+			neutral
+		/>
+	{/snippet}
 
-	<section class="section container">
+	<section class="section container reveal">
 		<div class="section-head">
 			<h2 class="section-title">Play today</h2>
-			<a class="link" href="/games">All games</a>
+			<Countdown />
 		</div>
 		<GameTiles games={data.games} />
 	</section>
 
-	{#snippet regionPicker()}
-		<label class="visually-hidden" for="region">Country</label>
-		<select id="region" class="select" value={data.region} onchange={changeRegion}>
-			{#each regions as option (option.code)}
-				<option value={option.code}>{option.name}</option>
-			{/each}
-		</select>
-	{/snippet}
-
-	<Row title="In cinemas in {country}" action={regionPicker} count={data.nowPlaying.length}>
-		{#if data.nowPlaying.length}
-			{@render media(data.nowPlaying)}
-		{:else}
-			<p class="none">No current listings for {country}.</p>
-		{/if}
-	</Row>
-
-	{#if data.topSeries.length}
-		<Row title="Top rated series" count={data.topSeries.length}>
-			{@render media(data.topSeries)}
-		</Row>
+	{#if data.trending.length}
+		<section class="section container reveal">
+			<div class="band">
+				<div class="band-copy">
+					<h2>Can't pick a film?</h2>
+					<p>Swipe through ten. We'll tell you what to watch.</p>
+					<a class="band-btn" href="/swipe">Start swiping</a>
+				</div>
+				<div class="band-wall" aria-hidden="true">
+					<Marquee
+						posters={data.topMovies.map((item) => item.poster_path).filter(Boolean)}
+						speed={50}
+					/>
+				</div>
+			</div>
+		</section>
 	{/if}
 
 	{#if data.actors.length}
@@ -114,33 +146,8 @@
 		</Row>
 	{/if}
 
-	{#if data.trending.length}
-		<section class="section swipe">
-			<div class="container swipe-copy">
-				<div>
-					<h2 class="section-title">Can't pick a film?</h2>
-					<p>Swipe through posters until something grabs you.</p>
-				</div>
-				<a class="btn btn-primary" href="/swipe">Start swiping</a>
-			</div>
-			<Marquee posters={data.trending.map((item) => item.poster_path).filter(Boolean)} />
-		</section>
-	{/if}
-
-	{#if data.topMovies.length}
-		<Row title="Top rated movies" count={data.topMovies.length}>
-			{@render media(data.topMovies)}
-		</Row>
-	{/if}
-
-	{#if data.upcoming.length}
-		<Row title="Coming soon in {country}" count={data.upcoming.length}>
-			{@render media(data.upcoming)}
-		</Row>
-	{/if}
-
 	{#if data.users.length}
-		<section class="section container community">
+		<section class="section container community reveal">
 			<h2 class="section-title">Community</h2>
 			<ul>
 				{#each data.users as user (user.id)}
@@ -154,36 +161,69 @@
 			</ul>
 		</section>
 	{/if}
-
-	<div class="end"></div>
 {/if}
 
 <style>
-	.moods {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 10px;
-		margin-top: 20px;
-	}
-
-	.swipe-copy {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: flex-end;
-		justify-content: space-between;
-		gap: 16px 32px;
-		margin-bottom: 24px;
-	}
-
-	.swipe-copy p {
-		margin-top: 6px;
-		color: var(--text-muted);
+	.lead {
+		margin-bottom: 20px;
 	}
 
 	.none {
-		grid-column: 1 / -1;
 		min-width: 60vw;
 		color: var(--text-muted);
+	}
+
+	.band {
+		display: grid;
+		grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+		align-items: center;
+		gap: 24px;
+		overflow: hidden;
+		background: var(--accent);
+		border-radius: var(--radius-lg);
+		color: var(--on-accent);
+	}
+
+	.band-copy {
+		display: grid;
+		justify-items: start;
+		gap: 8px;
+		padding: clamp(28px, 4vw, 56px);
+	}
+
+	.band h2 {
+		font-size: clamp(2rem, 5vw, 4rem);
+		font-weight: 600;
+		letter-spacing: -0.05em;
+		line-height: 1;
+	}
+
+	.band p {
+		font-size: 1.0625rem;
+		font-weight: 500;
+	}
+
+	.band-btn {
+		display: inline-flex;
+		align-items: center;
+		min-height: 48px;
+		margin-top: 12px;
+		padding: 0 24px;
+		background: var(--on-accent);
+		border-radius: 999px;
+		color: var(--accent);
+		font-weight: 600;
+		transition: transform 320ms var(--spring);
+	}
+
+	.band-btn:hover {
+		transform: scale(1.05);
+	}
+
+	.band-wall {
+		min-width: 0;
+		padding-block: 24px;
+		transform: rotate(-4deg) scale(1.1);
 	}
 
 	.community ul {
@@ -207,7 +247,14 @@
 		color: var(--text);
 	}
 
-	.end {
-		height: clamp(56px, 8vw, 96px);
+	@media (max-width: 767px) {
+		.band {
+			grid-template-columns: minmax(0, 1fr);
+			gap: 0;
+		}
+
+		.band-copy {
+			padding-bottom: 8px;
+		}
 	}
 </style>

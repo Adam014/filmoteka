@@ -40,21 +40,17 @@
 			{:else}
 				<span class="no-poster">{media.title}</span>
 			{/if}
-		</div>
-		<h3 class="title">{media.title}</h3>
-	</a>
-	{#if meta || rating}
-		<p class="meta">
-			{#if meta}<span>{meta}</span>{/if}
 			{#if rating}
-				<span class="rating">
-					<Icon name="star" size={14} filled />
+				<span class="badge">
+					<Icon name="star" size={13} filled />
 					<span class="visually-hidden">Rating</span>
 					{rating}
 				</span>
 			{/if}
-		</p>
-	{/if}
+		</div>
+		<h3 class="title">{media.title}</h3>
+	</a>
+	{#if meta}<p class="meta">{meta}</p>{/if}
 	{#if favorite}
 		<FavoriteButton {media} variant="overlay" />
 	{/if}
@@ -73,7 +69,7 @@
 	.poster {
 		aspect-ratio: 2 / 3;
 		overflow: hidden;
-		border-radius: var(--radius-sm);
+		border-radius: var(--radius-md);
 		background: var(--surface);
 		outline: 1px solid var(--line);
 		outline-offset: -1px;
@@ -100,6 +96,28 @@
 
 	.poster-link:hover .poster {
 		box-shadow: 0 18px 44px rgb(0 0 0 / 0.55);
+		outline-color: var(--line-strong);
+	}
+
+	.badge {
+		position: absolute;
+		top: 8px;
+		left: 8px;
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		padding: 2px 8px;
+		background: rgb(8 9 11 / 0.72);
+		border-radius: 999px;
+		font-size: 0.875rem;
+		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+	}
+
+	.badge :global(svg) {
+		color: var(--accent);
 	}
 
 	.poster-link:hover .poster::after {
@@ -128,6 +146,7 @@
 		display: -webkit-box;
 		margin-top: 10px;
 		overflow: hidden;
+		transition: color 160ms var(--ease);
 		-webkit-box-orient: vertical;
 		-webkit-line-clamp: 2;
 		line-clamp: 2;
@@ -137,20 +156,14 @@
 		line-height: 1.3;
 	}
 
+	.poster-link:hover .title {
+		color: var(--accent);
+	}
+
 	.meta {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 2px 10px;
-		margin-top: 4px;
+		margin-top: 2px;
 		color: var(--text-faint);
 		font-size: 0.875rem;
 		font-variant-numeric: tabular-nums;
-	}
-
-	.rating {
-		display: inline-flex;
-		align-items: center;
-		gap: 3px;
 	}
 </style>
