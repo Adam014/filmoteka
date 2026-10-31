@@ -155,10 +155,6 @@ export function spotlight(node) {
 	return { destroy: () => node.removeEventListener('pointermove', onmove) };
 }
 
-export function focusOnMount(node) {
-	node.focus({ preventScroll: true });
-}
-
 /** A short tap on phones that support it. */
 export function buzz(ms = 10) {
 	navigator.vibrate?.(ms);

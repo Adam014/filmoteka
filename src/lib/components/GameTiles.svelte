@@ -1,27 +1,36 @@
 <script>
 	import { spotlight } from '../actions/motion.js';
+	import { gameStatus, gameStorageKey, parseSavedGame } from '../game.js';
 	import { dayKey } from '../games/seed.js';
+	import { ROUNDS } from '../games/higherLower.js';
 	import { imageUrl } from '../media.js';
-	import { getBest, getPlay } from '../state/arcade.js';
-	import { BEST_KEY, ROUNDS } from '../games/higherLower.js';
+	import { getPlay } from '../state/arcade.js';
 	import { onMount } from 'svelte';
 
 	let { games } = $props();
 	let notes = $state({});
 
-	const dailyNote = (game) => {
-		const status = getPlay(game, dayKey())?.status;
-		if (status === 'won') return 'Solved today';
-		if (status === 'lost') return 'Played today';
-		return status === 'playing' ? 'In progress' : '';
-	};
+	const LABELS = { won: 'Solved today', lost: 'Played today', playing: 'In progress' };
+
+	function posterStatus(day) {
+		if (!day) return null;
+		try {
+			return gameStatus(parseSavedGame(localStorage.getItem(gameStorageKey(day))));
+		} catch {
+			return null;
+		}
+	}
 
 	onMount(() => {
-		const best = getBest(BEST_KEY);
+		const today = dayKey();
+		const highLow = getPlay('higher-lower', today);
+		const score = highLow?.marks?.filter((mark) => mark === 'right').length;
 		notes = {
-			frames: dailyNote('frames'),
-			connections: dailyNote('connections'),
-			'higher-lower': best ? `Best ${best}/${ROUNDS}` : ''
+			frames: LABELS[getPlay('frames', today)?.status],
+			connections: LABELS[getPlay('connections', today)?.status],
+			daily: LABELS[posterStatus(games.find((game) => game.slug === 'daily')?.posterDay)],
+			'higher-lower':
+				highLow?.status === 'playing' ? LABELS.playing : highLow && `Today ${score}/${ROUNDS}`
 		};
 	});
 </script>

@@ -33,38 +33,12 @@ export async function loadGame(user, day) {
 
 export async function saveGame(user, day, state) {
 	const record = { ...state, day, lastUpdated: new Date().toISOString() };
+	writeLocal(day, record);
 	if (user && supabase) {
 		const body = new Blob([JSON.stringify(record)], { type: 'application/json' });
 		const { error } = await supabase.storage
 			.from('games')
 			.upload(gameFilePath(user.id, day), body, { upsert: true });
-		if (!error) return;
-		console.error('Saving game failed:', error.message);
+		if (error) console.error('Saving game failed:', error.message);
 	}
-	writeLocal(day, record);
-}
-
-/** Saved games by day. Only files that exist are downloaded, so nothing 404s for unplayed days. */
-export async function loadAllGames(user, days) {
-	const games = new Map();
-	for (const day of days) {
-		const saved = readLocal(day);
-		if (saved) games.set(day, saved);
-	}
-	if (!user || !supabase) return games;
-
-	const { data, error } = await supabase.storage
-		.from('games')
-		.list(`daily-challenge/${user.id}`, { limit: 1000 });
-	if (error) return games;
-
-	await Promise.all(
-		(data ?? []).map(async (file) => {
-			const day = parseInt(file.name, 10);
-			if (!days.includes(day)) return;
-			const saved = await downloadGame(user.id, day).catch(() => null);
-			if (saved) games.set(day, saved);
-		})
-	);
-	return games;
 }

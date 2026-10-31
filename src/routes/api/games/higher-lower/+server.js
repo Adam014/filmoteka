@@ -1,29 +1,34 @@
-import { normalizeList } from '#lib/media.js';
-import { tmdbList } from '#lib/server/tmdb.js';
+import { dayKey, dayNumber } from '#lib/games/seed.js';
+import { parseId } from '#lib/media.js';
+import { higherLowerPuzzle, ratingsOf } from '#lib/server/games.js';
 
-const PAGES = [1, 2, 3, 4, 5, 6, 7, 8];
+const publicFilm = ({ id, title, date, backdrop_path }) => ({ id, title, date, backdrop_path });
 
+/** Today's pairs, without their ratings. */
 export async function GET() {
-	const pages = await Promise.all(
-		PAGES.map((page) =>
-			tmdbList('/discover/movie', {
-				sort_by: 'vote_count.desc',
-				include_adult: 'false',
-				page
-			})
-		)
-	);
-	const movies = normalizeList(pages.flat()).filter((movie) => movie.backdrop_path && movie.rating);
-	if (movies.length < 2) return Response.json({ message: 'Unavailable' }, { status: 503 });
+	const key = dayKey();
+	const rounds = await higherLowerPuzzle(key);
+	if (!rounds) return Response.json({ message: 'Unavailable' }, { status: 503 });
 
-	// Fresh order for every game.
-	const shuffled = movies
-		.map((movie) => [Math.random(), movie])
-		.sort((a, b) => a[0] - b[0])
-		.map(([, movie]) => ({
-			...movie,
-			rating: Math.round(movie.rating * 10) / 10,
-			overview: ''
-		}));
-	return Response.json({ movies: shuffled }, { headers: { 'cache-control': 'no-store' } });
+	return Response.json(
+		{
+			key,
+			number: dayNumber(key),
+			rounds: rounds.map(({ a, b }) => ({ a: publicFilm(a), b: publicFilm(b) }))
+		},
+		{ headers: { 'cache-control': 'no-store' } }
+	);
+}
+
+/** Ratings are only handed out for a pair once the player has picked. */
+export async function POST({ request }) {
+	const body = await request.json().catch(() => null);
+	const ids = Array.isArray(body?.ids) ? body.ids.map((id) => parseId(String(id))) : [];
+	if (ids.length !== 2 || ids.includes(null)) {
+		return Response.json({ message: 'Invalid pair' }, { status: 400 });
+	}
+
+	const ratings = await ratingsOf(ids);
+	if (!ratings) return Response.json({ message: 'Unavailable' }, { status: 503 });
+	return Response.json({ ratings });
 }

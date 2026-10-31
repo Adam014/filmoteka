@@ -27,18 +27,6 @@ export function savePlay(game, key, play) {
 	write(game, { ...data, plays: { ...data.plays, [key]: play } });
 }
 
-export function getBest(game) {
-	return read(game).best ?? 0;
-}
-
-/** Stores a new best score and says whether it was beaten. */
-export function submitScore(game, score) {
-	const data = read(game);
-	if (score <= (data.best ?? 0)) return false;
-	write(game, { ...data, best: score });
-	return true;
-}
-
 /** Days won in a row, counting back from today (or yesterday, if today isn't played yet). */
 export function getStreak(game, today) {
 	const plays = read(game).plays ?? {};

@@ -1,9 +1,12 @@
 import { GAMES } from '../games/catalog.js';
+import { buildRounds } from '../games/higherLower.js';
 import { ACTORS, DIRECTORS, FRAME_FILMS } from '../games/pool.js';
 import { yearOf } from '../format.js';
-import { hashString, pickForDay, seededShuffle } from '../games/seed.js';
+import { dayKey, hashString, pickForDay, seededShuffle } from '../games/seed.js';
+import { normalizeList } from '../media.js';
+import { safeQuery } from './catalog.js';
 import { cached } from './cache.js';
-import { tmdb } from './tmdb.js';
+import { tmdb, tmdbList } from './tmdb.js';
 
 const WEEK = 7 * 24 * 60 * 60 * 1000;
 const STILL_COUNT = 6;
@@ -139,12 +142,58 @@ export function connectionsPuzzle(key) {
 	});
 }
 
+/** Five pairs of well-known films for the day, with the ratings kept on the server. */
+export function higherLowerPuzzle(key) {
+	return cached(`higher-lower:${key}`, WEEK, async () => {
+		const pages = await Promise.all(
+			[1, 2, 3, 4, 5, 6, 7, 8].map((page) =>
+				tmdbList('/discover/movie', {
+					sort_by: 'vote_count.desc',
+					include_adult: 'false',
+					page
+				})
+			)
+		);
+		const films = normalizeList(pages.flat())
+			.filter((movie) => movie.backdrop_path && movie.rating)
+			.map((movie) => ({ ...movie, rating: Math.round(movie.rating * 10) / 10 }))
+			.sort((a, b) => a.id - b.id);
+		return buildRounds(seededShuffle(films, hashString(`higher-lower-v1:${key}`)));
+	});
+}
+
+/** Ratings of two films, one decimal place, as shown to the player. */
+export async function ratingsOf(ids) {
+	const movies = await Promise.all(ids.map((id) => tmdb(`/movie/${id}`, { language: 'en-US' })));
+	if (movies.some((movie) => !movie)) return null;
+	return movies.map((movie) => Math.round(movie.vote_average * 10) / 10);
+}
+
+const posterDays = () =>
+	cached('poster-days', 60 * 60 * 1000, async () => {
+		const rows = await safeQuery((client) =>
+			client.from('daily_challenge').select('day').order('day')
+		);
+		return rows?.length ? rows.map((row) => row.day) : null;
+	});
+
+/** The poster challenge everyone gets today, walking through all the challenges in turn. */
+export async function todaysPosterDay(key = dayKey()) {
+	const days = await posterDays();
+	return days ? pickForDay(days, key, 'poster-v1') : null;
+}
+
 /** Game tiles with a backdrop from each game's signature film. */
-export function gameTiles() {
+export async function gameTiles() {
+	const posterDay = await todaysPosterDay();
 	return Promise.all(
 		GAMES.map(async (game) => {
 			const movie = await tmdb(`/movie/${game.film}`, { language: 'en-US' }, WEEK);
-			return { ...game, image: movie?.backdrop_path ?? null };
+			return {
+				...game,
+				image: movie?.backdrop_path ?? null,
+				...(game.slug === 'daily' ? { posterDay } : {})
+			};
 		})
 	);
 }

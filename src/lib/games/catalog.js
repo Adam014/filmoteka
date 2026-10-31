@@ -24,7 +24,7 @@ export const GAMES = [
 		slug: 'daily',
 		href: '/games/daily',
 		name: 'Daily poster',
-		blurb: 'Every miss sharpens a blurred poster.',
+		blurb: 'Name the film as a blurred poster sharpens.',
 		film: 157336
 	}
 ];

@@ -1,9 +1,18 @@
 <script>
 	import { buzz, celebrate } from '#lib/actions/motion.js';
+	import Countdown from '#lib/components/Countdown.svelte';
 	import GameShell from '#lib/components/GameShell.svelte';
-	import Icon from '#lib/components/Icon.svelte';
 	import MovieGuess from '#lib/components/MovieGuess.svelte';
-	import { guess, isCorrectGuess, isFinished, newGame, posterBlur, skip } from '#lib/game.js';
+	import ShareButton from '#lib/components/ShareButton.svelte';
+	import {
+		MAX_GUESSES,
+		guess,
+		isCorrectGuess,
+		isFinished,
+		newGame,
+		posterBlur,
+		skip
+	} from '#lib/game.js';
 	import { formatDate, plural } from '#lib/format.js';
 	import { nextGame } from '#lib/games/catalog.js';
 	import { imageUrl, posterSrcset } from '#lib/media.js';
@@ -22,6 +31,13 @@
 
 	let challenge = $derived(data.challenge);
 	let finished = $derived(isFinished(game));
+	let shareText = $derived.by(() => {
+		if (!finished) return '';
+		const used = MAX_GUESSES - game.guessesLeft;
+		const squares = '🟥'.repeat(used) + (game.guessedCorrectly ? '🟩' : '');
+		const score = game.guessedCorrectly ? `${used + 1}/${MAX_GUESSES}` : `X/${MAX_GUESSES}`;
+		return `Filmoteka Poster #${data.day} ${score}\n${squares}\n${location.origin}/games/daily`;
+	});
 	let genres = $derived((challenge.genres ?? []).map((item) => item.name).join(', '));
 	let hints = $derived(
 		[
@@ -67,27 +83,10 @@
 </script>
 
 <svelte:head>
-	<title>Day {data.day} | Daily poster | Filmoteka</title>
+	<title>Daily poster | Filmoteka</title>
 </svelte:head>
 
-<GameShell title="Day {data.day}" back="/games/daily" backLabel="All days">
-	{#snippet status()}
-		{#if data.previousDay}
-			<a
-				class="icon-btn"
-				href="/games/daily/day-{data.previousDay}"
-				aria-label="Day {data.previousDay}"
-			>
-				<Icon name="left" />
-			</a>
-		{/if}
-		{#if data.nextDay}
-			<a class="icon-btn" href="/games/daily/day-{data.nextDay}" aria-label="Day {data.nextDay}">
-				<Icon name="right" />
-			</a>
-		{/if}
-	{/snippet}
-
+<GameShell title="Daily poster">
 	<div class="board">
 		<div class="poster-area">
 			<div class="poster">
@@ -126,12 +125,11 @@
 					<h2>{challenge.title}</h2>
 				</div>
 				<div class="actions">
-					<a class="btn btn-primary" href="/movie/{challenge.films_id}">View film</a>
-					{#if data.nextDay}
-						<a class="btn" href="/games/daily/day-{data.nextDay}">Next day</a>
-					{/if}
+					<ShareButton text={shareText} primary />
+					<a class="btn" href="/movie/{challenge.films_id}">View film</a>
 					<a class="btn btn-quiet" href={next.href}>Next: {next.name}</a>
 				</div>
+				<div class="count"><Countdown /></div>
 			{:else}
 				<p class="line" aria-live="polite">
 					{#if wrong}<span class="wrong">Not “{wrong}”.</span>{/if}
@@ -256,6 +254,10 @@
 		flex-wrap: wrap;
 		gap: 8px;
 		margin-top: 10px;
+	}
+
+	.count {
+		margin-top: 8px;
 	}
 
 	/* Portrait: the poster fills what's left above its hints. */

@@ -1,69 +1,68 @@
 <script>
-	import { buzz, celebrate, focusOnMount } from '#lib/actions/motion.js';
+	import { buzz, celebrate } from '#lib/actions/motion.js';
+	import Countdown from '#lib/components/Countdown.svelte';
 	import CountUp from '#lib/components/CountUp.svelte';
 	import EmptyState from '#lib/components/EmptyState.svelte';
 	import GameShell from '#lib/components/GameShell.svelte';
+	import Icon from '#lib/components/Icon.svelte';
 	import Pips from '#lib/components/Pips.svelte';
 	import ShareButton from '#lib/components/ShareButton.svelte';
-	import Icon from '#lib/components/Icon.svelte';
 	import { nextGame } from '#lib/games/catalog.js';
-	import { BEST_KEY, ROUNDS, buildRounds, verdict } from '#lib/games/higherLower.js';
+	import { ROUNDS, WIN_SCORE, verdict } from '#lib/games/higherLower.js';
 	import { yearOf } from '#lib/format.js';
 	import { imageUrl } from '#lib/media.js';
-	import { getBest, submitScore } from '#lib/state/arcade.js';
+	import { getPlay, savePlay } from '#lib/state/arcade.js';
+	import { toast } from '#lib/state/toast.svelte.js';
 	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
 
+	const GAME = 'higher-lower';
 	const REVEAL_MS = 1700;
-	const next = nextGame('higher-lower');
+	const next = nextGame(GAME);
 
-	let pool = [];
-	const used = new Set();
-
+	let puzzle = $state(null);
 	let rounds = $state([]);
 	let failed = $state(false);
 	let index = $state(0);
 	let phase = $state('guess');
 	let picked = $state(null);
 	let marks = $state([]);
-	let best = $state(0);
-	let isNewBest = $state(false);
+	let ratings = $state([]);
 	let timer;
 
 	let pair = $derived(rounds[index]);
 	let sides = $derived(pair ? [pair.a, pair.b] : []);
-	let winner = $derived(pair ? (pair.a.rating > pair.b.rating ? 0 : 1) : 0);
+	let shown = $derived(ratings[index] ?? null);
 	let score = $derived(marks.filter((mark) => mark === 'right').length);
 	let lastRight = $derived(marks.at(-1) === 'right');
 	let shareText = $derived.by(() => {
 		if (phase !== 'over') return '';
 		const squares = marks.map((mark) => (mark === 'right' ? '🟩' : '🟥')).join('');
-		return `Filmoteka Higher or Lower ${score}/${ROUNDS}\n${squares}\n${location.origin}/games/higher-lower`;
+		return `Filmoteka Higher or Lower #${puzzle.number} ${score}/${ROUNDS}\n${squares}\n${location.origin}/games/higher-lower`;
 	});
 
-	function deal() {
-		let dealt = buildRounds(pool, used);
-		if (!dealt) {
-			used.clear();
-			dealt = buildRounds(pool, used);
-		}
-		rounds = dealt ?? [];
-		index = 0;
-		picked = null;
-		marks = [];
-		phase = 'guess';
-		isNewBest = false;
-		best = getBest(BEST_KEY);
-		failed = !dealt;
-	}
+	const isWinner = (side) => shown && shown[side] >= shown[1 - side];
+
+	const persist = (status) =>
+		savePlay(GAME, puzzle.key, $state.snapshot({ rounds, marks, ratings, status }));
 
 	async function load() {
 		failed = false;
 		try {
 			const response = await fetch('/api/games/higher-lower');
 			if (!response.ok) throw new Error(`HTTP ${response.status}`);
-			pool = (await response.json()).movies;
-			deal();
+			const today = await response.json();
+			const saved = getPlay(GAME, today.key);
+			puzzle = today;
+			rounds = saved?.rounds ?? today.rounds;
+			marks = saved?.marks ?? [];
+			ratings = saved?.ratings ?? [];
+			if (marks.length >= ROUNDS) {
+				index = ROUNDS - 1;
+				phase = 'over';
+			} else {
+				index = marks.length;
+			}
 		} catch {
 			failed = true;
 		}
@@ -91,23 +90,39 @@
 			phase = 'guess';
 			return;
 		}
-		isNewBest = submitScore(BEST_KEY, score);
-		best = getBest(BEST_KEY);
 		phase = 'over';
+		persist(score >= WIN_SCORE ? 'won' : 'lost');
 		if (score === ROUNDS) celebrate();
 	}
 
-	function choose(side) {
+	async function choose(side) {
 		if (phase === 'reveal') {
 			advance();
 			return;
 		}
 		if (phase !== 'guess') return;
+		phase = 'checking';
 		picked = side;
-		phase = 'reveal';
-		marks = [...marks, side === winner ? 'right' : 'wrong'];
-		buzz(side === winner ? 10 : 40);
-		timer = setTimeout(advance, REVEAL_MS);
+		try {
+			const response = await fetch('/api/games/higher-lower', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ ids: [pair.a.id, pair.b.id] })
+			});
+			if (!response.ok) throw new Error(`HTTP ${response.status}`);
+			const result = (await response.json()).ratings;
+			const right = result[side] >= result[1 - side];
+			ratings = [...ratings, result];
+			marks = [...marks, right ? 'right' : 'wrong'];
+			phase = 'reveal';
+			buzz(right ? 10 : 40);
+			persist('playing');
+			timer = setTimeout(advance, REVEAL_MS);
+		} catch {
+			picked = null;
+			phase = 'guess';
+			toast.error("That pick didn't go through. Please try again.");
+		}
 	}
 
 	function onkeydown(event) {
@@ -121,7 +136,10 @@
 
 <svelte:head>
 	<title>Higher or Lower | Filmoteka</title>
-	<meta name="description" content="Two films, five rounds. Pick the one rated higher." />
+	<meta
+		name="description"
+		content="Two films, five rounds, a new set every day. Pick the one rated higher."
+	/>
 </svelte:head>
 
 <GameShell title="Higher or Lower" bleed>
@@ -145,11 +163,11 @@
 				{#each sides as movie, side (movie.id)}
 					<button
 						class="side"
-						class:win={phase !== 'guess' && side === winner}
-						class:lose={phase !== 'guess' && side !== winner}
-						class:shake={phase === 'reveal' && picked === side && side !== winner}
+						class:win={shown && isWinner(side)}
+						class:lose={shown && !isWinner(side)}
+						class:shake={phase === 'reveal' && picked === side && !isWinner(side)}
 						type="button"
-						aria-label="{movie.title}{phase === 'guess' ? '' : `, rated ${movie.rating}`}"
+						aria-label="{movie.title}{shown ? `, rated ${shown[side]}` : ''}"
 						onclick={() => choose(side)}
 						in:fly={{ x: side ? 70 : -70, duration: 480 }}
 					>
@@ -160,10 +178,10 @@
 						</span>
 						<span class="rating">
 							<Icon name="star" size={28} filled />
-							{#if phase === 'guess'}
+							{#if !shown}
 								<span class="unknown">?</span>
 							{:else}
-								<CountUp value={movie.rating} decimals={1} duration={1000} />
+								<CountUp value={shown[side]} decimals={1} duration={1000} />
 							{/if}
 						</span>
 					</button>
@@ -187,16 +205,13 @@
 				<div class="over" role="status">
 					<div class="card">
 						<p class="final"><CountUp value={score} duration={600} /><span>/{ROUNDS}</span></p>
-						<p class="line">{isNewBest ? 'New best!' : verdict(score)}</p>
+						<p class="line">{verdict(score)}</p>
 						<div class="result-pips"><Pips total={ROUNDS} {marks} label="Your rounds" /></div>
 						<div class="actions">
-							<button class="btn btn-primary" type="button" onclick={deal} use:focusOnMount>
-								Play again
-							</button>
-							<ShareButton text={shareText} />
+							<ShareButton text={shareText} primary />
+							<a class="btn" href={next.href}>Next: {next.name}</a>
 						</div>
-						<a class="link next" href={next.href}>Next: {next.name}</a>
-						{#if best && !isNewBest}<p class="best">Best {best}/{ROUNDS}</p>{/if}
+						<Countdown />
 					</div>
 				</div>
 			{/if}
@@ -392,16 +407,6 @@
 		justify-content: center;
 		gap: 10px;
 		margin-top: 8px;
-	}
-
-	.next {
-		margin-top: 6px;
-		color: var(--text-muted);
-	}
-
-	.best {
-		color: var(--text-faint);
-		font-size: 0.875rem;
 	}
 
 	/* Portrait screens stack the two films, and each half is one big thumb target. */
