@@ -102,7 +102,8 @@ function score(query, target) {
 	// One stray word in a longer search shouldn't lose the film it clearly means.
 	if (missed > (required.length >= 3 ? 1 : 0)) {
 		const start = target.compact.slice(0, query.compact.length);
-		if (query.compact.length >= 6 && distance(query.compact, start, 1) <= 1) return 200;
+		const spare = query.compact.length >= 10 ? 2 : 1;
+		if (query.compact.length >= 6 && distance(query.compact, start, spare) <= spare) return 200;
 		return 0;
 	}
 	const sum = scores.reduce((total, value) => total + value, 0);
