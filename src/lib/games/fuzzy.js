@@ -77,7 +77,7 @@ function wordScore(wanted, list) {
 				const start = distance(wanted, word.slice(0, wanted.length), limit);
 				const typos = Math.min(whole, start);
 				if (typos <= limit) best = Math.max(best, 60 - typos * 12);
-			} else if (limit && distance(wanted, word, limit) <= limit) {
+			} else if (limit && wanted.length >= 5 && distance(wanted, word, limit) <= limit) {
 				best = Math.max(best, 30);
 			}
 		}
@@ -101,9 +101,8 @@ function score(query, target) {
 	const missed = scores.filter((value) => !value).length;
 	// One stray word in a longer search shouldn't lose the film it clearly means.
 	if (missed > (required.length >= 3 ? 1 : 0)) {
-		const limit = allowance(query.compact.length);
 		const start = target.compact.slice(0, query.compact.length);
-		if (limit && distance(query.compact, start, limit) <= limit) return 300;
+		if (query.compact.length >= 6 && distance(query.compact, start, 1) <= 1) return 200;
 		return 0;
 	}
 	const sum = scores.reduce((total, value) => total + value, 0);
