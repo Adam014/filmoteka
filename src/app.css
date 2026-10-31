@@ -12,7 +12,13 @@
 	--accent: #d6ff3f;
 	--on-accent: #0b0d04;
 	--success: #4cc38a;
+	--close: #ffc53d;
 	--danger: #ff7a6b;
+	--tier-1: #4cc38a;
+	--tier-2: #ffd23f;
+	--tier-3: #ff9a3d;
+	--tier-4: #ff6363;
+	--tier-5: #b68cff;
 
 	--radius-sm: 10px;
 	--radius-md: 14px;

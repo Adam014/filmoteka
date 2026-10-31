@@ -22,6 +22,14 @@
 		'/games/frames',
 		'/games/connections',
 		'/games/higher-lower',
+		'/games/soundtrack',
+		'/games/earworm',
+		'/games/playlist',
+		'/games/playlist/[source]/[id]',
+		'/games/filmle',
+		'/games/grid',
+		'/games/year',
+		'/games/emoji',
 		'/games/daily/day-[day]',
 		'/swipe'
 	]);

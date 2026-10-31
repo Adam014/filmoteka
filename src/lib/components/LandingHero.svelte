@@ -3,6 +3,7 @@
 	import { imageUrl } from '../media.js';
 	import { palette } from '../state/palette.svelte.js';
 	import Icon from './Icon.svelte';
+	import TextStream from './TextStream.svelte';
 
 	let { posters = [] } = $props();
 
@@ -11,7 +12,6 @@
 	const PER_COLUMN = 8;
 
 	let hero = $state();
-	let word = $state(0);
 	let shortcut = $state('Ctrl K');
 
 	let columns = $derived(
@@ -25,9 +25,6 @@
 
 	$effect(() => {
 		if (/mac|iphone|ipad/i.test(navigator.platform)) shortcut = '⌘K';
-		if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-		const timer = setInterval(() => (word = (word + 1) % WORDS.length), 2800);
-		return () => clearInterval(timer);
 	});
 
 	// A pool of light follows the pointer over the wall of posters.
@@ -73,9 +70,8 @@
 	<div class="container copy">
 		<h1>
 			<span class="line">What are we watching</span>
-			<span class="line swap" aria-live="off">
-				{#key word}<span class="word">{WORDS[word]}</span>{/key}
-			</span>
+			<span class="visually-hidden">{WORDS[0]}</span>
+			<span class="line stream"><TextStream items={WORDS} /></span>
 		</h1>
 
 		<button class="search" type="button" onclick={() => (palette.open = true)}>
@@ -186,23 +182,9 @@
 		text-shadow: 0 2px 40px rgb(0 0 0 / 0.6);
 	}
 
-	.swap {
+	.stream {
 		display: block;
-		padding-bottom: 0.12em;
-		overflow: clip;
-	}
-
-	.word {
-		display: inline-block;
 		color: var(--accent);
-		animation: word-up 620ms var(--ease) both;
-	}
-
-	@keyframes word-up {
-		from {
-			opacity: 0;
-			transform: translateY(70%);
-		}
 	}
 
 	.search {

@@ -7,7 +7,8 @@
 	import { getPlay } from '../state/arcade.js';
 	import { onMount } from 'svelte';
 
-	let { games } = $props();
+	/** `bento` gives the first game a large tile, `even` makes them all the same size. */
+	let { games, variant = 'even' } = $props();
 	let notes = $state({});
 
 	const LABELS = { won: 'Solved today', lost: 'Played today', playing: 'In progress' };
@@ -25,9 +26,22 @@
 		const today = dayKey();
 		const highLow = getPlay('higher-lower', today);
 		const score = highLow?.marks?.filter((mark) => mark === 'right').length;
+		const scored = (game, max) => {
+			const play = getPlay(game, today);
+			if (!play) return undefined;
+			return play.status === 'playing' ? LABELS.playing : `Today ${play.score}/${max}`;
+		};
 		notes = {
-			frames: LABELS[getPlay('frames', today)?.status],
-			connections: LABELS[getPlay('connections', today)?.status],
+			...Object.fromEntries(
+				['frames', 'connections', 'filmle', 'emoji'].map((game) => [
+					game,
+					LABELS[getPlay(game, today)?.status]
+				])
+			),
+			soundtrack: scored('soundtrack', 5),
+			earworm: scored('earworm', 5),
+			grid: scored('grid', 9),
+			year: scored('year', 1000),
 			daily: LABELS[posterStatus(games.find((game) => game.slug === 'daily')?.posterDay)],
 			'higher-lower':
 				highLow?.status === 'playing' ? LABELS.playing : highLow && `Today ${score}/${ROUNDS}`
@@ -35,9 +49,9 @@
 	});
 </script>
 
-<ul class="tiles" use:spotlight>
+<ul class="tiles {variant}" use:spotlight>
 	{#each games as game (game.slug)}
-		<li class={game.slug}>
+		<li>
 			<a href={game.href}>
 				{#if game.image}
 					<img src={imageUrl(game.image, 'w780')} alt="" loading="lazy" />
@@ -55,18 +69,22 @@
 <style>
 	.tiles {
 		display: grid;
-		grid-template-columns: repeat(4, minmax(0, 1fr));
-		grid-auto-rows: minmax(190px, 25vh);
 		gap: 10px;
 	}
 
-	.frames {
+	.bento {
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		grid-auto-rows: minmax(190px, 25vh);
+	}
+
+	.bento li:first-child {
 		grid-column: span 2;
 		grid-row: span 2;
 	}
 
-	.connections {
-		grid-column: span 2;
+	.even {
+		grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+		grid-auto-rows: clamp(170px, 22vh, 230px);
 	}
 
 	li {
@@ -139,7 +157,7 @@
 		transition: color 160ms var(--ease);
 	}
 
-	.frames .name {
+	.bento li:first-child .name {
 		font-size: clamp(1.75rem, 3.4vw, 3rem);
 		letter-spacing: -0.04em;
 	}
@@ -161,19 +179,13 @@
 	}
 
 	@media (max-width: 900px) {
-		.tiles {
+		.bento {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
 			grid-auto-rows: 170px;
 		}
 
-		.frames,
-		.connections {
-			grid-column: span 2;
+		.bento li:first-child {
 			grid-row: span 1;
-		}
-
-		.frames {
-			grid-row: span 2;
 		}
 	}
 </style>

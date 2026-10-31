@@ -1,6 +1,7 @@
 <script>
 	import Countdown from '#lib/components/Countdown.svelte';
 	import GameTiles from '#lib/components/GameTiles.svelte';
+	import { GROUPS } from '#lib/games/catalog.js';
 
 	let { data } = $props();
 </script>
@@ -9,7 +10,7 @@
 	<title>Games | Filmoteka</title>
 	<meta
 		name="description"
-		content="Daily film puzzles: guess from stills, sort films into groups and beat your best streak."
+		content="Ten daily games: name the film from its music, a still or emoji, fill the grid and keep your streak."
 	/>
 </svelte:head>
 
@@ -19,9 +20,12 @@
 		<Countdown />
 	</div>
 
-	<div class="games">
-		<GameTiles games={data.games} />
-	</div>
+	{#each GROUPS as group (group.id)}
+		<section class="games">
+			<h2 class="section-title">{group.label}</h2>
+			<GameTiles games={data.games.filter((game) => game.group === group.id)} />
+		</section>
+	{/each}
 </div>
 
 <style>
@@ -34,6 +38,8 @@
 	}
 
 	.games {
-		margin-top: clamp(16px, 3vw, 28px);
+		display: grid;
+		gap: 14px;
+		margin-top: clamp(24px, 4vw, 44px);
 	}
 </style>

@@ -1,6 +1,5 @@
 /**
  * Well-known films with plenty of text-free stills. Every id is checked against TMDB.
- * Films whose stills feature Nazi symbols are left out: this is a casual daily game.
  */
 export const FRAME_FILMS = [
 	27205, 603, 155, 238, 550, 680, 278, 13, 157336, 597, 98, 120, 121, 122, 11, 1891, 329, 105, 348,
@@ -9,7 +8,7 @@ export const FRAME_FILMS = [
 	1124, 77, 11324, 106646, 37799, 6977, 115, 275, 28, 103, 185, 62, 857, 497, 1892, 240, 510, 111,
 	629, 562, 745, 1949, 949, 607, 8681, 9806, 150540, 324857, 508442, 272, 49026, 1726, 263115,
 	284054, 19995, 12445, 671, 101, 3176, 546554, 530915, 438631, 693134, 872585, 346698, 466272, 600,
-	389, 429, 567, 289, 1417, 4935, 372058, 152601, 10193, 585, 12, 2062, 9502
+	389, 429, 567, 289, 1417, 4935, 372058, 152601, 10193, 585, 12, 2062, 9502, 424, 16869, 89
 ];
 
 /** People whose filmographies make good Connections groups. */
@@ -19,3 +18,10 @@ export const DIRECTORS = [
 ];
 
 export const ACTORS = [31, 6193, 287, 500, 5064, 192, 1892, 2888, 3223, 1245];
+
+/** Actors with enough well-known films to fill every cell of a Movie Grid. */
+export const GRID_ACTORS = [
+	31, 6193, 287, 500, 5064, 192, 1892, 2888, 3223, 1245, 17419, 1136406, 16828, 4173, 2231, 3894,
+	73421, 10859, 1283, 934, 18918, 3896, 3084, 1158, 1327, 4724, 2963, 380, 62, 56731, 2037, 3061,
+	64, 8784, 1461, 90633, 72129, 234352
+];

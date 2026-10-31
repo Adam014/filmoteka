@@ -15,5 +15,9 @@ export const variables = defineEnvVars({
 	VITE_TMDB_FETCH_API_KEY: { schema: optional },
 	TMDB_API_URL: { schema: optional },
 	GITHUB_API_URL: { schema: optional },
-	CRON_SECRET: { schema: optional }
+	CRON_SECRET: { schema: optional },
+	SPOTIFY_CLIENT_ID: { schema: optional },
+	SPOTIFY_CLIENT_SECRET: { schema: optional },
+	SPOTIFY_API_URL: { schema: optional },
+	SPOTIFY_ACCOUNTS_URL: { schema: optional }
 });

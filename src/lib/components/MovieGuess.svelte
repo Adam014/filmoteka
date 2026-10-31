@@ -1,16 +1,32 @@
 <script>
-	import { imageUrl } from '../media.js';
+	import { loadFilmSearch } from '../games/filmIndex.js';
 	import { resultLabel } from '../search.js';
 	import { createSearch } from '../state/search.svelte.js';
 
-	let { onpick, ontype = undefined, placeholder = 'Type a movie title', up = false } = $props();
+	let {
+		onpick,
+		ontype = undefined,
+		placeholder = 'Type a movie title',
+		up = false,
+		label = 'Guess the movie',
+		// Searches a list we already have instead of the catalogue.
+		local = undefined,
+		empty = 'No movies match that. Try another title.'
+	} = $props();
 
 	const search = createSearch({ type: 'movie' });
 	let query = $state('');
 	let active = $state(0);
 	let open = $state(false);
 
-	let results = $derived(search.state.results);
+	let films = $state(null);
+	let found = $derived(local ? local(query) : (films?.(query) ?? []));
+	// Our list comes first. The wider search only adds to it, for films the list doesn't have.
+	let results = $derived.by(() => {
+		if (local) return found;
+		const known = new Set(found.map((film) => film.id));
+		return [...found, ...search.state.results.filter((film) => !known.has(film.id))].slice(0, 8);
+	});
 	let showList = $derived(open && query.trim().length > 0);
 
 	function clear() {
@@ -29,8 +45,21 @@
 		ontype?.();
 		active = 0;
 		open = true;
-		if (query.trim()) search.update(query);
+		if (local) return;
+		widen();
+	}
+
+	const ENOUGH = 3;
+
+	function widen() {
+		if (query.trim() && found.length < ENOUGH) search.update(query);
 		else search.reset();
+	}
+
+	async function prepareFilms() {
+		if (local || films) return;
+		films = await loadFilmSearch();
+		widen();
 	}
 
 	function onkeydown(event) {
@@ -50,7 +79,7 @@
 </script>
 
 <div class="guess">
-	<label class="visually-hidden" for="guess">Guess the movie</label>
+	<label class="visually-hidden" for="guess">{label}</label>
 	<input
 		id="guess"
 		class="input"
@@ -59,7 +88,10 @@
 		bind:value={query}
 		{oninput}
 		{onkeydown}
-		onfocus={() => (open = true)}
+		onfocus={() => {
+			open = true;
+			prepareFilms();
+		}}
 		onblur={() => setTimeout(() => (open = false), 120)}
 		role="combobox"
 		aria-expanded={showList}
@@ -72,7 +104,7 @@
 	{#if showList}
 		<div class="suggestions" class:up>
 			{#if results.length}
-				<ul id="guess-results" role="listbox" aria-label="Matching movies">
+				<ul id="guess-results" role="listbox" aria-label="Matches">
 					{#each results as result, index (result.id)}
 						<!-- svelte-ignore a11y_click_events_have_key_events -->
 						<li
@@ -85,14 +117,9 @@
 							onclick={() => pick(result)}
 							onmousemove={() => (active = index)}
 						>
-							<span class="thumb">
-								{#if result.image}
-									<img src={imageUrl(result.image, 'w92')} alt="" loading="lazy" />
-								{/if}
-							</span>
 							<span class="text">
 								<span class="name">{result.title}</span>
-								<span class="label">{resultLabel(result)}</span>
+								<span class="label">{result.label ?? resultLabel(result)}</span>
 							</span>
 						</li>
 					{/each}
@@ -102,7 +129,7 @@
 			{:else if search.state.failed}
 				<p class="note">Search isn't responding. Please try again.</p>
 			{:else}
-				<p class="note">No movies match that. Try another title.</p>
+				<p class="note">{empty}</p>
 			{/if}
 		</div>
 	{/if}
@@ -147,21 +174,6 @@
 
 	li.active {
 		background: rgb(255 255 255 / 0.08);
-	}
-
-	.thumb {
-		flex: none;
-		width: 32px;
-		height: 48px;
-		overflow: hidden;
-		border-radius: 4px;
-		background: var(--surface);
-	}
-
-	.thumb img {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
 	}
 
 	.text {

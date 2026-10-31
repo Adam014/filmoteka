@@ -1,7 +1,6 @@
 <script>
 	import { goto } from '$app/navigation';
 	import Avatar from '#lib/components/Avatar.svelte';
-	import Countdown from '#lib/components/Countdown.svelte';
 	import EmptyState from '#lib/components/EmptyState.svelte';
 	import FilterMenu from '#lib/components/FilterMenu.svelte';
 	import GameTiles from '#lib/components/GameTiles.svelte';
@@ -115,9 +114,9 @@
 	<section class="section container reveal">
 		<div class="section-head">
 			<h2 class="section-title">Play today</h2>
-			<Countdown />
+			<a class="link" href="/games">All {data.games.length} games</a>
 		</div>
-		<GameTiles games={data.games} />
+		<GameTiles games={data.games.filter((game) => game.landing)} variant="bento" />
 	</section>
 
 	{#if data.trending.length}

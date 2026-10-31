@@ -9,3 +9,8 @@ export const tmdbKey = () => privateEnv.VITE_TMDB_API_KEY;
 export const tmdbUrl = () => privateEnv.TMDB_API_URL || 'https://api.themoviedb.org/3';
 export const githubUrl = () => privateEnv.GITHUB_API_URL || 'https://api.github.com';
 export const cronSecret = () => privateEnv.CRON_SECRET;
+export const spotifyClientId = () => privateEnv.SPOTIFY_CLIENT_ID;
+export const spotifyClientSecret = () => privateEnv.SPOTIFY_CLIENT_SECRET;
+export const spotifyApiUrl = () => privateEnv.SPOTIFY_API_URL || 'https://api.spotify.com/v1';
+export const spotifyAccountsUrl = () =>
+	privateEnv.SPOTIFY_ACCOUNTS_URL || 'https://accounts.spotify.com';
