@@ -1,814 +1,284 @@
 <script>
-	import { supabase } from '$lib/db/supabaseClient';
-	import { page } from '$app/stores';
-	import { user } from '../../../../stores/user';
-	import lodash from 'lodash';
-	import { onMount, onDestroy } from 'svelte';
-	import Loader from '../../../../components/Loader.svelte';
-	import { goto } from '$app/navigation';
-	import toast from 'svelte-french-toast';
-	import { browser } from '$app/environment';
+	import { buzz, celebrate } from '#lib/actions/motion.js';
+	import GameShell from '#lib/components/GameShell.svelte';
+	import Icon from '#lib/components/Icon.svelte';
+	import MovieGuess from '#lib/components/MovieGuess.svelte';
+	import { guess, isCorrectGuess, isFinished, newGame, posterBlur, skip } from '#lib/game.js';
+	import { formatDate, plural } from '#lib/format.js';
+	import { nextGame } from '#lib/games/catalog.js';
+	import { imageUrl, posterSrcset } from '#lib/media.js';
+	import { auth } from '#lib/state/auth.svelte.js';
+	import { loadGame, saveGame } from '#lib/state/games.js';
+	import { untrack } from 'svelte';
 
-	let challenge = null;
-	let currentHint = 1; // Tracks the current hint
-	let guessedCorrectly = false; // Tracks if the user guessed correctly
-	let userGuess = ''; // Holds the user's input
-	let suggestions = []; // Autocomplete suggestions
-	let isLoading = false;
-	let incorrectGuess = false; // Show animation for incorrect guess
-	let guessesLeft = 3; // Maximum guesses allowed
-	let isSuggestionsOpen = false; // Tracks if suggestions dropdown is open
-	let alreadyPlayed = false; // Tracks if the user has already played this day
-	let savedState = null; // Holds saved state if revisiting
-	let currentUser = null; // Holds the current user
-	let hasPreviousDay = false; // Tracks if there is a previous day
-	let hasNextDay = false; // Tracks if there is a next day
-	let isFavorite = false; // Track if the guessed movie is a favorite
+	let { data } = $props();
 
-	// Reactively track the day from the page params
-	$: day = parseInt($page.params.day);
+	const next = nextGame('daily');
 
-	// Subscribe to user store
-	const unsubscribe = user.subscribe((value) => {
-		currentUser = value;
+	let game = $state(newGame());
+	let restored = $state(false);
+	let wrong = $state('');
+	let requestId = 0;
+
+	let challenge = $derived(data.challenge);
+	let finished = $derived(isFinished(game));
+	let genres = $derived((challenge.genres ?? []).map((item) => item.name).join(', '));
+	let hints = $derived(
+		[
+			{ label: 'Released', value: formatDate(challenge.release_date) || 'Unknown' },
+			{ label: 'Genres', value: genres || 'Unknown' },
+			{ label: 'Tagline', value: challenge.tagline || 'This film has no tagline' }
+		].filter((_, index) => finished || index < game.currentHint)
+	);
+
+	$effect(() => {
+		const day = data.day;
+		const userId = auth.user?.id;
+		if (!auth.ready) return;
+		untrack(async () => {
+			const id = ++requestId;
+			restored = false;
+			game = newGame();
+			wrong = '';
+			const saved = await loadGame(userId ? auth.user : null, day);
+			if (id !== requestId) return;
+			if (saved) game = saved;
+			restored = true;
+		});
 	});
 
-	// Cleanup subscription
-	onDestroy(() => {
-		unsubscribe();
-	});
-
-	// Debounce setup
-	const { debounce } = lodash;
-	const debouncedFetch = debounce(fetchSuggestions, 300);
-
-	// Watch for day changes and update data dynamically
-	$: if (day) {
-		initChallenge();
+	function play(state) {
+		game = state;
+		saveGame(auth.user, data.day, $state.snapshot(state));
 	}
 
-	// Initialize challenge data
-	// Always fetch the challenge data and then, if a saved state exists, apply it.
-	async function initChallenge() {
-		// Reset state
-		challenge = null;
-		alreadyPlayed = false;
-		savedState = null;
-		currentHint = 1;
-		guessedCorrectly = false;
-		guessesLeft = 3;
-		hasPreviousDay = false;
-		hasNextDay = false;
-
-		await checkAdjacentDays();
-		await checkIfPlayed();
-
-		// Always fetch the challenge so that we have the data for the day.
-		await fetchChallenge();
-
-		// Always try to load a saved state if one exists.
-		if (browser) {
-			// For anonymous users, check localStorage
-			if (!currentUser) {
-				if (localStorage.getItem(`daily-challenge-day-${day}`)) {
-					await fetchSavedState();
-					alreadyPlayed = guessedCorrectly || guessesLeft === 0;
-				}
-			} else {
-				// For authenticated users, check Supabase storage for a saved file
-				const { data, error } = await supabase.storage
-					.from('games')
-					.list(`daily-challenge/${currentUser.id}/`, { search: `${day}.json` });
-				if (!error && data.length > 0) {
-					await fetchSavedState();
-					alreadyPlayed = guessedCorrectly || guessesLeft === 0;
-				}
-			}
-		}
+	function submit(result) {
+		const correct = isCorrectGuess(challenge, result);
+		play(guess(game, correct));
+		wrong = correct ? '' : result.title;
+		if (correct) celebrate();
+		else buzz(40);
 	}
 
-	// Fetch the daily challenge
-	async function fetchChallenge() {
-		const { data, error } = await supabase
-			.from('daily_challenge')
-			.select('*')
-			.eq('day', day)
-			.single();
-
-		if (error) {
-			console.error('Error fetching challenge:', error);
-		} else {
-			challenge = data;
-			await checkIfFavorite(); // Check favorite status immediately after loading challenge
-		}
+	function pass() {
+		play(skip(game));
+		wrong = '';
 	}
-
-	async function updateSavedState() {
-		const gameState = {
-			guessedCorrectly,
-			guessesLeft,
-			currentHint,
-			lastUpdated: new Date().toISOString()
-		};
-
-		if (!currentUser) {
-			if (typeof window !== 'undefined') {
-				localStorage.setItem(`daily-challenge-day-${day}`, JSON.stringify(gameState));
-			}
-		} else {
-			const filePath = `daily-challenge/${currentUser.id}/${day}.json`;
-			try {
-				const fileContent = new Blob([JSON.stringify(gameState)], { type: 'application/json' });
-				const { error } = await supabase.storage
-					.from('games')
-					.upload(filePath, fileContent, { upsert: true });
-				if (error) {
-					console.error('Error updating saved state to Supabase storage:', error.message);
-				}
-			} catch (error) {
-				console.error('Error updating saved state:', error.message);
-			}
-		}
-	}
-
-	// Check if the user has already played this day
-	async function checkIfPlayed() {
-		if (!currentUser) {
-			if (typeof window !== 'undefined') {
-				const localState = localStorage.getItem(`daily-challenge-day-${day}`);
-				if (localState) {
-					try {
-						const parsed = JSON.parse(localState);
-						// Mark as already played only if the game is finished.
-						alreadyPlayed = parsed.guessedCorrectly || parsed.guessesLeft === 0;
-					} catch (error) {
-						console.error('Error parsing local saved state:', error);
-						alreadyPlayed = false;
-					}
-				}
-			}
-		} else {
-			const { data, error } = await supabase.storage
-				.from('games')
-				.list(`daily-challenge/${currentUser?.id}/`, { search: `${day}.json` });
-
-			if (error) {
-				console.error('Error checking game state:', error);
-				return;
-			}
-
-			if (data.length > 0) {
-				// For logged-in users, download and check the saved state.
-				const filePath = `daily-challenge/${currentUser.id}/${day}.json`;
-				const { data: fileData, error: downloadError } = await supabase.storage
-					.from('games')
-					.download(filePath);
-				if (!downloadError && fileData) {
-					try {
-						const text = await fileData.text();
-						const parsed = JSON.parse(text);
-						alreadyPlayed = parsed.guessedCorrectly || parsed.guessesLeft === 0;
-					} catch (e) {
-						console.error('Error parsing saved state for logged-in user:', e);
-						alreadyPlayed = false;
-					}
-				}
-			}
-		}
-	}
-
-	// Check for previous and next days
-	async function checkAdjacentDays() {
-		const { data, error } = await supabase
-			.from('daily_challenge')
-			.select('day')
-			.in('day', [day - 1, day + 1]);
-
-		if (error) {
-			console.error('Error checking adjacent days:', error);
-			return;
-		}
-
-		if (data.some((d) => d.day === day - 1)) {
-			hasPreviousDay = true;
-		}
-		if (data.some((d) => d.day === day + 1)) {
-			hasNextDay = true;
-		}
-	}
-
-	// Navigate to another day
-	function switchDay(newDay) {
-		goto(`/games/daily/day-${newDay}`);
-	}
-
-	// Fetch the saved state if the game was already played
-	async function fetchSavedState() {
-		if (!currentUser) {
-			// Ensure localStorage is only accessed on the client
-			if (typeof window !== 'undefined') {
-				const localState = localStorage.getItem(`daily-challenge-day-${day}`);
-				if (localState) {
-					try {
-						savedState = JSON.parse(localState);
-						applySavedState();
-					} catch (error) {
-						console.error('Error parsing local saved state:', error);
-					}
-				}
-			}
-		} else {
-			const filePath = `daily-challenge/${currentUser.id}/${day}.json`;
-
-			const { data, error } = await supabase.storage.from('games').download(filePath);
-
-			if (error) {
-				console.error('Error fetching saved state:', error);
-				return;
-			}
-
-			try {
-				const text = await data.text();
-				savedState = JSON.parse(text);
-				applySavedState();
-			} catch (parseError) {
-				console.error('Error parsing saved state JSON:', parseError);
-			}
-		}
-	}
-
-	// Apply saved state to variables
-	function applySavedState() {
-		guessedCorrectly = savedState.guessedCorrectly ?? false;
-		guessesLeft = savedState.guessesLeft ?? 3;
-		currentHint = savedState.currentHint ?? 1;
-		// Do not set alreadyPlayed here because it’s determined by the game progress.
-		// The UI will check guessedCorrectly or guessesLeft === 0.
-
-		// If the challenge wasn’t loaded yet, try to fetch it.
-		if (!challenge) {
-			fetchChallenge();
-		}
-	}
-
-	// Save game result to Supabase or localStorage
-	async function saveGameResult() {
-		const gameResult = {
-			day,
-			guessedCorrectly,
-			guessesLeft,
-			currentHint,
-			completedAt: new Date().toISOString()
-		};
-
-		if (!currentUser) {
-			// Save to localStorage for anonymous users
-			localStorage.setItem(`daily-challenge-day-${day}`, JSON.stringify(gameResult));
-		} else {
-			const filePath = `daily-challenge/${currentUser.id}/${day}.json`;
-
-			try {
-				const fileContent = new Blob([JSON.stringify(gameResult)], { type: 'application/json' });
-
-				const { error } = await supabase.storage
-					.from('games')
-					.upload(filePath, fileContent, { upsert: true });
-
-				if (error) {
-					throw error;
-				}
-			} catch (error) {
-				console.error('Error saving game result to Supabase storage:', error.message);
-			}
-		}
-	}
-
-	// Fetch suggestions for the search input
-	async function fetchSuggestions(query) {
-		isLoading = true;
-		isSuggestionsOpen = true;
-		try {
-			const { data, error } = await supabase
-				.from('films')
-				.select('id, title, poster_path')
-				.ilike('title', `%${query}%`)
-				.limit(100);
-
-			if (error) {
-				console.error('Error fetching suggestions:', error);
-				suggestions = [];
-			} else {
-				suggestions = data.map((movie) => ({
-					id: movie.id,
-					title: movie.title,
-					poster_path: movie.poster_path
-				}));
-			}
-		} catch (err) {
-			console.error('Error fetching suggestions:', err);
-			suggestions = [];
-		} finally {
-			isLoading = false;
-		}
-	}
-
-	// Handle guess submission
-	function handleGuess(selectedMovie) {
-		userGuess = selectedMovie.title;
-
-		if (userGuess.toLowerCase() === challenge.title.toLowerCase()) {
-			guessedCorrectly = true;
-			guessesLeft = 0;
-			saveGameResult();
-			checkIfFavorite();
-		} else {
-			incorrectGuess = true;
-			setTimeout(() => (incorrectGuess = false), 1000);
-			guessesLeft--;
-			if (guessesLeft === 0) {
-				currentHint = 3;
-				saveGameResult();
-				checkIfFavorite();
-			} else {
-				// Save state after an in-progress guess.
-				updateSavedState();
-			}
-		}
-
-		currentHint = Math.max(currentHint + 1, 3);
-		userGuess = '';
-		suggestions = [];
-		isSuggestionsOpen = false;
-	}
-
-	// Handle skipping the guess
-	function handleSkip() {
-		if (!guessedCorrectly && guessesLeft > 0) {
-			guessesLeft--;
-			currentHint++;
-			if (guessesLeft === 0) {
-				currentHint = 3;
-				saveGameResult();
-			} else {
-				// Save state after an in-progress skip.
-				updateSavedState();
-			}
-		}
-	}
-
-	// Close suggestions on clicking outside
-	function handleClickOutside(event) {
-		if (!event.target.closest('.search-container')) {
-			isSuggestionsOpen = false;
-		}
-	}
-
-	// Function to check if the movie is already marked as favorite
-	async function checkIfFavorite() {
-		if (!currentUser || !challenge) {
-			isFavorite = false;
-			return;
-		}
-
-		try {
-			const { data, error } = await supabase.storage.from('favorites').list(currentUser.email);
-
-			if (error) {
-				console.error('Error fetching favorites:', error.message);
-				isFavorite = false;
-				return;
-			}
-
-			// Match movie ID in favorites
-			isFavorite = data.some((file) => file.name === `${challenge.id}.json`);
-		} catch (err) {
-			console.error('Error checking favorite status:', err.message);
-			isFavorite = false;
-		}
-	}
-
-	// Function to toggle favorite status
-	async function toggleFavorite() {
-		if (!currentUser) {
-			goto('/login');
-			return;
-		}
-
-		const path = `${currentUser.email}/${challenge?.id}.json`;
-
-		if (isFavorite) {
-			try {
-				const { error } = await supabase.storage.from('favorites').remove([path]);
-				if (error) {
-					console.error('Error removing favorite:', error.message);
-					toast.error('Failed to remove from favorites.');
-					return;
-				}
-
-				toast.success(`${challenge.title} removed from favorites.`);
-			} catch (err) {
-				console.error('Error removing favorite:', err.message);
-				toast.error('Failed to remove from favorites.');
-			}
-		} else {
-			try {
-				const { error } = await supabase.storage
-					.from('favorites')
-					.upload(path, JSON.stringify({ id: challenge?.id, data: challenge }), {
-						contentType: 'application/json'
-					});
-				if (error) {
-					console.error('Error adding favorite:', error.message);
-					toast.error('Failed to add to favorites.');
-					return;
-				}
-
-				toast.success(`${challenge.title} added to favorites.`);
-			} catch (err) {
-				console.error('Error adding favorite:', err.message);
-				toast.error('Failed to add to favorites.');
-			}
-		}
-
-		isFavorite = !isFavorite;
-	}
-
-	onMount(() => {
-		checkIfFavorite();
-		document.addEventListener('click', handleClickOutside);
-		return () => {
-			document.removeEventListener('click', handleClickOutside);
-		};
-	});
 </script>
 
 <svelte:head>
-	<title>Games | Day {day}</title>
+	<title>Day {data.day} | Daily poster | Filmoteka</title>
 </svelte:head>
 
-{#if challenge}
-	<div class="challenge-container">
-		<div class="header fade-in">
-			<h1>🎬 Daily Challenge: Day {day}</h1>
-		</div>
-
-		<div class="day-navigation">
-			{#if hasPreviousDay}
-				<button class="nav-button" on:click={() => switchDay(day - 1)}>← Day {day - 1}</button>
-			{/if}
-			{#if hasNextDay}
-				<button class="nav-button" on:click={() => switchDay(day + 1)}>Day {day + 1} →</button>
-			{/if}
-		</div>
-
-		<div class="hint-container fade-in">
-			<div class="poster-wrapper">
-				{#if alreadyPlayed || guessedCorrectly || guessesLeft === 0}
-					<div>
-						<a href={`/movie/${challenge.films_id}`}>
-							<img
-								src={`https://image.tmdb.org/t/p/w400${challenge.poster_path}`}
-								alt="Movie Poster"
-								class="poster {guessedCorrectly || guessesLeft === 0 ? 'unblurred' : ''}"
-							/>
-						</a>
-					</div>
-				{:else}
-					<img
-						src={`https://image.tmdb.org/t/p/w400${challenge.poster_path}`}
-						alt="Movie Poster"
-						class="poster {guessedCorrectly || guessesLeft === 0 ? 'unblurred' : ''}"
-						style="filter: blur({guessedCorrectly || guessesLeft === 0
-							? '0px'
-							: currentHint === 1
-							? '20px'
-							: currentHint === 2
-							? '10px'
-							: '5px'});"
-					/>
-				{/if}
-
-				{#if guessesLeft === 0 || alreadyPlayed}
-					<div class="favorite-icon {isFavorite ? 'filled' : ''}" on:click={toggleFavorite}>
-						{isFavorite ? '★' : '☆'}
-					</div>
-				{/if}
-			</div>
-			<div class="hints">
-				{#if currentHint >= 1}
-					<p class="hint slide-in">🗓 Release Date: {challenge.release_date}</p>
-				{/if}
-				{#if currentHint >= 2}
-					<p class="hint slide-in">🎭 Genres: {challenge.genres.map((g) => g.name).join(', ')}</p>
-				{/if}
-				{#if currentHint >= 3}
-					<p class="hint slide-in">💬 Tagline: {challenge.tagline || 'No tagline available'}</p>
-				{/if}
-			</div>
-		</div>
-
-		<!-- Final Message -->
-		{#if alreadyPlayed || guessedCorrectly || guessesLeft === 0}
-			<p class={guessedCorrectly ? 'success-message fade-in' : 'game-over-message fade-in'}>
-				{guessedCorrectly
-					? `🎉 Correct! The movie is ${challenge.title}!`
-					: `❌ You didn’t guess it! The movie was "${challenge.title}".`}
-			</p>
+<GameShell title="Day {data.day}" back="/games/daily" backLabel="All days">
+	{#snippet status()}
+		{#if data.previousDay}
+			<a
+				class="icon-btn"
+				href="/games/daily/day-{data.previousDay}"
+				aria-label="Day {data.previousDay}"
+			>
+				<Icon name="left" />
+			</a>
 		{/if}
+		{#if data.nextDay}
+			<a class="icon-btn" href="/games/daily/day-{data.nextDay}" aria-label="Day {data.nextDay}">
+				<Icon name="right" />
+			</a>
+		{/if}
+	{/snippet}
 
-		{#if !guessedCorrectly && guessesLeft > 0}
-			<!-- Autocomplete Search -->
-			<div class="search-container fade-in">
-				<input
-					type="text"
-					placeholder="🔎 Search for a movie..."
-					bind:value={userGuess}
-					on:input={(e) => debouncedFetch(e.target.value)}
-					class="search-input {incorrectGuess ? 'shake' : ''}"
-				/>
-
-				<!-- Suggestions -->
-				{#if isSuggestionsOpen && suggestions?.length > 0 && !isLoading}
-					<ul class="suggestions">
-						{#each suggestions as suggestion}
-							<li on:click={() => handleGuess(suggestion)}>
-								<img
-									src={`https://image.tmdb.org/t/p/w92${suggestion.poster_path}`}
-									alt={suggestion.title}
-									class="thumbnail"
-								/>
-								<span>{suggestion.title}</span>
-							</li>
-						{/each}
-					</ul>
-				{:else if isLoading}
-					<Loader />
+	<div class="board">
+		<div class="poster-area">
+			<div class="poster">
+				{#if restored}
+					<img
+						src={imageUrl(challenge.poster_path, 'w342')}
+						srcset={posterSrcset(challenge.poster_path)}
+						sizes="(max-width: 767px) 46vw, 440px"
+						alt={finished ? `Poster of ${challenge.title}` : 'Blurred movie poster'}
+						style:filter="blur({posterBlur(game)}px)"
+						draggable="false"
+					/>
+				{:else}
+					<div class="skeleton fill" aria-busy="true" aria-label="Loading your game"></div>
 				{/if}
 			</div>
-			<div class="controls">
-				<button class="skip-button fade-in" on:click={handleSkip}>Skip Guess</button>
-				<p class="guesses-left fade-in">Guesses Left: {guessesLeft}</p>
-			</div>
+		</div>
+
+		{#if restored}
+			<ol class="hints">
+				{#each hints as hint (hint.label)}
+					<li class="rise">
+						<span class="label">{hint.label}</span>
+						<span>{hint.value}</span>
+					</li>
+				{/each}
+			</ol>
 		{/if}
 	</div>
-{:else}
-	<Loader />
-{/if}
+
+	{#if restored}
+		<div class="dock">
+			{#if finished}
+				<div class="result rise" class:won={game.guessedCorrectly} role="status">
+					<p class="verdict">{game.guessedCorrectly ? 'You got it' : 'The film was'}</p>
+					<h2>{challenge.title}</h2>
+				</div>
+				<div class="actions">
+					<a class="btn btn-primary" href="/movie/{challenge.films_id}">View film</a>
+					{#if data.nextDay}
+						<a class="btn" href="/games/daily/day-{data.nextDay}">Next day</a>
+					{/if}
+					<a class="btn btn-quiet" href={next.href}>Next: {next.name}</a>
+				</div>
+			{:else}
+				<p class="line" aria-live="polite">
+					{#if wrong}<span class="wrong">Not “{wrong}”.</span>{/if}
+					<span>{plural(game.guessesLeft, 'guess', 'guesses')} left</span>
+				</p>
+				<div class="row">
+					<div class="slot"><MovieGuess onpick={submit} up /></div>
+					<button class="btn" type="button" onclick={pass}>
+						{game.guessesLeft === 1 ? 'Give up' : 'Skip'}
+					</button>
+				</div>
+			{/if}
+		</div>
+	{/if}
+</GameShell>
 
 <style>
-	:root {
-		--primary-color: #a05cd5;
-		--background-color: #1a1a1a;
-		--text-color: #ffffff;
-		--hint-color: #d3d3d3;
-		--success-color: #7a1cac;
-		--error-color: #e74c3c;
-	}
-
-	body {
-		background: var(--background-color);
-		margin: 0;
-		font-family: 'Arial', sans-serif;
-	}
-
-	.day-navigation {
+	.board {
 		display: flex;
+		flex: 1;
 		justify-content: center;
-		gap: 10px;
-		margin-bottom: 40px;
+		gap: clamp(14px, 4vw, 48px);
+		min-height: 0;
 	}
 
-	.nav-button {
-		background-color: var(--primary-color);
-		color: var(--text-color);
-		border: none;
-		padding: 10px 15px;
-		border-radius: 8px;
-		cursor: pointer;
-		transition: background-color 0.2s ease;
-	}
-
-	.nav-button:hover {
-		background-color: var(--success-color);
-	}
-
-	.challenge-container {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		color: var(--text-color);
-		width: 90%;
-		max-width: 800px;
-		margin: 0 auto;
-		padding: 20px;
-		text-align: center;
-	}
-
-	.header h1 {
-		padding-bottom: 2rem;
-		color: var(--primary-color);
-		font-size: 2rem;
-	}
-
-	.hint-container {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 15px;
-	}
-
-	.poster-wrapper {
-		position: relative;
-		width: 250px;
-		height: 350px;
-		padding-bottom: 30px;
-	}
-
-	.poster-wrapper a {
-		display: flex;
+	.poster-area {
+		display: grid;
+		flex: 1;
+		place-items: center end;
+		min-width: 0;
+		min-height: 0;
+		container-type: size;
 	}
 
 	.poster {
+		width: min(100cqw, calc(100cqh * 2 / 3));
+		aspect-ratio: 2 / 3;
+		overflow: hidden;
+		background: var(--surface);
+		border-radius: var(--radius-md);
+	}
+
+	.poster img {
 		width: 100%;
 		height: 100%;
-		border-radius: 12px;
-		box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-		transition: filter 0.5s ease;
-		-webkit-user-drag: none;
-		pointer-events: none;
+		object-fit: cover;
+		/* Slightly enlarged so the blur never shows soft transparent edges. */
+		transform: scale(1.08);
+		transition: filter 600ms var(--ease);
 		user-select: none;
 	}
 
-	.favorite-icon {
-		position: absolute;
-		top: 10px;
-		right: 10px;
-		font-size: 2rem;
-		cursor: pointer;
-		color: rgba(255, 215, 0, 0.8);
-		text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.6);
-		transition: color 0.3s ease, transform 0.3s ease;
-	}
-
-	.favorite-icon:hover {
-		transform: scale(1.1);
-		color: gold;
-	}
-
-	.favorite-icon.isFavorite {
-		color: gold;
-	}
-
-	.unblurred {
-		filter: none !important;
+	.fill {
+		width: 100%;
+		height: 100%;
 	}
 
 	.hints {
-		padding-top: 10px;
-	}
-
-	.hint {
-		font-size: 1rem;
-		color: var(--hint-color);
-		text-align: center;
-	}
-
-	.search-container {
-		width: 100%;
-		margin-top: 20px;
-		position: relative;
-	}
-
-	.search-input {
-		width: 40%;
-		padding: 12px;
-		border-radius: 8px;
-		border: 1px solid var(--hint-color);
-		background-color: var(--background-color);
-		color: var(--text-color);
-		font-size: 1rem;
-	}
-
-	.suggestions {
-		position: absolute;
-		top: 50px;
-		width: 100%;
-		background: var(--background-color);
-		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-		border-radius: 8px;
-		overflow: hidden;
-	}
-
-	.suggestions li {
-		padding: 10px;
 		display: flex;
-		align-items: center;
-		cursor: pointer;
-		color: var(--text-color);
+		flex: 1;
+		flex-direction: column;
+		justify-content: center;
+		gap: 14px;
+		min-width: 0;
+		overflow-y: auto;
 	}
 
-	.suggestions li:hover {
-		background: var(--primary-color);
+	.hints li {
+		display: grid;
+		gap: 2px;
 	}
 
-	.thumbnail {
-		width: 40px;
-		height: 60px;
-		object-fit: cover;
-		margin-right: 10px;
+	.label {
+		color: var(--text-faint);
+		font-size: 0.875rem;
 	}
 
-	.controls {
-		margin-top: 20px;
+	.dock {
+		flex: none;
+		width: min(100%, 680px);
+		margin: 12px auto 0;
+	}
+
+	.line {
 		display: flex;
-		justify-content: space-between;
-		width: 43%;
+		flex-wrap: wrap;
+		gap: 2px 12px;
+		margin-bottom: 8px;
+		color: var(--text-muted);
 	}
 
-	.skip-button {
-		background-color: var(--primary-color);
-		color: var(--text-color);
-		border: none;
-		padding: 10px 20px;
-		border-radius: 8px;
-		cursor: pointer;
-		transition: background-color 0.2s ease;
+	.wrong {
+		color: var(--danger);
 	}
 
-	.skip-button:hover {
-		background-color: var(--success-color);
+	.row {
+		display: flex;
+		gap: 8px;
 	}
 
-	.success-message {
-		color: var(--success-color);
-		margin-top: 20px;
-		font-size: 1.2rem;
+	.slot {
+		flex: 1;
+		min-width: 0;
 	}
 
-	.game-over-message {
-		color: var(--error-color);
-		margin-top: 20px;
-		font-size: 1.2rem;
+	.verdict {
+		color: var(--danger);
 	}
 
-	@keyframes fadeIn {
-		0% {
-			opacity: 0;
-			transform: translateY(20px);
-		}
-		100% {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-	@keyframes slideIn {
-		0% {
-			opacity: 0;
-			transform: translateX(-20px);
-		}
-		100% {
-			opacity: 1;
-			transform: translateX(0);
-		}
-	}
-	@keyframes shake {
-		0%,
-		100% {
-			transform: translateX(0);
-		}
-		25% {
-			transform: translateX(-5px);
-		}
-		50% {
-			transform: translateX(5px);
-		}
-		75% {
-			transform: translateX(-5px);
-		}
+	.won .verdict {
+		color: var(--success);
 	}
 
-	.fade-in {
-		animation: fadeIn 0.8s ease-in-out;
-	}
-	.slide-in {
-		animation: slideIn 0.8s ease-in-out;
-	}
-	.shake {
-		animation: shake 0.5s ease-in-out;
+	h2 {
+		font-size: clamp(1.375rem, 3vw, 2rem);
+		letter-spacing: -0.03em;
+		line-height: 1.15;
 	}
 
-	@media (max-width: 768px) {
-		.search-input {
-			width: 90%;
+	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		margin-top: 10px;
+	}
+
+	/* Portrait: the poster fills what's left above its hints. */
+	@media (max-width: 767px), (orientation: portrait) {
+		.board {
+			flex-direction: column;
+			gap: 10px;
 		}
-		.controls {
-			width: 95%;
+
+		.poster-area {
+			place-items: center;
 		}
-		.challenge-container {
-			padding-top: 20px;
+
+		.hints {
+			flex: none;
+			justify-content: flex-start;
+			gap: 6px;
+			max-height: 40%;
 		}
-		.header h1 {
-			padding-bottom: 1rem;
+
+		.hints li {
+			grid-template-columns: 80px minmax(0, 1fr);
+			gap: 8px;
 		}
 	}
 </style>

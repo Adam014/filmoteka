@@ -1,356 +1,201 @@
 <script>
-	import { supabase } from '../../lib/db/supabaseClient';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
-	import supabase_logo from '../../lib/assets/supabase.svg';
-	import filmoteka_transparent from '../../lib/assets/filmoteka_transparent.svg';
-	import toast from 'svelte-french-toast';
+	import AuthPage from '#lib/components/AuthPage.svelte';
+	import { auth } from '#lib/state/auth.svelte.js';
+	import { toast } from '#lib/state/toast.svelte.js';
+	import { publicStorageUrl, supabase } from '#lib/supabase.js';
+	import { USERNAME_RULE, friendlyAuthError, isGuest } from '#lib/user.js';
 
-	let email = '';
-	let password = '';
-	let username = '';
-	let profilePicture = null;
-	let uploading = false;
-	let errorMessage = '';
-	let session = null;
-	let loading = true; // Track loading state
+	const MAX_AVATAR_BYTES = 4 * 1024 * 1024;
 
-	onMount(async () => {
-		const { data } = await supabase.auth.getSession();
-		session = data.session;
+	let email = $state('');
+	let password = $state('');
+	let username = $state('');
+	let avatar = $state(null);
+	let error = $state('');
+	let busy = $state(false);
+	let sentTo = $state('');
 
-		if (session) {
-			goto('/profile');
-		} else {
-			loading = false;
-		}
+	// Guests stay here so they can upgrade to a real account.
+	$effect(() => {
+		if (auth.ready && auth.user && !isGuest(auth.user)) goto('/profile', { replace: true });
 	});
 
-	async function signUp() {
+	function pickAvatar(event) {
+		const file = event.currentTarget.files?.[0] ?? null;
+		error = '';
+		if (file && !file.type.startsWith('image/')) {
+			error = 'Please choose an image file.';
+			event.currentTarget.value = '';
+			return;
+		}
+		if (file && file.size > MAX_AVATAR_BYTES) {
+			error = 'Please choose an image smaller than 4 MB.';
+			event.currentTarget.value = '';
+			return;
+		}
+		avatar = file;
+	}
+
+	async function usernameTaken(name) {
 		try {
-			uploading = true;
-			errorMessage = '';
+			const response = await fetch(`/api/username-available?name=${encodeURIComponent(name)}`);
+			return !(await response.json()).available;
+		} catch {
+			return false;
+		}
+	}
 
-			let avatar_url = '';
+	async function uploadAvatar() {
+		if (!avatar) return { url: '', path: null };
+		const extension = avatar.name.split('.').pop()?.toLowerCase() || 'png';
+		const path = `public/${crypto.randomUUID()}/avatar.${extension}`;
+		const { error: uploadError } = await supabase.storage.from('avatars').upload(path, avatar);
+		if (uploadError)
+			throw new Error("Your picture couldn't be uploaded. Try another or remove it.");
+		return { url: publicStorageUrl('avatars', path), path };
+	}
 
-			if (profilePicture) {
-				const fileExt = profilePicture.name.split('.').pop();
-				const fileName = `${email}.${fileExt}`;
-				const filePath = `public/${email}/${fileName}`;
+	async function signUp(event) {
+		event.preventDefault();
+		error = '';
+		if (!supabase) {
+			error = 'Sign-up is unavailable right now.';
+			return;
+		}
 
-				const { data: avatarData, error: avatarError } = await supabase.storage
-					.from('avatars')
-					.upload(filePath, profilePicture);
+		const name = username.trim();
+		if (!USERNAME_RULE.test(name)) {
+			error =
+				'Usernames need 2–30 characters: letters, numbers, dots, dashes or underscores, starting with a letter or number.';
+			return;
+		}
 
-				if (avatarError) {
-					errorMessage = avatarError.message;
-					return;
-				}
-
-				const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
-				avatar_url = publicUrlData.publicUrl;
+		busy = true;
+		try {
+			if (await usernameTaken(name)) {
+				error = 'That username is taken. Please choose another.';
+				return;
 			}
 
-			const { error } = await supabase.auth.signUp({
+			const uploaded = await uploadAvatar();
+			const { data, error: signUpError } = await supabase.auth.signUp({
 				email,
 				password,
 				options: {
-					data: {
-						avatar_url,
-						display_name: username
-					}
+					data: { display_name: name, avatar_url: uploaded.url },
+					emailRedirectTo: `${location.origin}/login`
 				}
 			});
 
-			if (error) {
-				errorMessage = error.message;
-				toast.error(error.message);
-			} else {
-				goto('/login');
-				toast.success('Registration successful! Please check your email to confirm your account.', {
-					duration: 10000
-				});
+			// With confirmation on, an existing address is reported as a user without identities.
+			const duplicate = data?.user && data.user.identities?.length === 0;
+			if (signUpError || duplicate) {
+				if (uploaded.path) await supabase.storage.from('avatars').remove([uploaded.path]);
+				error = duplicate
+					? 'An account with this email already exists.'
+					: friendlyAuthError(signUpError);
+				return;
 			}
-		} catch (error) {
-			console.error('Error during registration:', error);
-			errorMessage = 'An unexpected error occurred.';
+
+			if (data.session) {
+				toast.success('Welcome to Filmoteka');
+				await goto('/', { replace: true });
+			} else {
+				sentTo = email;
+			}
+		} catch (caught) {
+			error = friendlyAuthError(caught);
 		} finally {
-			uploading = false;
-		}
-	}
-
-	function handleFileChange(event) {
-		if (event.target.files && event.target.files[0]) {
-			profilePicture = event.target.files[0];
-		}
-	}
-
-	async function signInAnonymously() {
-		errorMessage = '';
-		const { data, error } = await supabase.auth.signInAnonymously();
-
-		if (error) {
-			errorMessage = error.message;
-			toast.error(error.message);
-		} else {
-			// Redirect to homepage after successful anonymous login
-			goto('/');
-			toast.success('Signed in as guest!', { duration: 10000 });
+			busy = false;
 		}
 	}
 </script>
 
 <svelte:head>
-	<title>Register | Filmoteka</title>
+	<title>Sign up | Filmoteka</title>
 </svelte:head>
 
-{#if loading}
-	<p>Loading...</p>
+{#if sentTo}
+	<AuthPage
+		title="Check your inbox"
+		lede="We sent a confirmation link to {sentTo}. Open it to finish signing up."
+	>
+		<a class="btn btn-block" href="/login">Back to log in</a>
+	</AuthPage>
 {:else}
-	<div class="form-wrapper">
-		<div class="logo-container">
-			<a href="/">
-				<img src={filmoteka_transparent} alt="filmoteka_logo" />
-			</a>
-		</div>
-		<h1>Register</h1>
-		<div class="form-container">
-			<form on:submit|preventDefault={signUp}>
-				<div class="input-group">
-					<label for="email">Email:</label>
-					<input id="email" type="email" bind:value={email} required />
-				</div>
-
-				<div class="input-group">
-					<label for="password">Password:</label>
-					<input id="password" type="password" bind:value={password} required />
-				</div>
-
-				<div class="input-group">
-					<label for="username">Username:</label>
-					<input id="username" type="text" bind:value={username} required />
-				</div>
-
-				<div class="input-group file-input">
-					<label for="profilePicture">Profile Picture:</label>
-					<input id="profilePicture" type="file" accept="image/*" on:change={handleFileChange} />
-				</div>
-
-				{#if errorMessage}
-					<p class="error">{errorMessage}</p>
-				{/if}
-
-				<button type="submit" disabled={uploading}>
-					{uploading ? 'Registering...' : 'Register'}
-				</button>
-			</form>
-
-			<!-- OR Separator -->
-			<div class="separator">
-				<span>OR</span>
+	<AuthPage
+		title="Create your account"
+		lede="Save favorites, follow people and keep your daily challenge streak across devices."
+	>
+		<form onsubmit={signUp}>
+			<div class="field">
+				<label for="username">Username</label>
+				<input
+					id="username"
+					class="input"
+					type="text"
+					bind:value={username}
+					autocomplete="username"
+					required
+				/>
 			</div>
+			<div class="field">
+				<label for="email">Email</label>
+				<input
+					id="email"
+					class="input"
+					type="email"
+					bind:value={email}
+					autocomplete="email"
+					required
+				/>
+			</div>
+			<div class="field">
+				<label for="password">Password</label>
+				<input
+					id="password"
+					class="input"
+					type="password"
+					bind:value={password}
+					minlength="6"
+					autocomplete="new-password"
+					required
+				/>
+				<p class="field-hint">At least 6 characters.</p>
+			</div>
+			<div class="field">
+				<label for="avatar">Profile picture (optional)</label>
+				<input id="avatar" class="file" type="file" accept="image/*" onchange={pickAvatar} />
+			</div>
+			{#if error}<p class="form-error" role="alert">{error}</p>{/if}
+			<button class="btn btn-primary btn-block" type="submit" disabled={busy}>
+				{busy ? 'Creating your account…' : 'Create account'}
+			</button>
+		</form>
 
-			<!-- Guest Login as Text Button -->
-			<p class="guest-text" on:click={signInAnonymously}>Continue as Guest</p>
-		</div>
-
-		<p class="footer">Already have an account? <a href="/login">Login here</a></p>
-		<p class="footer">Forgot password? <a href="/settings/account">Reset password</a></p>
-		<p class="supabase">
-			Powered by <a class="supabase-link" href="https://supabase.com"
-				><img src={supabase_logo} alt="supabase_logo" /></a
-			>
-		</p>
-	</div>
+		{#snippet footer()}
+			<p>Already have an account? <a class="link" href="/login">Log in</a></p>
+		{/snippet}
+	</AuthPage>
 {/if}
 
 <style>
-	.supabase {
-		padding-top: 100px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
+	.file {
+		width: 100%;
+		color: var(--text-muted);
+		font-size: 0.9375rem;
 	}
 
-	.supabase-link {
-		color: #36bc80;
-	}
-
-	.supabase img {
-		width: 90px;
-		padding: 5px 0px 0px 10px;
-	}
-
-	.form-wrapper {
-		width: 25vw;
-		padding: 5vh;
-		margin: 2.3rem;
-		border-radius: 8px;
-		display: flex;
-		flex-direction: column;
-	}
-
-	.logo-container {
-		display: flex;
-		justify-content: center;
-		padding-bottom: 20px;
-	}
-
-	.separator {
-		display: flex;
-		align-items: center;
-		text-align: center;
-		margin: 20px 0;
-	}
-
-	.separator::before,
-	.separator::after {
-		content: '';
-		flex: 1;
-		border-bottom: 1px solid #ddd;
-	}
-
-	.separator span {
-		padding: 0 10px;
-		color: #ddd;
-		font-size: 1rem;
-	}
-
-	.guest-text {
-		text-align: center;
-		color: #7a1cac;
-		font-size: 1.2rem;
+	.file::file-selector-button {
+		min-height: 40px;
+		margin-right: 12px;
+		padding: 0 14px;
+		background: none;
+		border: 1px solid var(--line-strong);
+		border-radius: var(--radius-md);
+		color: var(--text);
+		font: inherit;
 		cursor: pointer;
-		font-weight: bold;
-		transition: 0.2s ease-in;
-		margin-top: 10px;
-	}
-
-	.guest-text:hover {
-		text-decoration: underline;
-		color: #ad49e1;
-	}
-
-	.form-wrapper img {
-		width: 90px;
-	}
-
-	h1 {
-		text-align: center;
-		color: #e5e5e5;
-		font-size: 3rem;
-		padding-bottom: 40px;
-	}
-
-	.input-group {
-		width: 100%;
-		margin-bottom: 20px;
-	}
-
-	label {
-		display: block;
-		margin-bottom: 5px;
-		color: #e5e5e5;
-	}
-
-	input[type='email'],
-	input[type='password'],
-	input[type='text'],
-	input[type='file'] {
-		width: 100%;
-		padding: 10px;
-		border: 1px solid #ddd;
-		border-radius: 4px;
-		box-sizing: border-box;
-	}
-
-	button {
-		width: 100%;
-		padding: 10px;
-		background-color: #7a1cac;
-		border: none;
-		border-radius: 4px;
-		color: #fff;
-		cursor: pointer;
-		transition: 0.2s ease-in;
-	}
-
-	button:hover {
-		background-color: #430c5c;
-	}
-
-	button:disabled {
-		background-color: #ccc;
-	}
-
-	.footer {
-		text-align: center;
-		margin-top: 20px;
-	}
-
-	.footer a {
-		color: #7a1cac;
-		text-decoration: none;
-	}
-
-	.footer a:hover {
-		text-decoration: underline;
-	}
-
-	.error {
-		color: #ff0000;
-	}
-
-	@media (max-width: 1024px) {
-		.form-wrapper {
-			width: 60%;
-			background-color: rgba(26, 26, 26, 0.9);
-			color: #fff;
-		}
-
-		h1 {
-			font-size: 2.5rem;
-			padding-bottom: 0px !important;
-		}
-
-		.logo-container img {
-			width: 100px;
-		}
-
-		.logo-container {
-			padding-top: 20px;
-		}
-
-		.supabase {
-			padding-top: 20px;
-		}
-
-		form {
-			width: 70%;
-		}
-	}
-
-	@media (max-width: 768px) {
-		input[type='email'],
-		input[type='password'],
-		input[type='text'],
-		input[type='file'] {
-			padding: 5px;
-		}
-		.logo-container img {
-			width: 80px;
-		}
-		h1 {
-			font-size: 1.8rem;
-		}
-
-		form {
-			width: 100%;
-		}
-		.form-wrapper {
-			width: 100%;
-			padding: 4vh;
-			margin: 1rem;
-		}
 	}
 </style>

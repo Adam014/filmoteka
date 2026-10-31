@@ -1,100 +1,130 @@
 <script>
+	import '@fontsource-variable/geist';
+	import '../app.css';
+	import { dev } from '$app/env';
+	import { onNavigate } from '$app/navigation';
+	import { navigating, page } from '$app/state';
+	import Footer from '#lib/components/Footer.svelte';
+	import Header from '#lib/components/Header.svelte';
+	import SearchPalette from '#lib/components/SearchPalette.svelte';
+	import Toaster from '#lib/components/Toaster.svelte';
+	import { auth, initAuth } from '#lib/state/auth.svelte.js';
+	import { syncFavorites } from '#lib/state/favorites.svelte.js';
+	import { syncNotifications } from '#lib/state/notifications.svelte.js';
 	import { inject } from '@vercel/analytics';
-	import { Toaster } from 'svelte-french-toast';
-	import Navbar from '../components/Navbar.svelte';
-	import { page } from '$app/stores';
-	import toast from 'svelte-french-toast';
 	import { onMount } from 'svelte';
 
-	if (process.env.NODE_ENV === 'production') {
-		inject();
-		console.warn = () => {};
-	}
+	let { children } = $props();
+	let searchOpen = $state(false);
 
-	// Access the data returned from the server load function
-	export let data;
-	const { session } = data;
-
-	const toastKey = 'trafficToastShown';
+	// Games fill exactly one screen, so nothing sits below them.
+	const FULL_SCREEN = new Set([
+		'/games/frames',
+		'/games/connections',
+		'/games/higher-lower',
+		'/games/daily/day-[day]',
+		'/swipe'
+	]);
+	let fullScreen = $derived(FULL_SCREEN.has(page.route.id));
 
 	onMount(() => {
-		// Check if the toast has already been shown
-		const isToastShown = localStorage.getItem(toastKey);
-
-		if (!isToastShown) {
-			// Show the toast
-			toast(
-				'🎮 A new game is available! Check it out in the menu or at filmoteka.app/games/daily 🚀',
-				{
-					duration: 15000,
-					icon: '🎉'
-				}
-			);
-
-			// Set a flag in localStorage to prevent showing again
-			localStorage.setItem(toastKey, 'true');
-		}
+		if (!dev && !['localhost', '127.0.0.1'].includes(location.hostname)) inject();
+		return initAuth();
 	});
+
+	// Cross-fades between pages. Filters and pagination on the same page stay instant.
+	onNavigate((navigation) => {
+		if (!document.startViewTransition) return;
+		if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+		if (navigation.from?.route.id === navigation.to?.route.id) return;
+
+		return new Promise((resolve) => {
+			document.startViewTransition(async () => {
+				resolve();
+				await navigation.complete;
+			});
+		});
+	});
+
+	$effect(() => {
+		if (!auth.ready) return;
+		syncFavorites();
+		syncNotifications(auth.user);
+	});
+
+	function onkeydown(event) {
+		const combo = (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k';
+		const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName);
+		if (combo || (event.key === '/' && !typing && !searchOpen)) {
+			event.preventDefault();
+			searchOpen = combo ? !searchOpen : true;
+		}
+	}
 </script>
 
-{#if !$page.url.pathname.startsWith('/register') && !$page.url.pathname.startsWith('/login')}
-	<Navbar {session} />
+<svelte:window {onkeydown} />
+
+{#if navigating.to}
+	<div class="progress" role="progressbar" aria-label="Loading page"></div>
 {/if}
 
-<main class="app-content main-content">
-	<Toaster position="bottom-right" />
-	<slot />
-</main>
+<div class="shell" class:full-screen={fullScreen}>
+	<Header onsearch={() => (searchOpen = true)} />
+	<main id="content">
+		{@render children()}
+	</main>
+	{#if !fullScreen}<Footer />{/if}
+</div>
+
+<SearchPalette bind:open={searchOpen} />
+<Toaster />
 
 <style>
-	:global(body) {
-		margin: 0;
-		padding: 0;
-		box-sizing: border-box;
-		font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
-			Cantarell, 'Open Sans', sans-serif;
-		-webkit-font-smoothing: antialiased;
-		-moz-osx-font-smoothing: grayscale;
-		overflow-x: hidden;
-		--primary-color: #3a86ff;
-		--secondary-color: #ff006e;
-		--accent-color: #8338ec;
-		--dark-bg: #121212;
-		--darker-bg: #0a0a0a;
-		--light-text: #f8f9fa;
-		--gray-text: #adb5bd;
-		--card-bg: #1e1e1e;
-		--gradient-bg: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
-
-		background-color: var(--dark-bg);
-		background-image: radial-gradient(
-			circle at 20% 50%,
-			rgba(51, 16, 117, 0.4) 0%,
-			rgba(13, 13, 13, 0.95) 100%
-		);
-		background-attachment: fixed;
-		color: var(--light-text);
+	.shell {
+		display: flex;
+		flex-direction: column;
+		min-height: 100dvh;
 	}
 
-	:global(*) {
-		box-sizing: border-box;
+	main {
+		flex: 1;
+		min-width: 0;
 	}
 
-	.main-content {
-		min-height: 100vh;
+	.full-screen {
+		height: max(100dvh, 540px);
+	}
+
+	.full-screen main {
+		display: flex;
+		min-height: 0;
+	}
+
+	/* Phones give the whole screen to the game, which has its own way back. */
+	@media (max-width: 767px), (max-height: 500px) {
+		.full-screen :global(header) {
+			display: none;
+		}
+	}
+
+	.progress {
+		position: fixed;
+		z-index: 80;
+		top: 0;
+		left: 0;
 		width: 100%;
+		height: 2px;
+		background: var(--accent);
+		transform-origin: left;
+		animation: progress 1.4s var(--ease) forwards;
 	}
 
-	/* Toast styling overrides */
-	:global(.toaster) {
-		--toastBackground: var(--darker-bg, #0a0a0a);
-		--toastColor: var(--light-text, #f8f9fa);
-		--toastBorder: 1px solid rgba(255, 255, 255, 0.1);
-		--toastBarBackground: var(--secondary-color, #ff006e);
-	}
-
-	:global(.toaster .toast) {
-		border-radius: 0.75rem;
-		box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+	@keyframes progress {
+		from {
+			transform: scaleX(0);
+		}
+		to {
+			transform: scaleX(0.9);
+		}
 	}
 </style>

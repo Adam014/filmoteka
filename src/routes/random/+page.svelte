@@ -1,267 +1,101 @@
 <script>
-	import MovieCard from '../../components/MovieCard.svelte';
-	import { supabase } from '../../lib/db/supabaseClient';
-	import { onDestroy, onMount } from 'svelte';
-	import { user } from '../../stores/user';
-	import { toast } from 'svelte-french-toast';
+	import EmptyState from '#lib/components/EmptyState.svelte';
+	import MediaCard from '#lib/components/MediaCard.svelte';
 
-	let movies = [];
-	let isLoading = false;
-	let currentUser;
-	let movieCount = 1; // Default value
-	let genres = []; // All available genres
-	let selectedGenre = null; // Selected genre
+	const COUNTS = [1, 5, 10, 15, 30];
 
-	// console.log(movieCount);
+	let { data } = $props();
 
-	const unsubscribe = user.subscribe((value) => {
-		currentUser = value;
-	});
+	let count = $state(5);
+	let genre = $state('');
+	let movies = $state([]);
+	let status = $state('idle');
 
-	onDestroy(() => {
-		unsubscribe();
-	});
-
-	// Fetch all genres from the database
-	async function fetchGenres() {
+	async function pick(event) {
+		event.preventDefault();
+		status = 'loading';
 		try {
-			const { data: moviesWithGenres, error } = await supabase
-				.from('film_detailed')
-				.select('genres');
-
-			if (error) throw error;
-
-			if (!moviesWithGenres || moviesWithGenres?.length === 0) {
-				toast.error('No genres found.');
-				return;
-			}
-
-			// Extract unique genres
-			const uniqueGenres = new Map();
-
-			moviesWithGenres.forEach((movie) => {
-				movie.genres.forEach((genre) => {
-					if (!uniqueGenres.has(genre.id)) {
-						uniqueGenres.set(genre.id, genre.name);
-					}
-				});
-			});
-
-			// Convert to an array for the select dropdown
-			genres = Array.from(uniqueGenres, ([id, name]) => ({ id, name }));
-		} catch (error) {
-			console.error('Error fetching genres:', error.message);
-			toast.error('Error fetching genres.');
-		}
-	}
-
-	// Check if a movie is a favorite
-	async function checkIfFavorite(movie) {
-		if (!currentUser) {
-			return false;
-		}
-
-		try {
-			const { data: favoriteFiles, error } = await supabase.storage
-				.from('favorites')
-				.list(currentUser.email);
-
-			if (error) {
-				console.error('Error fetching favorites:', error.message);
-				return false;
-			}
-
-			return favoriteFiles.some((file) => file.name === `${movie.id}.json`);
-		} catch (err) {
-			console.error('Error checking favorite status:', err.message);
-			return false;
-		}
-	}
-
-	async function fetchRandomMovies() {
-		try {
-			isLoading = true;
-
-			let randomMovies, error;
-
-			if (selectedGenre) {
-				// Fetch movies filtered by genre
-				({ data: randomMovies, error } = await supabase.rpc('get_random_movies_by_genre', {
-					count: movieCount,
-					genre_id: selectedGenre
-				}));
-			} else {
-				// Fetch purely random movies
-				({ data: randomMovies, error } = await supabase.rpc('get_all_random_movies', {
-					count: movieCount
-				}));
-			}
-
-			if (error) throw error;
-
-			if (!randomMovies || randomMovies?.length === 0) {
-				toast.error('No random movies found.');
-				movies = [];
-				return;
-			}
-
-			// Update movies and their favorite status
-			movies = await Promise.all(
-				randomMovies.map(async (movie) => {
-					movie.isFavorite = await checkIfFavorite(movie);
-					return movie;
-				})
-			);
-		} catch (error) {
-			console.error('Error fetching random movies:', error.message);
-			toast.error('Error fetching random movies.');
+			const params = new URLSearchParams({ count: String(count) });
+			if (genre) params.set('genre', genre);
+			const response = await fetch(`/api/random?${params}`);
+			if (!response.ok) throw new Error(`HTTP ${response.status}`);
+			movies = (await response.json()).movies;
+			status = movies.length ? 'done' : 'empty';
+		} catch {
 			movies = [];
-		} finally {
-			isLoading = false;
+			status = 'failed';
 		}
 	}
-
-	// Reset favorites for the current movies when a movie's favorite status changes
-	async function resetFavorites() {
-		movies = await Promise.all(
-			movies.map(async (movie) => {
-				movie.isFavorite = await checkIfFavorite(movie);
-				return movie;
-			})
-		);
-	}
-
-	// Handle manual movieCount selection
-	function handleSelect(event) {
-		movieCount = parseInt(event.target.value, 10);
-	}
-
-	onMount(() => {
-		fetchGenres(); // Fetch genres when the component mounts
-	});
 </script>
 
 <svelte:head>
-	<title>Random Movies | Filmoteka</title>
+	<title>Random movies | Filmoteka</title>
+	<meta name="description" content="Can't decide what to watch? Let Filmoteka pick for you." />
 </svelte:head>
 
-<section class="random-movie-section">
-	<h1>Random Movies</h1>
-	<div class="controls">
-		<div class="control">
-			<label for="movie-count">Count:</label>
-			<select id="movie-count" on:change={handleSelect} class="custom-select">
-				<option value="1" selected={movieCount === 1}>1</option>
-				<option value="5" selected={movieCount === 5}>5</option>
-				<option value="10" selected={movieCount === 10}>10</option>
-				<option value="15" selected={movieCount === 15}>15</option>
-				<option value="30" selected={movieCount === 30}>30</option>
-			</select>
-		</div>
-		<div class="control">
-			<label for="genre-select">Genre:</label>
-			<select id="genre-select" bind:value={selectedGenre} class="custom-select">
-				<option value={null} selected={selectedGenre === null}>All Genres</option>
-				{#each genres as genre}
-					<option value={genre.id}>{genre.name}</option>
+<div class="container page">
+	<h1 class="page-title">Can't decide?</h1>
+	<p class="page-lede">Pick a genre, or leave it open, and we'll choose something for you.</p>
+
+	<form class="controls" onsubmit={pick}>
+		<div class="field">
+			<label for="genre">Genre</label>
+			<select id="genre" class="select" bind:value={genre}>
+				<option value="">Any genre</option>
+				{#each data.genres as option (option.id)}
+					<option value={String(option.id)}>{option.name}</option>
 				{/each}
 			</select>
 		</div>
-	</div>
-	<div />
-	<button on:click={fetchRandomMovies} class="random-button">
-		{isLoading ? 'Loading...' : 'Get Random Movies'}
-	</button>
+		<div class="field">
+			<label for="count">How many</label>
+			<select id="count" class="select" bind:value={count}>
+				{#each COUNTS as option (option)}
+					<option value={option}>{option}</option>
+				{/each}
+			</select>
+		</div>
+		<button class="btn btn-primary" type="submit" disabled={status === 'loading'}>
+			{status === 'loading' ? 'Choosing…' : movies.length ? 'Pick again' : 'Surprise me'}
+		</button>
+	</form>
 
-	{#if movies?.length > 0}
-		<div class="movies-display">
-			{#each movies as movie}
-				<MovieCard {movie} on:favorite={resetFavorites} />
+	{#if status === 'failed'}
+		<EmptyState title="We couldn't pick anything">
+			<p>The catalogue didn't answer. Please try again in a moment.</p>
+		</EmptyState>
+	{:else if status === 'empty'}
+		<EmptyState title="Nothing in that genre yet">
+			<p>Try a different genre, or choose “Any genre”.</p>
+		</EmptyState>
+	{:else if movies.length}
+		<div class="media-grid results" class:loading={status === 'loading'}>
+			{#each movies as media (media.id)}
+				<MediaCard {media} />
 			{/each}
 		</div>
-	{:else if !isLoading}
-		<p class="placeholder">Click the button to get random movies!</p>
 	{/if}
-</section>
+</div>
 
 <style>
-	.random-movie-section {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		min-height: 80vh;
-		text-align: center;
-	}
-
-	.control {
-		display: flex;
-		align-items: center;
-	}
-
-	.control label {
-		padding-right: 20px;
-	}
-
 	.controls {
-		padding: 20px;
-		display: flex;
-		align-items: center;
-		gap: 10px;
-	}
-
-	.controls label {
-		font-size: 1.2rem;
-		font-weight: bold;
-	}
-
-	.controls select {
-		padding: 10px;
-		font-size: 1rem;
-		border-radius: 5px;
-		border: 1px solid #ccc;
-		background: #1e1e1e;
-		color: white;
-	}
-
-	.random-button {
-		background-color: #7a1cac;
-		color: white;
-		padding: 12px 24px;
-		font-size: 1.2rem;
-		border: none;
-		border-radius: 8px;
-		cursor: pointer;
-		margin: 20px 0;
-	}
-
-	.random-button:hover {
-		background-color: #a05cd5;
-	}
-
-	.movies-display {
-		margin-top: 20px;
 		display: flex;
 		flex-wrap: wrap;
-		gap: 10px;
-		justify-content: center;
+		align-items: flex-end;
+		gap: 16px;
+		margin-top: 32px;
 	}
 
-	.placeholder {
-		color: #888;
-		font-size: 1.2rem;
+	.controls .select {
+		min-width: 160px;
 	}
 
-	@media (max-width: 768px) {
-		.controls {
-			display: block;
-		}
-		.control {
-			padding: 10px;
-		}
+	.results {
+		margin-top: clamp(32px, 5vw, 56px);
+		transition: opacity 160ms var(--ease);
+	}
 
-		.control select {
-			width: 100%;
-		}
+	.results.loading {
+		opacity: 0.5;
 	}
 </style>

@@ -1,312 +1,95 @@
 <script>
-	import { supabase } from '../../lib/db/supabaseClient';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
-	import supabase_logo from '../../lib/assets/supabase.svg';
-	import filmoteka_transparent from '../../lib/assets/filmoteka_transparent.svg';
-	import toast from 'svelte-french-toast';
+	import { page } from '$app/state';
+	import AuthPage from '#lib/components/AuthPage.svelte';
+	import { safeNext } from '#lib/redirects.js';
+	import { auth } from '#lib/state/auth.svelte.js';
+	import { toast } from '#lib/state/toast.svelte.js';
+	import { supabase } from '#lib/supabase.js';
+	import { friendlyAuthError } from '#lib/user.js';
 
-	let email = '';
-	let password = '';
-	let errorMessage = '';
-	let session = null;
-	let loading = true; // Track loading state
+	let email = $state('');
+	let password = $state('');
+	let error = $state('');
+	let busy = $state(false);
 
-	onMount(async () => {
-		// Fetch the session directly from Supabase
-		const { data } = await supabase.auth.getSession();
-		session = data.session;
+	let next = $derived(safeNext(page.url.searchParams.get('next')));
 
-		if (session) {
-			// If there's an active session, redirect to the profile page
-			goto('/profile');
-		} else {
-			// Stop loading once the session has been checked
-			loading = false;
-		}
+	// Someone already signed in has nothing to do here.
+	$effect(() => {
+		if (auth.ready && auth.user) goto(next === '/' ? '/profile' : next, { replace: true });
 	});
 
-	async function signIn() {
-		errorMessage = '';
-		const { error } = await supabase.auth.signInWithPassword({
-			email,
-			password
-		});
-
-		if (error) {
-			errorMessage = error.message;
-			toast.error(error.message);
-		} else {
-			// Redirect to home page after successful login
-			goto('/');
-			toast.success('You are logged in!', { duration: 10000 });
+	async function run(action, successMessage) {
+		error = '';
+		if (!supabase) {
+			error = 'Sign-in is unavailable right now.';
+			return;
+		}
+		busy = true;
+		try {
+			const { error: authError } = await action();
+			if (authError) {
+				error = friendlyAuthError(authError);
+				return;
+			}
+			toast.success(successMessage);
+			await goto(next, { replace: true });
+		} catch (caught) {
+			error = friendlyAuthError(caught);
+		} finally {
+			busy = false;
 		}
 	}
 
-	async function signInAnonymously() {
-		errorMessage = '';
-		const { data, error } = await supabase.auth.signInAnonymously();
-
-		if (error) {
-			errorMessage = error.message;
-			toast.error(error.message);
-		} else {
-			// Redirect to homepage after successful anonymous login
-			goto('/');
-			toast.success('Signed in as guest!', { duration: 10000 });
-		}
+	function signIn(event) {
+		event.preventDefault();
+		run(() => supabase.auth.signInWithPassword({ email, password }), 'Welcome back');
 	}
+
+	const continueAsGuest = () =>
+		run(() => supabase.auth.signInAnonymously(), "You're browsing as a guest");
 </script>
 
 <svelte:head>
-	<title>Login | Filmoteka</title>
+	<title>Log in | Filmoteka</title>
 </svelte:head>
 
-{#if loading}
-	<p>Loading...</p>
-{:else}
-	<div class="form-wrapper">
-		<div class="logo-container">
-			<a href="/">
-				<img src={filmoteka_transparent} alt="filmoteka_logo" />
-			</a>
+<AuthPage title="Log in">
+	<form onsubmit={signIn}>
+		<div class="field">
+			<label for="email">Email</label>
+			<input
+				id="email"
+				class="input"
+				type="email"
+				bind:value={email}
+				autocomplete="email"
+				required
+			/>
 		</div>
-		<h1>Login</h1>
-		<div class="form-container">
-			<form on:submit|preventDefault={signIn}>
-				<div class="input-group">
-					<label for="email">Email:</label>
-					<input id="email" type="email" bind:value={email} required />
-				</div>
-
-				<div class="input-group">
-					<label for="password">Password:</label>
-					<input id="password" type="password" bind:value={password} required />
-				</div>
-
-				<button type="submit">Login</button>
-			</form>
-
-			<!-- OR Separator -->
-			<div class="separator">
-				<span>OR</span>
-			</div>
-
-			<!-- Guest Login as Text Button -->
-			<p class="guest-text" on:click={signInAnonymously}>Continue as Guest</p>
+		<div class="field">
+			<label for="password">Password</label>
+			<input
+				id="password"
+				class="input"
+				type="password"
+				bind:value={password}
+				autocomplete="current-password"
+				required
+			/>
 		</div>
+		{#if error}<p class="form-error" role="alert">{error}</p>{/if}
+		<button class="btn btn-primary btn-block" type="submit" disabled={busy}>
+			{busy ? 'Logging in…' : 'Log in'}
+		</button>
+		<button class="btn btn-block" type="button" disabled={busy} onclick={continueAsGuest}>
+			Continue as guest
+		</button>
+	</form>
 
-		<p class="footer">Don't have an account? <a href="/register">Register here</a></p>
-		<p class="footer">Forgot password? <a href="/settings/account">Reset password</a></p>
-		<p class="supabase">
-			Powered by <a class="supabase-link" href="https://supabase.com"
-				><img src={supabase_logo} alt="supabase_logo" /></a
-			>
-		</p>
-	</div>
-{/if}
-
-<style>
-	.supabase {
-		padding-top: 100px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.supabase-link {
-		color: #36bc80;
-	}
-
-	.supabase img {
-		width: 90px;
-		padding: 5px 0px 0px 10px;
-	}
-
-	.form-wrapper {
-		width: 25vw;
-		padding: 5vh;
-		margin: 2.3rem;
-		border-radius: 8px;
-		display: flex;
-		flex-direction: column;
-	}
-
-	.logo-container {
-		display: flex;
-		justify-content: center;
-		padding-bottom: 20px;
-	}
-
-	.form-wrapper img {
-		width: 90px;
-	}
-
-	h1 {
-		text-align: center;
-		color: #e5e5e5;
-		font-size: 3rem;
-		padding-bottom: 40px;
-	}
-
-	.input-group {
-		width: 100%;
-		margin-bottom: 20px;
-	}
-
-	label {
-		display: block;
-		margin-bottom: 5px;
-		color: #e5e5e5;
-	}
-
-	input[type='email'],
-	input[type='password'] {
-		width: 100%;
-		padding: 10px;
-		border: 1px solid #ddd;
-		border-radius: 4px;
-		box-sizing: border-box;
-		color: black;
-	}
-
-	button {
-		width: 100%;
-		padding: 10px;
-		background-color: #7a1cac;
-		border: none;
-		border-radius: 4px;
-		color: #fff;
-		cursor: pointer;
-		transition: 0.2s ease-in;
-		font-size: 1rem;
-		font-weight: bold;
-	}
-
-	button:hover {
-		background-color: #430c5c;
-	}
-
-	button:disabled {
-		background-color: #ccc;
-	}
-
-	.separator {
-		display: flex;
-		align-items: center;
-		text-align: center;
-		margin: 20px 0;
-	}
-
-	.separator::before,
-	.separator::after {
-		content: '';
-		flex: 1;
-		border-bottom: 1px solid #ddd;
-	}
-
-	.separator span {
-		padding: 0 10px;
-		color: #ddd;
-		font-size: 1rem;
-	}
-
-	.guest-text {
-		text-align: center;
-		color: #7a1cac;
-		font-size: 1.2rem;
-		cursor: pointer;
-		font-weight: bold;
-		transition: 0.2s ease-in;
-		margin-top: 10px;
-	}
-
-	.guest-text:hover {
-		text-decoration: underline;
-		color: #ad49e1;
-	}
-
-	.footer {
-		text-align: center;
-		margin-top: 20px;
-	}
-
-	.footer a {
-		color: #7a1cac;
-		text-decoration: none;
-	}
-
-	.footer a:hover {
-		text-decoration: underline;
-	}
-
-	.error {
-		color: #ff0000;
-	}
-
-	@media (max-width: 1024px) {
-		.form-wrapper {
-			width: 60%;
-			background-color: rgba(26, 26, 26, 0.9);
-			color: #fff;
-		}
-
-		h1 {
-			font-size: 2.5rem;
-			padding-bottom: 0px !important;
-		}
-
-		.logo-container img {
-			width: 100px;
-		}
-
-		.logo-container {
-			padding-top: 20px;
-		}
-
-		.supabase {
-			padding-top: 50px;
-		}
-
-		form {
-			width: 70%;
-		}
-
-		h1 {
-			color: #fff;
-		}
-
-		label,
-		input {
-			color: #fff;
-		}
-	}
-
-	@media (max-width: 768px) {
-		input[type='email'],
-		input[type='password'],
-		input[type='text'],
-		input[type='file'] {
-			padding: 5px;
-		}
-		form {
-			width: 100%;
-		}
-
-		h1 {
-			font-size: 1.8rem;
-		}
-
-		.form-wrapper {
-			width: 100%;
-		}
-		.logo-container img {
-			width: 80px;
-		}
-		.form-wrapper {
-			width: 100%;
-			padding: 4vh;
-			margin: 1rem;
-		}
-	}
-</style>
+	{#snippet footer()}
+		<p>New here? <a class="link" href="/register">Create an account</a></p>
+		<p><a class="link" href="/forgot-password">Forgot your password?</a></p>
+	{/snippet}
+</AuthPage>

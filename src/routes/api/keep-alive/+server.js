@@ -1,42 +1,19 @@
-import { createClient } from '@supabase/supabase-js';
-import { json } from '@sveltejs/kit';
-import { env } from '$env/dynamic/private'; 
-import { PUBLIC_SUPABASE_URL } from '$env/static/public'; 
+import { cronSecret } from '#lib/server/env.js';
+import { db } from '#lib/server/supabase.js';
 
-const supabase = createClient(
-  PUBLIC_SUPABASE_URL,
-  env.SUPABASE_SERVICE_ROLE_KEY 
-);
+export async function GET({ request }) {
+	const secret = cronSecret();
+	if (secret && request.headers.get('authorization') !== `Bearer ${secret}`) {
+		return Response.json({ message: 'Unauthorized' }, { status: 401 });
+	}
 
-export const prerender = false; 
+	const client = db();
+	if (!client) return Response.json({ message: 'Supabase is not configured' }, { status: 503 });
 
-export async function GET() {
-  console.log('Spouštím Supabase keep-alive ping (SvelteKit)...');
-
-  try {
-    const { data, error } = await supabase
-      .from('films') 
-      .select('id, original_title') 
-      .limit(1);
-
-    if (error) {
-      throw new Error(`Supabase chyba: ${error.message}`);
-    }
-
-    console.log('Supabase keep-alive: Ping úspěšný.');
-    console.log('Načtená ukázková data:', data);
-
-    return json({
-      message: 'Supabase databáze úspěšně pingnuta.',
-      data: data
-    });
-
-  } catch (error) {
-    console.error('Chyba při Supabase keep-alive pingu:', error.message);
-
-    return json(
-      { message: 'Chyba při pingu Supabase.', error: error.message },
-      { status: 500 }
-    );
-  }
+	const { error } = await client.from('films').select('id').limit(1);
+	if (error) {
+		console.error('Keep-alive ping failed:', error.message);
+		return Response.json({ message: 'Ping failed' }, { status: 500 });
+	}
+	return Response.json({ message: 'Database pinged' });
 }

@@ -1,44 +1,17 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
 		<meta
-			name="description"
-			content="Filmoteka is a MovieDB Web app, where I'm learning the power of SvelteKit!"
+			name="viewport"
+			content="width=device-width, initial-scale=1, interactive-widget=resizes-content"
 		/>
+		<meta name="theme-color" content="#0a0a0b" />
+		<meta name="color-scheme" content="dark" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
-		<meta name="viewport" content="width=device-width" />
 		%sveltekit.head%
-		<title>Filmoteka</title>
 	</head>
-	<body>
+	<body data-sveltekit-preload-data="hover">
 		<div id="svelte">%sveltekit.body%</div>
 	</body>
 </html>
-
-<style>
-	@import url('https://fonts.googleapis.com/css2?family=Corben&display=swap');
-	@import url('https://fonts.googleapis.com/css2?family=Sarabun&display=swap');
-
-	:root {
-		--bg: #1a1a1a;
-		--text-color: #e5e5e5;
-		--darkest-purple: #2e073f;
-		--purple: #ad49e1;
-		--darker-purple: #7a1cac;
-	}
-
-	* {
-		margin: 0;
-	}
-
-	body {
-		font-family: 'Sarabun', sans-serif;
-		background-color: var(--bg);
-		color: var(--text-color);
-	}
-
-	::selection {
-		background-color: #616161;
-	}
-</style>

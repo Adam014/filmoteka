@@ -1,8 +1,11 @@
 {
-  "crons": [
-    {
-      "path": "/api/keep-alive",
-      "schedule": "0 8 * * *"
-    }
-  ]
+	"$schema": "https://openapi.vercel.sh/vercel.json",
+	"installCommand": "bun install --frozen-lockfile",
+	"buildCommand": "bun run build",
+	"crons": [
+		{
+			"path": "/api/keep-alive",
+			"schedule": "0 8 * * *"
+		}
+	]
 }
