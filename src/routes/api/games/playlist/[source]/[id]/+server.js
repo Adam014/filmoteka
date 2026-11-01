@@ -47,7 +47,7 @@ async function load({ params, url }) {
 		quick,
 		size,
 		lengths: quick ? QUICK_LENGTHS : LENGTHS,
-		rounds: dealRounds(songs, seed, deal, quick ? 2 : 1)
+		rounds: await dealRounds(songs, seed, deal, quick ? 2 : 1)
 	};
 }
 

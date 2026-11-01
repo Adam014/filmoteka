@@ -38,17 +38,50 @@ export async function deezer(path, params = {}) {
 	return null;
 }
 
+export const normaliseSong = (text) =>
+	text
+		.toLowerCase()
+		.normalize('NFD')
+		.replace(/\p{M}/gu, '')
+		.replace(/\(.*?\)|\[.*?\]|feat\..*$| - .*$/g, ' ')
+		.replace(/[^a-z0-9 ]/g, ' ')
+		.replace(/\s+/g, ' ')
+		.trim();
+
+/** Whether a Deezer result is this song by this artist, and can be played from here. */
+export function isSameSong(item, wanted, singer) {
+	const name = normaliseSong(item.title);
+	const by = normaliseSong(item.artist.name);
+	return (
+		item.preview &&
+		item.readable !== false &&
+		(name === wanted || name.startsWith(wanted)) &&
+		(by.includes(singer) || singer.includes(by))
+	);
+}
+
+/** Songs are often on Deezer several times, and each release is only licensed for some countries. */
+async function otherVersion(track) {
+	const wanted = normaliseSong(track.title_short ?? track.title);
+	const singer = normaliseSong(track.artist?.name ?? '');
+	const results = await deezer('/search', { q: `${singer} ${wanted}`, limit: 25 });
+	if (!results?.data) return null;
+	return results.data.find((item) => isSameSong(item, wanted, singer)) ?? false;
+}
+
 /**
  * A track's 30-second preview. Deezer's links only last about 15 minutes, so this is kept for
  * less than that and never stored with a puzzle.
- * @returns {Promise<any>} null if Deezer couldn't be reached, false if the track is gone.
+ * @returns {Promise<any>} null if Deezer couldn't be reached, false if the song can't be played.
  */
 export function trackPreview(id) {
 	return cached(`deezer:${id}`, TEN_MINUTES, async () => {
 		const data = await deezer(`/track/${id}`);
 		if (!data) return null;
-		const track = data.readable === false ? data.alternative : data;
-		if (data.error || !track?.preview) return false;
+		if (data.error) return false;
+		const playable = data.preview ? data : data.alternative?.preview ? data.alternative : null;
+		const track = playable ?? (await otherVersion(data));
+		if (!track) return track;
 		return {
 			clip: track.preview,
 			link: track.link ?? data.link,

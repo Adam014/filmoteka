@@ -1,7 +1,7 @@
 import { LISTEN_TIERS } from '../games/listen.js';
 import { hashString, seededShuffle } from '../games/seed.js';
 import { cached } from './cache.js';
-import { deezer } from './deezer.js';
+import { deezer, isSameSong, normaliseSong as normalise, trackPreview } from './deezer.js';
 import { spotify } from './spotify.js';
 import { adminDb } from './supabase.js';
 
@@ -29,16 +29,6 @@ export class TryAgain extends Error {
 		this.retryAfter = retryAfter;
 	}
 }
-
-const normalise = (text) =>
-	text
-		.toLowerCase()
-		.normalize('NFD')
-		.replace(/\p{M}/gu, '')
-		.replace(/\(.*?\)|\[.*?\]|feat\..*$| - .*$/g, ' ')
-		.replace(/[^a-z0-9 ]/g, ' ')
-		.replace(/\s+/g, ' ')
-		.trim();
 
 const fromAddress = (text) => {
 	const spotifyLink =
@@ -96,17 +86,6 @@ function spotifyEmbed(id) {
 	});
 }
 
-const matches = (item, wanted, singer) => {
-	const name = normalise(item.title);
-	const by = normalise(item.artist.name);
-	return (
-		item.preview &&
-		item.readable !== false &&
-		(name === wanted || name.startsWith(wanted)) &&
-		(by.includes(singer) || singer.includes(by))
-	);
-};
-
 /** @returns {Promise<any>} null if Deezer doesn't have it. */
 async function findOnDeezer({ title, artist }) {
 	const wanted = normalise(title);
@@ -114,7 +93,7 @@ async function findOnDeezer({ title, artist }) {
 	for (const q of [`${artist} ${wanted}`, wanted]) {
 		const results = await deezer('/search', { q, limit: 25 });
 		if (!results?.data) throw new TryAgain(3);
-		const hit = results.data.find((item) => matches(item, wanted, singer));
+		const hit = results.data.find((item) => isSameSong(item, wanted, singer));
 		if (hit) return hit;
 	}
 	return null;
@@ -446,23 +425,33 @@ const dealOf = (track, label, tier) => ({
 
 /**
  * The songs of one round, from most to least popular. Each difficulty walks through its own fixed
- * shuffle, so the next deal brings new songs until that difficulty has been through them all.
+ * shuffle, so the next deal brings new songs until that difficulty has been through them all. A song
+ * Deezer can't play at all gives way to the next one, so nobody gets stuck on a silent clip.
  *
  * @param {any[]} tracks
  * @param {string} seed
  * @param {number} deal
  * @param {number} perTier
  */
-export function dealRounds(tracks, seed, deal = 0, perTier = 1) {
+export async function dealRounds(tracks, seed, deal = 0, perTier = 1) {
 	const ranked = [...tracks].sort((a, b) => b.rank - a.rank);
-	return LISTEN_TIERS.flatMap((label, tier) => {
-		const from = Math.floor((tier * ranked.length) / LISTEN_TIERS.length);
-		const to = Math.floor(((tier + 1) * ranked.length) / LISTEN_TIERS.length);
-		const shuffled = seededShuffle(ranked.slice(from, to), hashString(`${seed}:${tier}`));
-		return Array.from({ length: perTier }, (_, index) =>
-			dealOf(shuffled[(deal * perTier + index) % shuffled.length], label, tier)
-		);
-	});
+	const tiers = await Promise.all(
+		LISTEN_TIERS.map(async (label, tier) => {
+			const from = Math.floor((tier * ranked.length) / LISTEN_TIERS.length);
+			const to = Math.floor(((tier + 1) * ranked.length) / LISTEN_TIERS.length);
+			const shuffled = seededShuffle(ranked.slice(from, to), hashString(`${seed}:${tier}`));
+			const picked = [];
+			let position = deal * perTier;
+			for (let tries = 0; picked.length < perTier && tries < shuffled.length; tries++) {
+				const track = shuffled[position++ % shuffled.length];
+				const unplayable =
+					tries < shuffled.length - perTier && (await trackPreview(track.id)) === false;
+				if (!unplayable) picked.push(dealOf(track, label, tier));
+			}
+			return picked;
+		})
+	);
+	return tiers.flat();
 }
 
 export const PLAYLIST_MIN_TRACKS = LISTEN_TIERS.length;

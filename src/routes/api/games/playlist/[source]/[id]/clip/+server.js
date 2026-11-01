@@ -27,9 +27,8 @@ export async function GET({ params, url }) {
 	}
 	try {
 		const songs = await playlistSongs(source, id, size);
-		const round =
-			songs.length > 0 &&
-			dealRounds(songs, seed, deal, quick ? 2 : 1)[Number(url.searchParams.get('round'))];
+		const rounds = songs.length ? await dealRounds(songs, seed, deal, quick ? 2 : 1) : [];
+		const round = rounds[Number(url.searchParams.get('round'))];
 		if (!round) return Response.json({ message: 'Unavailable' }, { status: 503 });
 		return clipRedirect(round.trackId);
 	} catch (error) {
