@@ -1,8 +1,9 @@
 import { buildSeries, parseId } from '#lib/media.js';
 import { tmdbDetail } from '#lib/server/tmdb.js';
+import { cdnCache } from '#lib/server/cache.js';
 import { error } from '@sveltejs/kit';
 
-export async function load({ params }) {
+export async function load({ params, setHeaders }) {
 	const id = parseId(params.id);
 	if (!id) error(404, "We don't have a series at this address.");
 
@@ -14,5 +15,6 @@ export async function load({ params }) {
 		if (notFound) error(404, "We don't have a series at this address.");
 		error(503, 'Series details are unavailable right now.');
 	}
+	setHeaders(cdnCache(24));
 	return { series };
 }

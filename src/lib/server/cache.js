@@ -20,3 +20,14 @@ export async function cached(key, ttlMs, load) {
 		throw error;
 	}
 }
+
+/**
+ * Lets Vercel's CDN answer repeat visits (crawlers above all) without running the function.
+ * Only for pages that look the same for everyone: no cookies, no region, no user.
+ */
+export function cdnCache(hours) {
+	const seconds = hours * 60 * 60;
+	return {
+		'cache-control': `public, max-age=0, s-maxage=${seconds}, stale-while-revalidate=${seconds * 7}`
+	};
+}

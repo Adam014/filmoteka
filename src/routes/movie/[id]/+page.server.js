@@ -1,9 +1,10 @@
 import { buildMovie, parseId } from '#lib/media.js';
 import { safeQuery } from '#lib/server/catalog.js';
 import { tmdbDetail } from '#lib/server/tmdb.js';
+import { cdnCache } from '#lib/server/cache.js';
 import { error } from '@sveltejs/kit';
 
-export async function load({ params }) {
+export async function load({ params, setHeaders }) {
 	const id = parseId(params.id);
 	if (!id) error(404, "We don't have a movie at this address.");
 
@@ -22,5 +23,6 @@ export async function load({ params }) {
 		if (notFound) error(404, "We don't have a movie at this address.");
 		error(503, 'Movie details are unavailable right now.');
 	}
+	setHeaders(cdnCache(24));
 	return { movie };
 }

@@ -1,0 +1,16 @@
+# Every crawler is welcome to read films, series and people.
+# Filter, sort, page and shuffle URLs are endless combinations of the same
+# catalogue, so they stay off limits; so do the API and account pages.
+User-agent: *
+Allow: /
+Disallow: /*?
+Disallow: /api/
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /settings
+Disallow: /profile
+Disallow: /swipe
+Disallow: /random
+Crawl-delay: 5

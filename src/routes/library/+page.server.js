@@ -2,6 +2,7 @@ import { DECADES, filterHref, parseFilters } from '#lib/library-filters.js';
 import { normalizeList } from '#lib/media.js';
 import { PAGE_SIZE, parsePage } from '#lib/pagination.js';
 import { db } from '#lib/server/supabase.js';
+import { cdnCache } from '#lib/server/cache.js';
 import { redirect } from '@sveltejs/kit';
 
 const ORDER = {
@@ -35,7 +36,7 @@ function applyFilters(query, filters) {
 	return filtered;
 }
 
-export async function load({ url }) {
+export async function load({ url, setHeaders }) {
 	const page = parsePage(url.searchParams.get('page'));
 	const filters = parseFilters(url.searchParams);
 	const { column, ascending } = ORDER[filters.sort];
@@ -68,6 +69,7 @@ export async function load({ url }) {
 		return failed;
 	}
 
+	setHeaders(cdnCache(1));
 	return {
 		movies: normalizeList(data),
 		page,

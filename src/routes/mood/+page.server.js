@@ -1,10 +1,11 @@
 import { normalizeList } from '#lib/media.js';
 import { ERAS, LENGTHS, MOODS, discoverParams } from '#lib/moods.js';
+import { cdnCache } from '#lib/server/cache.js';
 import { tmdb } from '#lib/server/tmdb.js';
 
 const PAGES = 12;
 
-export async function load({ url }) {
+export async function load({ url, setHeaders }) {
 	const mood = MOODS.find((item) => item.id === url.searchParams.get('mood')) ?? MOODS[0];
 	const length = LENGTHS.find((item) => item.id === url.searchParams.get('length'))?.id ?? 'any';
 	const era = ERAS.find((item) => item.id === url.searchParams.get('era'))?.id ?? 'any';
@@ -17,6 +18,7 @@ export async function load({ url }) {
 	const page = (spin % Math.max(Math.min(first?.total_pages ?? 1, PAGES), 1)) + 1;
 	const data = page === 1 ? first : await tmdb('/discover/movie', params(page));
 
+	if (data) setHeaders(cdnCache(1));
 	return {
 		moodId: mood.id,
 		length,
